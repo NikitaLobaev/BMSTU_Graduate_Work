@@ -11,8 +11,9 @@ repositories {
 }
 
 dependencies {
-    testImplementation(kotlin("test"))
     implementation("io.github.rchowell:dotlin:1.0.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-cli:0.3.5")
+    testImplementation(kotlin("test"))
 }
 
 tasks.test {

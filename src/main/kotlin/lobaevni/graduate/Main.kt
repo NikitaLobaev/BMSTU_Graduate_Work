@@ -1,23 +1,36 @@
 package lobaevni.graduate
 
+import kotlinx.cli.ArgParser
+import kotlinx.cli.ArgType
 import lobaevni.graduate.jez.*
 import lobaevni.graduate.jez.Jez.wordEqSat
 import java.io.File
 
-private val letterRegex = "^[a-zA-Z]+$".toRegex()
+private const val PROGRAM_NAME = "jez"
 
-fun main() {
+private val letterRegex = "^[A-Z][A-Z0-9]*$".toRegex()
+private val variableRegex = "^[a-z][a-z0-9]*$".toRegex()
+
+fun main(args: Array<String>) {
+    val parser = ArgParser(PROGRAM_NAME)
+    val dotFilename by parser.option(
+        type = ArgType.String,
+        fullName = "dot",
+        description = "Output DOT-representation filename (without extension)",
+    )
+    parser.parse(args)
+
     val letters: JezSourceConstants
     val variables: JezVariables
     val equation: JezEquation
     try {
-        letters = parseLetters()
-        variables = parseVariables()
-        equation = parseEquation(letters, variables)
+        letters = readln().parseLetters()
+        variables = readln().parseVariables()
+        equation = readln().parseEquation(letters, variables)
     } catch (e: Exception) {
         println("Usage:")
-        println("{A,B,...}")
-        println("{x,y,...}")
+        println("{A, B, ...}")
+        println("{x, y, ...}")
         println("T1 = T2")
         return
     }
@@ -26,6 +39,7 @@ fun main() {
         equation.wordEqSat()
     } catch (e: Exception) {
         println("Unfortunately, exception was thrown while solving the equation.")
+        e.printStackTrace()
         return
     }
 
@@ -35,51 +49,57 @@ fun main() {
         } else {
             println("Unfortunately, solution wasn't found.")
         }
-        writeDOT(result)
+
+        dotFilename?.let {
+            writeDOT(result, it)
+        }
     } catch (e: Exception) {
         e.printStackTrace()
         return
     }
 }
 
-private fun parseLetters(): JezSourceConstants {
-    val letters = readln().trim('{', '}').uppercase().split(",").map { JezElement.Constant.Source(it) }
-    assert(letters.find { !(it.value as String).isWord() } == null)
+private fun String.parseLetters(): JezSourceConstants {
+    val letters = parseSequence().map { JezElement.Constant.Source(it) }
+    assert(letters.find { !(it.value as String).matches(letterRegex) } == null)
     return letters
 }
 
-private fun parseVariables(): JezVariables {
-    val variables = readln().trim('{', '}').lowercase().split(",").map { JezElement.Variable(it) }
-    assert(variables.find { !(it.name as String).isWord() } == null)
+private fun String.parseVariables(): JezVariables {
+    val variables = parseSequence().map { JezElement.Variable(it) }
+    assert(variables.find { !(it.name as String).matches(variableRegex) } == null)
     return variables
 }
 
-private fun parseEquation(letters: JezSourceConstants, variables: JezVariables): JezEquation {
-    val equationString = readln().split(" = ").toMutableList()
-    assert(equationString.size == 2)
+private fun String.parseEquation(letters: JezSourceConstants, variables: JezVariables): JezEquation {
+    val eqStr = split("=").toMutableList()
+    assert(eqStr.size == 2)
 
-    val equationParts: MutableList<JezEquationPart> = mutableListOf(mutableListOf(), mutableListOf())
-    for (i in 0..1) {
-        assert(equationString[i].isNotEmpty())
+    val eqParts: MutableList<JezEquationPart> = mutableListOf(mutableListOf(), mutableListOf())
+    eqStr.forEachIndexed { eqPartIdx, sourceEqPartStr ->
+        var eqPartStr = sourceEqPartStr.trim()
+        assert(eqPartStr.isNotEmpty())
+
         do {
-            val element: JezElement? = if (equationString[i][0].isUpperCase()) {
-                letters.find { equationString[i].startsWith(it.value as String) }
+            val element: JezElement? = if (eqPartStr[0].isUpperCase()) { // letter
+                letters.find { eqPartStr.startsWith(it.value as String) }
             } else { // variable
-                variables.find { equationString[i].startsWith(it.name as String) }
+                variables.find { eqPartStr.startsWith(it.name as String) }
             }
-            assert(element != null)
-            equationParts[i] += listOf(element!!)
+            assert(element != null) { """Couldn't parse element "$element"""" }
+            eqParts[eqPartIdx] += listOf(element!!)
 
             val length: Int = when (element) {
                 is JezElement.Constant.Source -> (element.value as String).length
                 is JezElement.Variable -> (element.name as String).length
                 else -> 0
             }
-            equationString[i] = equationString[i].substring(length)
-        } while (equationString[i].isNotEmpty())
+            assert(length > 0) { """Empty length of element "$element"""" }
+            eqPartStr = eqPartStr.substring(length)
+        } while (eqPartStr.isNotEmpty())
     }
 
-    return JezEquation(equationParts[0], equationParts[1])
+    return JezEquation(eqParts[0], eqParts[1])
 }
 
 private fun printResult(result: JezResult) {
@@ -88,16 +108,18 @@ private fun printResult(result: JezResult) {
     }
 }
 
-private fun writeDOT(result: JezResult) {
+private fun String.parseSequence(): List<String> {
+    return trim('{', '}')
+        .split(",")
+        .map { it.trim() }
+}
+
+private fun writeDOT(result: JezResult, filename: String) {
     println()
     print("Writing DOT-representation...")
-    val timeMs = System.currentTimeMillis()
     val graphStr = result.history.dot()
 
-    val workingDirectory = File("output")
-    workingDirectory.mkdirs()
-
-    val graphDOTFile = File(workingDirectory, "$timeMs.dot")
+    val graphDOTFile = File("$filename.dot")
     graphDOTFile.createNewFile()
     graphDOTFile.printWriter().use { printWriter ->
         printWriter.println(graphStr)
@@ -105,8 +127,8 @@ private fun writeDOT(result: JezResult) {
         printWriter.close()
     }
 
-    val resultPNGFile = File(workingDirectory, "$timeMs.png")
-    """dot -Tpng ${graphDOTFile.path} -o ${resultPNGFile.path}""".runCommand()
+    val resultPNGFile = File("$filename.png")
+    "dot -Tpng ${graphDOTFile.path} -o ${resultPNGFile.path}".runCommand()
 
     println(" SUCCESS")
 }
@@ -120,5 +142,3 @@ private fun String.runCommand() {
         .redirectError(ProcessBuilder.Redirect.INHERIT)
         .start()
 }
-
-private fun String.isWord(): Boolean = matches(letterRegex)
