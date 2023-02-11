@@ -12,6 +12,7 @@ repositories {
 
 dependencies {
     testImplementation(kotlin("test"))
+    implementation("io.github.rchowell:dotlin:1.0.2")
 }
 
 tasks.test {
