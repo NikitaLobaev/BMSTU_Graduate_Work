@@ -1,10 +1,17 @@
 package lobaevni.graduate.jez
 
+typealias JezSigma = MutableMap<JezVariable, List<JezSourceConstant>>
+internal typealias JezReplaces = MutableMap<List<JezSourceConstant>, JezGeneratedConstant>
+internal typealias JezConstant = JezElement.Constant
+internal typealias JezSourceConstant = JezElement.Constant.Source
+internal typealias JezGeneratedConstant = JezElement.Constant.Generated
+internal typealias JezVariable = JezElement.Variable
+
 sealed class JezElement {
 
     abstract class Constant : JezElement() {
 
-        abstract val source: JezSourceConstants
+        abstract val source: List<JezSourceConstant>
 
         data class Source(
             val value: Any,
@@ -17,12 +24,11 @@ sealed class JezElement {
         }
 
         data class Generated(
-            val value: JezConstants,
+            val value: List<JezConstant>,
+            val number: Int = (Math.random() * Int.MAX_VALUE).toInt(),
         ) : Constant() {
 
             override val source = value.map { it.source }.flatten()
-
-            val number: Int = (Math.random() * Int.MAX_VALUE).toInt()
 
             override fun toString(): String = "GENCONST($number)"
 

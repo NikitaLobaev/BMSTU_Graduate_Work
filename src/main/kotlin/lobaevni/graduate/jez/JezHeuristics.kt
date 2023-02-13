@@ -1,65 +1,66 @@
 package lobaevni.graduate.jez
 
+private const val SHORTEN_HEUR_NAME = "shorten"
+
 object JezHeuristics {
 
     /**
      * Heuristic of shortening of the [JezEquation]. Cuts similar starts and ends of the left and right side of the
      * [JezEquation].
      */
-    internal fun JezEquation.shorten(state: JezState): JezEquation {
-        var newEquation = this
-        val leftIndex = newEquation.u.zip(newEquation.v).indexOfFirst { (uElement, vElement) ->
+    internal fun JezState.tryShorten(): Boolean {
+        val leftIndex = equation.u.zip(equation.v).indexOfFirst { (uElement, vElement) ->
             uElement != vElement
-        }.takeIf { it != -1 } ?: minOf(newEquation.u.size, newEquation.v.size)
-        newEquation = JezEquation(
-            u = newEquation.u.drop(leftIndex),
-            v = newEquation.v.drop(leftIndex),
+        }.takeIf { it != -1 } ?: minOf(equation.u.size, equation.v.size)
+        equation = JezEquation(
+            u = equation.u.drop(leftIndex),
+            v = equation.v.drop(leftIndex),
         )
 
-        val rightIndex = newEquation.u.reversed().zip(newEquation.v.reversed()).indexOfFirst { (uElement, vElement) ->
+        val rightIndex = equation.u.reversed().zip(equation.v.reversed()).indexOfFirst { (uElement, vElement) ->
             uElement != vElement
-        }.takeIf { it != -1 } ?: minOf(newEquation.u.size, newEquation.v.size)
-        newEquation = JezEquation(
-            u = newEquation.u.dropLast(rightIndex),
-            v = newEquation.v.dropLast(rightIndex),
+        }.takeIf { it != -1 } ?: minOf(equation.u.size, equation.v.size)
+        equation = JezEquation(
+            u = equation.u.dropLast(rightIndex),
+            v = equation.v.dropLast(rightIndex),
         )
 
-        state.history.addEquation(newEquation, "shorten")
-
-        return newEquation
+        return if (leftIndex > 0 || rightIndex > 0) {
+            history.addEquation(equation, SHORTEN_HEUR_NAME)
+            true
+        } else {
+            false
+        }
     }
 
     /**
-     * Heuristic of finding contradictions in the [JezEquation] at left or at right sides of it.
+     * Heuristic of finding contradictions in the [JezEquation] at left and at right sides of both parts of it.
      * @return true, if contradiction was found, false otherwise.
      */
     internal fun JezEquation.findSideContradictions(): Boolean {
-        val shortenedEquation = shorten(JezState())
-        return (shortenedEquation.u.firstOrNull() is JezElement.Constant &&
-                shortenedEquation.v.firstOrNull() is JezElement.Constant) ||
-                (shortenedEquation.u.lastOrNull() is JezElement.Constant &&
-                shortenedEquation.v.lastOrNull() is JezElement.Constant) ||
-                (shortenedEquation.u.isEmpty() && shortenedEquation.v.find { it is JezElement.Constant } != null) ||
-                (shortenedEquation.v.isEmpty() && shortenedEquation.u.find { it is JezElement.Constant } != null)
+        return (u.firstOrNull() is JezConstant && v.firstOrNull() is JezConstant && u.first() != v.first()) ||
+                (u.lastOrNull() is JezConstant && v.lastOrNull() is JezConstant && u.last() != v.last()) ||
+                (u.isEmpty() && v.find { it is JezConstant } != null) ||
+                (v.isEmpty() && u.find { it is JezConstant } != null)
     }
 
     /**
      * Heuristic to determine what pairs of constants we might count as non-crossing.
      * @return pair of left and right constants lists respectively.
      */
-    internal fun JezEquation.getSideLetters(): Pair<JezConstants, JezConstants> {
-        fun JezEquationPart.findExcludedLetters(): Pair<Set<JezElement.Constant>, Set<JezElement.Constant>> {
-            val lettersLeftExcluded = mutableSetOf<JezElement.Constant>()
-            val lettersRightExcluded = mutableSetOf<JezElement.Constant>()
+    internal fun JezEquation.getSideLetters(): Pair<List<JezConstant>, List<JezConstant>> { //TODO: shouldn't we return pair of sets instead of pair of lists?
+        fun JezEquationPart.findExcludedLetters(): Pair<Set<JezConstant>, Set<JezConstant>> {
+            val lettersLeftExcluded = mutableSetOf<JezConstant>()
+            val lettersRightExcluded = mutableSetOf<JezConstant>()
             forEachIndexed { index, element ->
-                if (element !is JezElement.Constant) {
+                if (element !is JezConstant) {
                     return@forEachIndexed
                 }
 
-                if (index > 0 && elementAt(index - 1) is JezElement.Variable) {
+                if (index > 0 && elementAt(index - 1) is JezVariable) {
                     lettersRightExcluded += element
                 }
-                if (index + 1 < size && elementAt(index + 1) is JezElement.Variable) {
+                if (index + 1 < size && elementAt(index + 1) is JezVariable) {
                     lettersLeftExcluded += element
                 }
             }

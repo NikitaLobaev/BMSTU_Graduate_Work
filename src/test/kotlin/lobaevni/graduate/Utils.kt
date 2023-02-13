@@ -1,9 +1,6 @@
 package lobaevni.graduate
 
-import lobaevni.graduate.jez.JezElement
-import lobaevni.graduate.jez.JezEquation
-import lobaevni.graduate.jez.JezEquationPart
-import lobaevni.graduate.jez.JezSigma
+import lobaevni.graduate.jez.*
 
 object Utils {
 
@@ -23,9 +20,9 @@ object Utils {
     private fun parseEquationPart(u: String): JezEquationPart {
         return u.map {
             if (it.isUpperCase()) { // constant
-                JezElement.Constant.Source(it)
+                JezSourceConstant(it)
             } else { // variable
-                JezElement.Variable(it)
+                JezVariable(it)
             }
         }.toMutableList()
     }

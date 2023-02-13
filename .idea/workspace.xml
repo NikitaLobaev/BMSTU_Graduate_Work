@@ -5,11 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="85e7987e-bcf2-4b0a-8323-009184876a50" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/Main.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/Main.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/Jez.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/Jez.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/Jez.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/JezElement.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/JezElement.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/JezEquation.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/JezEquation.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/JezHeuristics.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/JezHeuristics.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/kotlin/lobaevni/graduate/Utils.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/kotlin/lobaevni/graduate/Utils.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/kotlin/lobaevni/graduate/WordEqSatTests.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/kotlin/lobaevni/graduate/JezEquationTests.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -77,8 +80,8 @@
       <recent name="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate" />
     </key>
   </component>
-  <component name="RunManager" selected="Kotlin.MainKt">
-    <configuration name="WordEqSatTests" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+  <component name="RunManager" selected="Gradle.JezEquationTests">
+    <configuration name="JezEquationTests" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
@@ -91,7 +94,7 @@
           <list>
             <option value=":test" />
             <option value="--tests" />
-            <option value="&quot;lobaevni.graduate.WordEqSatTests&quot;" />
+            <option value="&quot;lobaevni.graduate.JezEquationTests&quot;" />
           </list>
         </option>
         <option name="vmOptions" />
@@ -111,13 +114,13 @@
       </method>
     </configuration>
     <list>
-      <item itemvalue="Gradle.WordEqSatTests" />
+      <item itemvalue="Gradle.JezEquationTests" />
       <item itemvalue="Kotlin.MainKt" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Gradle.JezEquationTests" />
         <item itemvalue="Kotlin.MainKt" />
-        <item itemvalue="Gradle.WordEqSatTests" />
       </list>
     </recent_temporary>
   </component>
@@ -130,7 +133,7 @@
       <option name="presentableId" value="Default" />
       <updated>1676116636033</updated>
       <workItem from="1676116638592" duration="4804000" />
-      <workItem from="1676126189464" duration="317000" />
+      <workItem from="1676126189464" duration="18312000" />
     </task>
     <servers />
   </component>

@@ -2,13 +2,12 @@ package lobaevni.graduate
 
 import lobaevni.graduate.Utils.parseEquation
 import lobaevni.graduate.Utils.toStringMap
-import lobaevni.graduate.jez.Jez.wordEqSat
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-class WordEqSatTests {
+class JezEquationTests {
 
     @Test
     fun test1() {
@@ -17,7 +16,7 @@ class WordEqSatTests {
             "x" to "",
             "y" to "",
         )
-        val result = sourceEquation.wordEqSat()
+        val result = sourceEquation.tryFindMinimalSolution()
         assertTrue(result.isSolved)
         val actualSigma = result.sigma.toStringMap()
         assertEquals(expectedSigma, actualSigma)
@@ -27,7 +26,7 @@ class WordEqSatTests {
     fun test2() {
         val sourceEquation = parseEquation("A", "A")
         val expectedSigma = emptyMap<String, String>()
-        val result = sourceEquation.wordEqSat()
+        val result = sourceEquation.tryFindMinimalSolution()
         assertTrue(result.isSolved)
         val actualSigma = result.sigma.toStringMap()
         assertEquals(expectedSigma, actualSigma)
@@ -39,7 +38,7 @@ class WordEqSatTests {
         val expectedSigma = mapOf(
             "x" to "A",
         )
-        val result = sourceEquation.wordEqSat()
+        val result = sourceEquation.tryFindMinimalSolution()
         assertTrue(result.isSolved)
         val actualSigma = result.sigma.toStringMap()
         assertEquals(expectedSigma, actualSigma)
@@ -51,7 +50,7 @@ class WordEqSatTests {
         val expectedSigma = mapOf(
             "x" to "B",
         )
-        val result = sourceEquation.wordEqSat()
+        val result = sourceEquation.tryFindMinimalSolution()
         assertTrue(result.isSolved)
         val actualSigma = result.sigma.toStringMap()
         assertEquals(expectedSigma, actualSigma)
@@ -64,7 +63,7 @@ class WordEqSatTests {
             "x" to "A",
             "y" to "",
         )
-        val result = sourceEquation.wordEqSat()
+        val result = sourceEquation.tryFindMinimalSolution()
         assertTrue(result.isSolved)
         val actualSigma = result.sigma.toStringMap()
         assertEquals(expectedSigma, actualSigma)
@@ -73,14 +72,14 @@ class WordEqSatTests {
     @Test
     fun testNoSolution1() {
         val sourceEquation = parseEquation("A", "B")
-        val result = sourceEquation.wordEqSat()
+        val result = sourceEquation.tryFindMinimalSolution()
         assertFalse(result.isSolved)
     }
 
     @Test
     fun testNoSolution2() {
         val sourceEquation = parseEquation("x", "Ax")
-        val result = sourceEquation.wordEqSat()
+        val result = sourceEquation.tryFindMinimalSolution()
         assertFalse(result.isSolved)
     }
 
