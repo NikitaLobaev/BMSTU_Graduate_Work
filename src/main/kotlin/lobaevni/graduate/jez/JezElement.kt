@@ -21,6 +21,8 @@ sealed class JezElement {
 
             override fun toString(): String = "CONST($value)"
 
+            override fun toHTMLString(): String = "$value"
+
         }
 
         data class Generated(
@@ -32,6 +34,8 @@ sealed class JezElement {
 
             override fun toString(): String = "GENCONST($number)"
 
+            override fun toHTMLString(): String = "&zeta;<sub>$number</sub>"
+
         }
 
     }
@@ -42,6 +46,23 @@ sealed class JezElement {
 
         override fun toString(): String = "VAR($name)"
 
+        override fun toHTMLString(): String = "$name"
+
     }
 
+    //TODO: open fun toString()? same problem with JezAction.toString()
+
+    open fun toHTMLString(): String {
+        return toString()
+    }
+
+}
+
+/**
+ * Reveals source constants values and returns list of these [JezSourceConstant].
+ */
+internal fun List<JezConstant>.toJezSourceConstants(): List<JezSourceConstant> {
+    return map { constant ->
+        constant.source
+    }.flatten()
 }

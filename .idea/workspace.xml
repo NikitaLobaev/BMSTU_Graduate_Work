@@ -7,12 +7,12 @@
     <list default="true" id="85e7987e-bcf2-4b0a-8323-009184876a50" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/Main.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/Main.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/Jez.kt" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/JezElement.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/JezElement.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/JezEquation.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/JezEquation.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/JezHeuristics.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/JezHeuristics.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/kotlin/lobaevni/graduate/Utils.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/kotlin/lobaevni/graduate/Utils.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/kotlin/lobaevni/graduate/WordEqSatTests.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/kotlin/lobaevni/graduate/JezEquationTests.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/JezHistory.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/JezState.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/JezState.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/kotlin/lobaevni/graduate/JezEquationTests.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/kotlin/lobaevni/graduate/JezEquationTests.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -37,6 +37,7 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
+        <option value="Kotlin File" />
         <option value="Kotlin Class" />
       </list>
     </option>
@@ -79,8 +80,13 @@
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate" />
     </key>
+    <key name="MoveKotlinTopLevelDeclarationsDialog.RECENTS_KEY">
+      <recent name="lobaevni.graduate.jez.action" />
+      <recent name="lobaevni.graduate.jez" />
+      <recent name="lobaevni.graduate.jez.history" />
+    </key>
   </component>
-  <component name="RunManager" selected="Gradle.JezEquationTests">
+  <component name="RunManager" selected="Kotlin.MainKt">
     <configuration name="JezEquationTests" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -107,7 +113,7 @@
     <configuration name="MainKt" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="lobaevni.graduate.MainKt" />
       <module name="BMSTU_Graduate_Work.main" />
-      <option name="PROGRAM_PARAMETERS" value="--dot output/representation" />
+      <option name="PROGRAM_PARAMETERS" value="--dot output/representation -sl" />
       <shortenClasspath name="NONE" />
       <method v="2">
         <option name="Make" enabled="true" />
@@ -119,8 +125,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Gradle.JezEquationTests" />
         <item itemvalue="Kotlin.MainKt" />
+        <item itemvalue="Gradle.JezEquationTests" />
       </list>
     </recent_temporary>
   </component>
@@ -133,7 +139,10 @@
       <option name="presentableId" value="Default" />
       <updated>1676116636033</updated>
       <workItem from="1676116638592" duration="4804000" />
-      <workItem from="1676126189464" duration="18312000" />
+      <workItem from="1676126189464" duration="18452000" />
+      <workItem from="1676320940636" duration="1027000" />
+      <workItem from="1676650288410" duration="17152000" />
+      <workItem from="1676754990767" duration="22340000" />
     </task>
     <servers />
   </component>

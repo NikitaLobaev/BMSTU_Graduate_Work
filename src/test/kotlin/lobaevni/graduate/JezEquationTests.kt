@@ -2,6 +2,7 @@ package lobaevni.graduate
 
 import lobaevni.graduate.Utils.parseEquation
 import lobaevni.graduate.Utils.toStringMap
+import lobaevni.graduate.jez.tryFindMinimalSolution
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse

@@ -1,6 +1,6 @@
 package lobaevni.graduate.jez
 
-private const val SHORTEN_HEUR_NAME = "shorten"
+import lobaevni.graduate.jez.action.CropAction
 
 object JezHeuristics {
 
@@ -12,25 +12,18 @@ object JezHeuristics {
         val leftIndex = equation.u.zip(equation.v).indexOfFirst { (uElement, vElement) ->
             uElement != vElement
         }.takeIf { it != -1 } ?: minOf(equation.u.size, equation.v.size)
-        equation = JezEquation(
-            u = equation.u.drop(leftIndex),
-            v = equation.v.drop(leftIndex),
-        )
 
         val rightIndex = equation.u.reversed().zip(equation.v.reversed()).indexOfFirst { (uElement, vElement) ->
             uElement != vElement
         }.takeIf { it != -1 } ?: minOf(equation.u.size, equation.v.size)
-        equation = JezEquation(
-            u = equation.u.dropLast(rightIndex),
-            v = equation.v.dropLast(rightIndex),
-        )
 
-        return if (leftIndex > 0 || rightIndex > 0) {
-            history.addEquation(equation, SHORTEN_HEUR_NAME)
-            true
-        } else {
-            false
-        }
+        apply(CropAction(
+            state = this,
+            leftPart = equation.u.subList(0, leftIndex),
+            rightPart = equation.v.subList(equation.v.size - rightIndex, equation.v.size),
+        ))
+
+        return leftIndex > 0 || rightIndex > 0
     }
 
     /**
@@ -48,7 +41,7 @@ object JezHeuristics {
      * Heuristic to determine what pairs of constants we might count as non-crossing.
      * @return pair of left and right constants lists respectively.
      */
-    internal fun JezEquation.getSideLetters(): Pair<List<JezConstant>, List<JezConstant>> { //TODO: shouldn't we return pair of sets instead of pair of lists?
+    internal fun JezEquation.getSideLetters(): Pair<Set<JezConstant>, Set<JezConstant>> {
         fun JezEquationPart.findExcludedLetters(): Pair<Set<JezConstant>, Set<JezConstant>> {
             val lettersLeftExcluded = mutableSetOf<JezConstant>()
             val lettersRightExcluded = mutableSetOf<JezConstant>()
@@ -79,7 +72,7 @@ object JezHeuristics {
             removeAll(vExcludedLetters.second)
         }
 
-        return Pair(leftLetters.toMutableList(), rightLetters.toMutableList())
+        return Pair(leftLetters, rightLetters)
     }
 
 }
