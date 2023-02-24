@@ -1,6 +1,8 @@
 package lobaevni.graduate.jez
 
-typealias JezSigma = MutableMap<JezVariable, List<JezSourceConstant>>
+import java.util.*
+
+typealias JezSigma = MutableMap<JezVariable, LinkedList<JezSourceConstant>>
 internal typealias JezReplaces = MutableMap<List<JezSourceConstant>, JezGeneratedConstant>
 internal typealias JezConstant = JezElement.Constant
 internal typealias JezSourceConstant = JezElement.Constant.Source

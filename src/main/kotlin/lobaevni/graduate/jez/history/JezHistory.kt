@@ -10,25 +10,31 @@ private const val DOT_GRAPH_NAME = "recompression"
 private const val DOT_NODE_IGNORED_COLOR = "#F1948A"
 
 internal class JezHistory(
-    private val dotShortenLabels: Boolean,
+    dot: Boolean = false,
+    private val dotShortenLabels: Boolean = false,
 ) {
 
     private val rootGraphNode: JezHistoryGraphNode = JezHistoryGraphNode()
     private var currentGraphNode: JezHistoryGraphNode = rootGraphNode
 
-    val dotRootGraph: DotRootGraph = digraph(DOT_GRAPH_NAME) {
-        node {
-            shape = DotNodeShape.BOX
+    val dotRootGraph: DotRootGraph? = if (dot) {
+        digraph(DOT_GRAPH_NAME) {
+            node {
+                shape = DotNodeShape.BOX
+            }
         }
-    }
+    } else null
 
     /**
-     * TODO
+     * Puts record to a history.
+     * @param reversion true, if this action was reverted, false if this action was applied.
+     * @param ignored false, if [newEquation] was honestly processed in main algorithm, true otherwise.
      */
-    fun putApplication(
+    fun put(
         oldEquation: JezEquation? = null,
         action: JezAction? = null,
         newEquation: JezEquation,
+        reversion: Boolean = false, //TODO
         ignored: Boolean = false,
     ) {
         val newGraphNode = JezHistoryGraphNode(
@@ -40,7 +46,7 @@ internal class JezHistory(
             currentGraphNode = newGraphNode
         }
 
-        dotRootGraph.apply {
+        dotRootGraph?.apply {
             val newEquationStrBr = "\"$newEquation\""
             +newEquationStrBr + {
                 label = if (dotShortenLabels) newEquation.toHTMLString().formatHTMLLabel() else newEquation.toString()
@@ -56,13 +62,6 @@ internal class JezHistory(
                 }
             }
         }
-    }
-
-    /**
-     * TODO
-     */
-    fun putReversion() {
-        //TODO
     }
 
     //TODO: @Experimental? @RequiresOptIn?

@@ -29,11 +29,11 @@ internal data class CropAction(
 
         val oldEquation = state.equation
         state.equation = JezEquation(
-            u = state.equation.u.drop(leftPart.size).dropLast(rightPart.size),
-            v = state.equation.v.drop(leftPart.size).dropLast(rightPart.size),
+            u = oldEquation.u.drop(leftPart.size).dropLast(rightPart.size),
+            v = oldEquation.v.drop(leftPart.size).dropLast(rightPart.size),
         )
 
-        state.history?.putApplication(
+        state.history?.put(
             oldEquation = oldEquation,
             action = this,
             newEquation = state.equation,
@@ -42,7 +42,24 @@ internal data class CropAction(
     }
 
     override fun revertAction(): Boolean {
-        TODO("Not yet implemented")
+        val cropSize = leftPart.size + rightPart.size
+        if (cropSize == 0) {
+            return false
+        }
+
+        val oldEquation = state.equation
+        state.equation = JezEquation(
+            u = leftPart + oldEquation.u + rightPart,
+            v = leftPart + oldEquation.v + rightPart,
+        )
+
+        state.history?.put(
+            oldEquation = oldEquation,
+            action = this,
+            newEquation = state.equation,
+            reversion = true,
+        )
+        return true
     }
 
     override fun toString(): String {

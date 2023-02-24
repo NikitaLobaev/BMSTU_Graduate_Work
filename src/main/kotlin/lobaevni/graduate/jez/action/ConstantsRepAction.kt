@@ -1,6 +1,5 @@
 package lobaevni.graduate.jez.action
 
-import lobaevni.graduate.Utils.prefixFunction
 import lobaevni.graduate.jez.*
 
 internal data class ConstantsRepAction(
@@ -10,27 +9,11 @@ internal data class ConstantsRepAction(
 ) : JezAction() {
 
     override fun applyAction(): Boolean {
-        if (repPart.isEmpty()) return false
-
-        val p = repPart.prefixFunction()
-        val oldEquation = state.equation
-        state.equation = JezEquation(
-            u = state.equation.u.replace(p),
-            v = state.equation.v.replace(p),
-        )
-
-        state.replaces[repPart.toJezSourceConstants()] = constant
-
-        state.history?.putApplication(
-            oldEquation = oldEquation,
-            action = this,
-            newEquation = state.equation,
-        )
-        return true
+        return action(true)
     }
 
     override fun revertAction(): Boolean {
-        TODO("Not yet implemented")
+        return action(false)
     }
 
     override fun toString(): String {
@@ -42,30 +25,32 @@ internal data class ConstantsRepAction(
     }
 
     /**
-     * Replaces all subparts [p] with [constant] in [JezEquationPart].
+     * Applies or reverts current [JezAction]
+     * @param apply true to apply current [JezAction], false to revert.
      */
-    private fun JezEquationPart.replace(p: Collection<Int>): JezEquationPart { //TODO: try to rewrite this function in functional style
-        var k = 0
-        var l = 0
-        var result: MutableList<JezElement> = mutableListOf()
-        while (k < size) {
-            if (elementAt(k) == repPart[l]) {
-                l++
-                if (l == repPart.size) {
-                    result = (result.dropLast(repPart.size - 1) + constant).toMutableList() //TODO: create extension?
-                    l = 0
-                } else {
-                    result += elementAt(k)
-                }
-                k++
-            } else if (l == 0) {
-                result += elementAt(k)
-                k++
-            } else {
-                l = p.elementAt(l - 1)
-            }
+    private fun action(apply: Boolean): Boolean {
+        if (repPart.isEmpty()) return false
+
+        val oldEquation = state.equation
+        state.equation = if (apply) {
+            oldEquation.replace(repPart, listOf(constant))
+        } else {
+            oldEquation.replace(listOf(constant), repPart)
         }
-        return result
+
+        if (apply) {
+            state.replaces[repPart.toJezSourceConstants()] = constant
+        } else {
+            state.replaces.remove(repPart.toJezSourceConstants())
+        }
+
+        state.history?.put(
+            oldEquation = oldEquation,
+            action = this,
+            newEquation = state.equation,
+            reversion = !apply,
+        )
+        return true
     }
 
 }

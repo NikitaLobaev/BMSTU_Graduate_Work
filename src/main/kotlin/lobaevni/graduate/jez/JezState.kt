@@ -6,19 +6,21 @@ import lobaevni.graduate.jez.history.JezHistory
 internal class JezState(
     var equation: JezEquation,
     storeHistory: Boolean,
+    dot: Boolean,
     dotShortenLabels: Boolean,
 ) {
 
-    val sigmaLeft: JezSigma = mutableMapOf() //TODO: it's enough just one sigma with mutable bidirectional linked list
-    val sigmaRight: JezSigma = mutableMapOf()
+    val sigma: JezSigma = mutableMapOf()
     val replaces: JezReplaces = mutableMapOf()
-    val history: JezHistory? = if (storeHistory) JezHistory(dotShortenLabels) else null
+    val history: JezHistory? = if (storeHistory) JezHistory(dot, dotShortenLabels) else null
 
     fun apply(action: JezAction) {
         action.applyAction()
     }
 
-    //TODO: fun revert(action: JezAction)...
+    fun revert(action: JezAction) {
+        action.revertAction()
+    }
 
     fun getOrGenerateConstant(repPart: List<JezConstant>): JezGeneratedConstant {
         return replaces.getOrPut(repPart.toJezSourceConstants()) { JezGeneratedConstant(repPart, replaces.size) }

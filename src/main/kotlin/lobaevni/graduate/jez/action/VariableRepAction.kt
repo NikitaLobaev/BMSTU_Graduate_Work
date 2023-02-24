@@ -10,28 +10,11 @@ internal data class VariableRepAction(
 ) : JezAction() {
 
     override fun applyAction(): Boolean {
-        if (leftRepPart.isEmpty() && rightRepPart.isEmpty()) return false
-
-        val repPart = leftRepPart + variable + rightRepPart
-        val oldEquation = state.equation
-        state.equation = JezEquation(
-            u = state.equation.u.replaceVariable(variable, repPart),
-            v = state.equation.v.replaceVariable(variable, repPart),
-        )
-
-        state.sigmaLeft[variable] = state.sigmaLeft[variable]!! + leftRepPart.toJezSourceConstants()
-        state.sigmaRight[variable] = state.sigmaRight[variable]!! + rightRepPart.toJezSourceConstants()
-
-        state.history?.putApplication(
-            oldEquation = oldEquation,
-            action = this,
-            newEquation = state.equation,
-        )
-        return true
+        return action(true)
     }
 
     override fun revertAction(): Boolean {
-        TODO("Not yet implemented")
+        return action(false)
     }
 
     override fun toString(): String {
@@ -43,19 +26,45 @@ internal data class VariableRepAction(
     }
 
     /**
-     * @return [JezEquationPart] with specified [repPart] replacement of [variable].
+     * Applies or reverts current [JezAction]
+     * @param apply true to apply current [JezAction], false to revert.
      */
-    private fun JezEquationPart.replaceVariable(
-        variable: JezVariable,
-        repPart: List<JezElement>,
-    ): JezEquationPart {
-        return map { element ->
-            if (element == variable) {
-                repPart
-            } else {
-                listOf(element)
+    private fun action(apply: Boolean): Boolean {
+        if (leftRepPart.isEmpty() && rightRepPart.isEmpty()) return false
+
+        val repPart = leftRepPart + variable + rightRepPart
+        val oldEquation = state.equation
+        state.equation = if (apply) {
+            oldEquation.replace(listOf(variable), repPart)
+        } else {
+            oldEquation.replace(repPart, listOf(variable))
+        }
+
+        val leftRepSourcePart = leftRepPart.toJezSourceConstants()
+        val rightRepSourcePart = rightRepPart.toJezSourceConstants()
+        if (apply) {
+            leftRepSourcePart.reversed().forEach { constant ->
+                state.sigma[variable]!!.addFirst(constant)
             }
-        }.flatten()
+            rightRepSourcePart.forEach { constant ->
+                state.sigma[variable]!!.addLast(constant)
+            }
+        } else {
+            for (i in leftRepSourcePart.indices) {
+                state.sigma[variable]!!.removeFirst()
+            }
+            for (i in rightRepSourcePart.indices) {
+                state.sigma[variable]!!.removeLast()
+            }
+        }
+
+        state.history?.put(
+            oldEquation = oldEquation,
+            action = this,
+            newEquation = state.equation,
+            reversion = !apply,
+        )
+        return true
     }
 
 }

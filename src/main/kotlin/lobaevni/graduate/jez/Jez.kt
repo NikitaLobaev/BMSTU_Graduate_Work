@@ -6,6 +6,7 @@ import lobaevni.graduate.jez.JezHeuristics.getSideLetters
 import lobaevni.graduate.jez.JezHeuristics.tryShorten
 import lobaevni.graduate.jez.action.ConstantsRepAction
 import lobaevni.graduate.jez.action.VariableRepAction
+import java.util.*
 
 data class JezResult(
     val sigma: JezSigma,
@@ -20,12 +21,14 @@ private val stubGeneratedConstant = JezGeneratedConstant(listOf())
  */
 fun JezEquation.tryFindMinimalSolution(
     storeHistory: Boolean = false,
+    dot: Boolean = false,
     dotShortenLabels: Boolean = false,
     maxIterationsCount: Int = (u.size + v.size) * 2, //TODO: this value might be too small for some cases, increase it
 ): JezResult {
     val state = JezState(
         equation = this,
         storeHistory = storeHistory,
+        dot = dot,
         dotShortenLabels = dotShortenLabels,
     )
     return state.tryFindMinimalSolution(maxIterationsCount)
@@ -37,12 +40,12 @@ fun JezEquation.tryFindMinimalSolution(
 internal fun JezState.tryFindMinimalSolution(
     maxIterationsCount: Int,
 ): JezResult {
+    sigma.clear()
     for (variable in equation.getUsedVariables()) {
-        sigmaLeft.getOrPut(variable) { emptyList() }
-        sigmaRight.getOrPut(variable) { emptyList() }
+        sigma[variable] = LinkedList()
     }
 
-    history?.putApplication(newEquation = equation)
+    history?.put(newEquation = equation)
 
     trySolveTrivial()
 
@@ -63,11 +66,6 @@ internal fun JezState.tryFindMinimalSolution(
     }
 
     val isSolved = equation.checkEmptySolution()
-
-    val sigma = sigmaLeft
-    for (entry in sigmaRight) {
-        sigma[entry.key] = sigma[entry.key]!! + entry.value.reversed()
-    }
 
     return JezResult(
         sigma = sigma,
@@ -216,7 +214,7 @@ internal fun JezState.pop(
 
                     if (equation.findSideContradictions() || equation.checkEmptySolution()) return this else {}
                 } else {
-                    history?.putApplication(equation, action, newPossibleEquation, true)
+                    history?.put(equation, action, newPossibleEquation, true)
                 }
             }
         }

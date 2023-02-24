@@ -53,7 +53,8 @@ fun main(args: Array<String>) {
 
     val result = try {
         equation.tryFindMinimalSolution(
-            storeHistory = dotFilename != null,
+            dot = dotFilename != null,
+            storeHistory = dotFilename != null, //TODO: need one more input flag, should we solve equation for double exponent...
             dotShortenLabels = dotShortenLabels,
         )
     } catch (e: Exception) {
