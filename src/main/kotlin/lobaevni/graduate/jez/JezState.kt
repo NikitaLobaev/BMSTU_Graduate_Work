@@ -10,7 +10,8 @@ internal class JezState(
     dotHTMLLabels: Boolean,
 ) {
 
-    val sigma: JezSigma = mutableMapOf()
+    val sigmaLeft: JezMutableSigma = mutableMapOf()
+    val sigmaRight: JezMutableSigma = mutableMapOf()
     val replaces: JezReplaces = mutableMapOf()
     val history: JezHistory? = if (storeHistory) JezHistory(dot, dotHTMLLabels) else null
 

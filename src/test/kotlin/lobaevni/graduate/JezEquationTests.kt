@@ -100,6 +100,18 @@ class JezEquationTests {
     }
 
     @Test
+    fun test8() {
+        val sourceEquation = parseEquation("x", "AB")
+        val expectedSigma = mapOf(
+            "x" to "AB",
+        )
+        val result = sourceEquation.tryFindMinimalSolution()
+        assertTrue(result.isSolved, FAILED_MSG_IS_NOT_SOLVED)
+        val actualSigma = result.sigma.toStringMap()
+        assertEquals(expectedSigma, actualSigma, FAILED_MSG_WRONG_SIGMA)
+    }
+
+    @Test
     fun testNoSolution1() {
         val sourceEquation = parseEquation("A", "B")
         val result = sourceEquation.tryFindMinimalSolution()

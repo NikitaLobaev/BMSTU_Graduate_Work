@@ -6,7 +6,6 @@ import lobaevni.graduate.jez.JezHeuristics.getSideLetters
 import lobaevni.graduate.jez.JezHeuristics.tryShorten
 import lobaevni.graduate.jez.action.ConstantsRepAction
 import lobaevni.graduate.jez.action.VariableRepAction
-import java.util.*
 
 data class JezResult(
     val sigma: JezSigma,
@@ -40,9 +39,11 @@ fun JezEquation.tryFindMinimalSolution(
 internal fun JezState.tryFindMinimalSolution(
     maxIterationsCount: Int,
 ): JezResult {
-    sigma.clear()
+    sigmaLeft.clear()
+    sigmaRight.clear()
     for (variable in equation.getUsedVariables()) {
-        sigma[variable] = LinkedList()
+        sigmaLeft[variable] = mutableListOf()
+        sigmaRight[variable] = mutableListOf()
     }
 
     history?.put(newEquation = equation)
@@ -60,12 +61,14 @@ internal fun JezState.tryFindMinimalSolution(
 
         if (equation.findSideContradictions() || equation.checkEmptySolution()) break
 
-        val constants = equation.getSideLetters()
-        pairComp(constants.first, constants.second).trySolveTrivial()
+        pairComp().trySolveTrivial()
         iteration++
     }
 
     val isSolved = equation.checkEmptySolution()
+    val sigma: JezSigma = equation.getUsedVariables().associateWith { variable ->
+        sigmaLeft[variable]!! + sigmaRight[variable]!!
+    }
 
     return JezResult(
         sigma = sigma,
@@ -107,19 +110,15 @@ internal fun JezState.blockComp(): JezState {
 }
 
 /**
- * Turning crossing pairs from cartesian product [lettersLeft]*[lettersRight] into non-crossing ones and compressing
- * them.
- * @param lettersLeft constants, that might be on the left side of the crossing pair being replaced.
- * @param lettersRight similarly, constants, that might be on the right side.
+ * Turning crossing pairs into non-crossing ones and compressing them.
  */
-internal fun JezState.pairComp(
-    lettersLeft: Collection<JezConstant>,
-    lettersRight: Collection<JezConstant>,
-): JezState {
-    pop(lettersLeft, lettersRight)
+internal fun JezState.pairComp(): JezState {
+    var constants = equation.getSideLetters()
+    pop(constants.first, constants.second)
 
-    for (a in lettersLeft) {
-        for (b in lettersRight) {
+    constants = equation.getSideLetters()
+    for (a in constants.first) {
+        for (b in constants.second) {
             if (a == b) continue //we don't compress blocks here
 
             apply(ConstantsRepAction(this, listOf(a, b)))

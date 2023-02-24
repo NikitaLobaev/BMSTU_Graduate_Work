@@ -22,7 +22,7 @@ internal data class VariableRepAction(
     }
 
     override fun toHTMLString(): String {
-        return "${variable.toHTMLString()} &rarr; ${leftRepPart.convertToHTMLString()}${variable.toHTMLString()}${rightRepPart.convertToHTMLString()}"
+        return "${variable.toHTMLString()} &rarr; ${leftRepPart.convertToHTMLString(false)}${variable.toHTMLString()}${rightRepPart.convertToHTMLString(false)}"
     }
 
     /**
@@ -42,19 +42,17 @@ internal data class VariableRepAction(
 
         val leftRepSourcePart = leftRepPart.toJezSourceConstants()
         val rightRepSourcePart = rightRepPart.toJezSourceConstants()
+        val sigmaLeftValue = state.sigmaLeft[variable]!!
+        val sigmaRightValue = state.sigmaRight[variable]!!
         if (apply) {
-            leftRepSourcePart.reversed().forEach { constant ->
-                state.sigma[variable]!!.addFirst(constant)
-            }
-            rightRepSourcePart.forEach { constant ->
-                state.sigma[variable]!!.addLast(constant)
-            }
+            sigmaLeftValue += leftRepSourcePart
+            sigmaRightValue += rightRepSourcePart
         } else {
             for (i in leftRepSourcePart.indices) {
-                state.sigma[variable]!!.removeFirst()
+                sigmaLeftValue.removeLast()
             }
             for (i in rightRepSourcePart.indices) {
-                state.sigma[variable]!!.removeLast()
+                sigmaRightValue.removeLast()
             }
         }
 

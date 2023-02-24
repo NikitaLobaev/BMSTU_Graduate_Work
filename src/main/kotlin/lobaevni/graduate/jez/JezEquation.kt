@@ -49,7 +49,9 @@ internal fun JezEquationPart.convertToString(): String {
     }.trim()
 }
 
-internal fun JezEquationPart.convertToHTMLString(): String {
+internal fun JezEquationPart.convertToHTMLString(
+    epsilonIfEmpty: Boolean = true,
+): String {
     data class Acc(
         val total: String,
         val element: JezElement,
@@ -74,5 +76,5 @@ internal fun JezEquationPart.convertToHTMLString(): String {
         }?.let { acc ->
             val elementStr = acc.element.toHTMLString()
             Acc(acc.total + elementStr, acc.element, 0)
-        }?.total ?: ""
+        }?.total ?: if (epsilonIfEmpty) "&epsilon;" else ""
 }

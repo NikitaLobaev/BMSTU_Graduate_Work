@@ -66,7 +66,7 @@ internal class JezHistory(
 
     //TODO: @Experimental? @RequiresOptIn?
     private fun String.formatHTMLLabel(): String {
-        return "\" label=<$this> hacklabel=\""
+        return "\" label=<&nbsp;$this&nbsp;> hacklabel=\""
     }
 
 }
