@@ -41,7 +41,8 @@ internal fun JezState.tryFindMinimalSolution(
 ): JezResult {
     sigmaLeft.clear()
     sigmaRight.clear()
-    for (variable in equation.getUsedVariables()) {
+    val variables = equation.getUsedVariables()
+    for (variable in variables) {
         sigmaLeft[variable] = mutableListOf()
         sigmaRight[variable] = mutableListOf()
     }
@@ -66,7 +67,7 @@ internal fun JezState.tryFindMinimalSolution(
     }
 
     val isSolved = equation.checkEmptySolution()
-    val sigma: JezSigma = equation.getUsedVariables().associateWith { variable ->
+    val sigma: JezSigma = variables.associateWith { variable ->
         sigmaLeft[variable]!! + sigmaRight[variable]!!
     }
 

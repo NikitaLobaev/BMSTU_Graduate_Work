@@ -30,6 +30,7 @@ internal class JezHistory(
      * @param reversion true, if this action was reverted, false if this action was applied.
      * @param ignored false, if [newEquation] was honestly processed in main algorithm, true otherwise.
      */
+    @OptIn(DotExperimentalHTMLLabel::class)
     fun put(
         oldEquation: JezEquation? = null,
         action: JezAction? = null,
@@ -64,7 +65,7 @@ internal class JezHistory(
         }
     }
 
-    //TODO: @Experimental? @RequiresOptIn?
+    @DotExperimentalHTMLLabel
     private fun String.formatHTMLLabel(): String {
         return "\" label=<&nbsp;$this&nbsp;> hacklabel=\""
     }
