@@ -7,12 +7,12 @@ internal class JezState(
     var equation: JezEquation,
     storeHistory: Boolean,
     dot: Boolean,
-    dotShortenLabels: Boolean,
+    dotHTMLLabels: Boolean,
 ) {
 
     val sigma: JezSigma = mutableMapOf()
     val replaces: JezReplaces = mutableMapOf()
-    val history: JezHistory? = if (storeHistory) JezHistory(dot, dotShortenLabels) else null
+    val history: JezHistory? = if (storeHistory) JezHistory(dot, dotHTMLLabels) else null
 
     fun apply(action: JezAction) {
         action.applyAction()

@@ -7,7 +7,7 @@ import lobaevni.graduate.jez.*
 
 private const val OPTION_DOT_FILENAME_DESCRIPTION = "Output DOT-representation filename (without extension)"
 private const val OPTION_DOT_SHORTEN_LABELS_DESCRIPTION = "Shorten labels in DOT-representation"
-private const val OPTION_DOT_SHORTEN_PATHS_DESCRIPTION = "Shorten paths in DOT-representation"
+//private const val OPTION_DOT_SHORTEN_PATHS_DESCRIPTION = "Shorten paths in DOT-representation"
 
 private const val USAGE_MESSAGE = """
 Usage:
@@ -22,21 +22,20 @@ fun main(args: Array<String>) {
     val parser = ArgParser("jez")
     val dotFilename by parser.option(
         description = OPTION_DOT_FILENAME_DESCRIPTION,
-        fullName = "dot",
+        fullName = "dot-filename",
         type = ArgType.String,
     )
-    val dotShortenLabels by parser.option(
+    val dotHTMLLabels by parser.option(
         description = OPTION_DOT_SHORTEN_LABELS_DESCRIPTION,
-        fullName = "dot-shorten-labels",
-        shortName = "sl",
+        fullName = "dot-html-labels",
         type = ArgType.Boolean,
     ).default(false)
-    val dotShortenPaths by parser.option(
+    /*val dotShortenPaths by parser.option(
         description = OPTION_DOT_SHORTEN_PATHS_DESCRIPTION,
         fullName = "dot-shorten-paths",
         shortName = "sp",
         type = ArgType.Boolean,
-    ).default(false)
+    ).default(false)*/ //TODO
     parser.parse(args)
 
     val letters: List<JezSourceConstant>
@@ -55,7 +54,7 @@ fun main(args: Array<String>) {
         equation.tryFindMinimalSolution(
             dot = dotFilename != null,
             storeHistory = dotFilename != null, //TODO: need one more input flag, should we solve equation for double exponent...
-            dotShortenLabels = dotShortenLabels,
+            dotHTMLLabels = dotHTMLLabels,
         )
     } catch (e: Exception) {
         println(ERROR_MESSAGE)

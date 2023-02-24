@@ -11,7 +11,7 @@ private const val DOT_NODE_IGNORED_COLOR = "#F1948A"
 
 internal class JezHistory(
     dot: Boolean = false,
-    private val dotShortenLabels: Boolean = false,
+    private val dotHTMLLabels: Boolean = false,
 ) {
 
     private val rootGraphNode: JezHistoryGraphNode = JezHistoryGraphNode()
@@ -49,14 +49,14 @@ internal class JezHistory(
         dotRootGraph?.apply {
             val newEquationStrBr = "\"$newEquation\""
             +newEquationStrBr + {
-                label = if (dotShortenLabels) newEquation.toHTMLString().formatHTMLLabel() else newEquation.toString()
+                label = if (dotHTMLLabels) newEquation.toHTMLString().formatHTMLLabel() else newEquation.toString()
                 if (ignored) color = DOT_NODE_IGNORED_COLOR
             }
             oldEquation?.let {
                 val oldEquationStrBr = "\"$oldEquation\""
                 action?.let {
                     oldEquationStrBr - newEquationStrBr + {
-                        label = if (dotShortenLabels) action.toHTMLString().formatHTMLLabel() else action.toString()
+                        label = if (dotHTMLLabels) action.toHTMLString().formatHTMLLabel() else action.toString()
                         if (ignored) color = DOT_NODE_IGNORED_COLOR
                     }
                 }

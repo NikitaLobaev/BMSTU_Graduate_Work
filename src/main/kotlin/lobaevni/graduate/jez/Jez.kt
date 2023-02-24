@@ -22,14 +22,14 @@ private val stubGeneratedConstant = JezGeneratedConstant(listOf())
 fun JezEquation.tryFindMinimalSolution(
     storeHistory: Boolean = false,
     dot: Boolean = false,
-    dotShortenLabels: Boolean = false,
+    dotHTMLLabels: Boolean = false,
     maxIterationsCount: Int = (u.size + v.size) * 2, //TODO: this value might be too small for some cases, increase it
 ): JezResult {
     val state = JezState(
         equation = this,
         storeHistory = storeHistory,
         dot = dot,
-        dotShortenLabels = dotShortenLabels,
+        dotHTMLLabels = dotHTMLLabels,
     )
     return state.tryFindMinimalSolution(maxIterationsCount)
 }
