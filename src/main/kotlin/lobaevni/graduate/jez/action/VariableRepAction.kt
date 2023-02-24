@@ -22,7 +22,7 @@ internal data class VariableRepAction(
         state.sigmaLeft[variable] = state.sigmaLeft[variable]!! + leftRepPart.toJezSourceConstants()
         state.sigmaRight[variable] = state.sigmaRight[variable]!! + rightRepPart.toJezSourceConstants()
 
-        state.history?.putApplied(
+        state.history?.putApplication(
             oldEquation = oldEquation,
             action = this,
             newEquation = state.equation,

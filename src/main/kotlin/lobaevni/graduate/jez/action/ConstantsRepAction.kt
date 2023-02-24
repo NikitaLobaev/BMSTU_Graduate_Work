@@ -1,5 +1,6 @@
 package lobaevni.graduate.jez.action
 
+import lobaevni.graduate.Utils.prefixFunction
 import lobaevni.graduate.jez.*
 
 internal data class ConstantsRepAction(
@@ -20,7 +21,7 @@ internal data class ConstantsRepAction(
 
         state.replaces[repPart.toJezSourceConstants()] = constant
 
-        state.history?.putApplied(
+        state.history?.putApplication(
             oldEquation = oldEquation,
             action = this,
             newEquation = state.equation,
@@ -37,13 +38,13 @@ internal data class ConstantsRepAction(
     }
 
     override fun toHTMLString(): String {
-        return "${repPart.convertToHTMLString()} -> ${constant.toHTMLString()}"
+        return "${repPart.convertToHTMLString()} &rarr; ${constant.toHTMLString()}"
     }
 
     /**
      * Replaces all subparts [p] with [constant] in [JezEquationPart].
      */
-    private fun JezEquationPart.replace(p: Collection<Int>): JezEquationPart { //TODO: try to redo this function in functional style
+    private fun JezEquationPart.replace(p: Collection<Int>): JezEquationPart { //TODO: try to rewrite this function in functional style
         var k = 0
         var l = 0
         var result: MutableList<JezElement> = mutableListOf()
@@ -65,29 +66,6 @@ internal data class ConstantsRepAction(
             }
         }
         return result
-    }
-
-    /**
-     * Computes prefix function for [Collection].
-     * @return [ArrayList] of values of computed prefix function.
-     */
-    private fun <T: Any> Collection<T>.prefixFunction(): ArrayList<Int> { //TODO: try to redo this function in functional style
-        var j = 0
-        var i = 1
-        val p = ArrayList<Int>(size)
-        while (i < size) {
-            if (elementAt(i) == elementAt(j)) {
-                p[i] = j + 1
-                i++
-                j++
-            } else if (j == 0) {
-                p[i] = 0
-                i++
-            } else {
-                j = p[i - 1]
-            }
-        }
-        return p
     }
 
 }

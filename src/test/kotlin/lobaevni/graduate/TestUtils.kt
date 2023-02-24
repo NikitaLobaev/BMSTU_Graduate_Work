@@ -2,7 +2,7 @@ package lobaevni.graduate
 
 import lobaevni.graduate.jez.*
 
-object Utils {
+object TestUtils {
 
     /**
      * Parses [JezEquation] in kind of "[u] = [v]".
@@ -38,7 +38,7 @@ object Utils {
             .mapValues {
                 it.value.map { sourceConstants ->
                     sourceConstants.value.toString()
-                }.joinToString { sourceConstant ->
+                }.joinToString("") { sourceConstant ->
                     sourceConstant
                 }
             }

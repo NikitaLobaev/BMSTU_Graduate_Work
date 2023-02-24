@@ -19,8 +19,8 @@ private val stubGeneratedConstant = JezGeneratedConstant(listOf())
  * Tries to find minimal solution of this [JezEquation].
  */
 fun JezEquation.tryFindMinimalSolution(
-    storeHistory: Boolean,
-    dotShortenLabels: Boolean,
+    storeHistory: Boolean = false,
+    dotShortenLabels: Boolean = false,
     maxIterationsCount: Int = (u.size + v.size) * 2, //TODO: this value might be too small for some cases, increase it
 ): JezResult {
     val state = JezState(
@@ -42,7 +42,7 @@ internal fun JezState.tryFindMinimalSolution(
         sigmaRight.getOrPut(variable) { emptyList() }
     }
 
-    history?.putApplied(newEquation = equation,)
+    history?.putApplication(newEquation = equation)
 
     trySolveTrivial()
 
@@ -57,8 +57,8 @@ internal fun JezState.tryFindMinimalSolution(
 
         if (equation.findSideContradictions() || equation.checkEmptySolution()) break
 
-        val letters = equation.getSideLetters()
-        pairComp(letters.first, letters.second).trySolveTrivial()
+        val constants = equation.getSideLetters()
+        pairComp(constants.first, constants.second).trySolveTrivial()
         iteration++
     }
 
@@ -115,8 +115,8 @@ internal fun JezState.blockComp(): JezState {
  * @param lettersRight similarly, constants, that might be on the right side.
  */
 internal fun JezState.pairComp(
-    lettersLeft: Set<JezConstant>,
-    lettersRight: Set<JezConstant>,
+    lettersLeft: Collection<JezConstant>,
+    lettersRight: Collection<JezConstant>,
 ): JezState {
     pop(lettersLeft, lettersRight)
 
@@ -125,8 +125,6 @@ internal fun JezState.pairComp(
             if (a == b) continue //we don't compress blocks here
 
             apply(ConstantsRepAction(this, listOf(a, b)))
-
-            //history.addEquation(equation, "($a, $b) --> $gc")
 
             trySolveTrivial()
 
@@ -138,12 +136,12 @@ internal fun JezState.pairComp(
 
 /**
  * Compression for a crossing pairs.
- * @param lettersLeft constants, that might be on the left side of the crossing pair being replaced.
- * @param lettersRight similarly, constants, that might be on the right side.
+ * @param constantsLeft constants, that might be on the left side of the crossing pair being replaced.
+ * @param constantsRight similarly, constants, that might be on the right side.
  */
 internal fun JezState.pop(
-    lettersLeft: Set<JezConstant>,
-    lettersRight: Set<JezConstant>,
+    constantsLeft: Collection<JezConstant>,
+    constantsRight: Collection<JezConstant>,
 ): JezState {
     /**
      * Pops the specified [constant] from the [variable].
@@ -168,63 +166,58 @@ internal fun JezState.pop(
     }
 
     /**
-     * Tries to assume which constant could we use for popping via checking prefixes (or postfixes, according to
-     * [left] respectively).
+     * Tries to assume which constant could we use for popping via checking prefixes (or postfixes, according to [left]
+     * respectively).
      */
-    fun JezEquation.assumeLetter(
+    fun JezEquation.assumeConstant(
         variable: JezVariable,
-        letters: Set<JezConstant>,
+        constants: Collection<JezConstant>,
         left: Boolean,
     ): JezConstant? {
-        val uLetter: JezElement?
-        val vLetter: JezElement?
+        val uConstant: JezElement?
+        val vConstant: JezElement?
         if (left) {
-            uLetter = u.firstOrNull()
-            vLetter = v.firstOrNull()
+            uConstant = u.firstOrNull()
+            vConstant = v.firstOrNull()
         } else {
-            uLetter = u.lastOrNull()
-            vLetter = v.lastOrNull()
+            uConstant = u.lastOrNull()
+            vConstant = v.lastOrNull()
         }
-        if (uLetter == variable && vLetter is JezConstant && letters.contains(vLetter)) {
-            return vLetter
-        } else if (vLetter == variable && uLetter is JezConstant && letters.contains(uLetter)) {
-            return uLetter
+        if (uConstant == variable && vConstant is JezConstant && constants.contains(vConstant)) {
+            return vConstant
+        } else if (vConstant == variable && uConstant is JezConstant && constants.contains(uConstant)) {
+            return uConstant
         }
-        return letters.firstOrNull()
+        return constants.firstOrNull()
     }
 
     for (variable in equation.getUsedVariables()) {
-        val firstLetter = equation.assumeLetter(variable, lettersRight, true)
-        firstLetter?.let {
-            val newPossibleEquation = equation.copy(
-                u = equation.u.popPart(variable, firstLetter, true),
-                v = equation.v.popPart(variable, firstLetter, true),
+        for (side in listOf(true, false)) { //true value for left side of the equation, false value for right
+            val constant = equation.assumeConstant(
+                variable = variable,
+                constants = if (side) constantsLeft else constantsRight,
+                left = side,
             )
-            if (!newPossibleEquation.findSideContradictions()) {
-                apply(VariableRepAction(this, variable, leftRepPart = listOf(firstLetter)))
+            constant?.let {
+                val newPossibleEquation = equation.copy(
+                    u = equation.u.popPart(variable, constant, side),
+                    v = equation.v.popPart(variable, constant, side),
+                )
+                val action = VariableRepAction(
+                    state = this,
+                    variable = variable,
+                    leftRepPart = if (side) listOf(constant) else listOf(),
+                    rightRepPart = if (side) listOf() else listOf(constant),
+                )
+                if (!newPossibleEquation.findSideContradictions()) {
+                    apply(action)
 
-                trySolveTrivial()
+                    trySolveTrivial()
 
-                if (equation.findSideContradictions() || equation.checkEmptySolution()) return this
-            } else {
-                //TODO: history.addEquation(newPossibleEquation, comment, false)
-            }
-        }
-
-        val lastLetter = equation.assumeLetter(variable, lettersLeft, false)
-        lastLetter?.let {
-            val newPossibleEquation = equation.copy(
-                u = equation.u.popPart(variable, lastLetter, false),
-                v = equation.v.popPart(variable, lastLetter, false),
-            )
-            if (!newPossibleEquation.findSideContradictions()) {
-                apply(VariableRepAction(this, variable, rightRepPart = listOf(lastLetter)))
-
-                trySolveTrivial()
-
-                if (equation.findSideContradictions() || equation.checkEmptySolution()) return this
-            } else {
-                //TODO: history.addEquation(newPossibleEquation, comment, false)
+                    if (equation.findSideContradictions() || equation.checkEmptySolution()) return this else {}
+                } else {
+                    history?.putApplication(equation, action, newPossibleEquation, true)
+                }
             }
         }
     }
