@@ -9,11 +9,34 @@ internal data class ConstantsRepAction(
 ) : JezAction() {
 
     override fun applyAction(): Boolean {
-        return action(true)
+        if (repPart.isEmpty()) return false
+
+        val oldEquation = state.equation
+        state.equation = oldEquation.replace(repPart, listOf(constant))
+
+        state.replaces[repPart.toJezSourceConstants()] = constant
+
+        state.history?.putApplication(
+            oldEquation = oldEquation,
+            action = this,
+            newEquation = state.equation,
+        )
+        return true
     }
 
     override fun revertAction(): Boolean {
-        return action(false)
+        if (repPart.isEmpty()) return false
+
+        val oldEquation = state.equation
+        state.equation = oldEquation.replace(listOf(constant), repPart)
+
+        state.replaces.remove(repPart.toJezSourceConstants())
+
+        state.history?.putReversion(
+            oldEquation = oldEquation,
+            newEquation = state.equation,
+        )
+        return true
     }
 
     override fun toString(): String {
@@ -22,35 +45,6 @@ internal data class ConstantsRepAction(
 
     override fun toHTMLString(): String {
         return "${repPart.convertToHTMLString()} &rarr; ${constant.toHTMLString()}"
-    }
-
-    /**
-     * Applies or reverts current [JezAction]
-     * @param apply true to apply current [JezAction], false to revert.
-     */
-    private fun action(apply: Boolean): Boolean {
-        if (repPart.isEmpty()) return false
-
-        val oldEquation = state.equation
-        state.equation = if (apply) {
-            oldEquation.replace(repPart, listOf(constant))
-        } else {
-            oldEquation.replace(listOf(constant), repPart)
-        }
-
-        if (apply) {
-            state.replaces[repPart.toJezSourceConstants()] = constant
-        } else {
-            state.replaces.remove(repPart.toJezSourceConstants())
-        }
-
-        state.history?.put(
-            oldEquation = oldEquation,
-            action = this,
-            newEquation = state.equation,
-            reversion = !apply,
-        )
-        return true
     }
 
 }

@@ -15,12 +15,18 @@ internal class JezState(
     val replaces: JezReplaces = mutableMapOf()
     val history: JezHistory? = if (storeHistory) JezHistory(dot, dotHTMLLabels) else null
 
-    fun apply(action: JezAction) {
-        action.applyAction()
+    /**
+     * TODO @return @see...
+     */
+    fun apply(action: JezAction): Boolean {
+        return action.applyAction()
     }
 
-    fun revert(action: JezAction) {
-        action.revertAction()
+    /**
+     * TODO @return @see...
+     */
+    fun revert(): Boolean {
+        return history?.currentGraphNode?.action?.revertAction() ?: false
     }
 
     fun getOrGenerateConstant(repPart: List<JezConstant>): JezGeneratedConstant {

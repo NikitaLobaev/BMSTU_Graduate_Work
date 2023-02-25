@@ -33,7 +33,7 @@ internal data class CropAction(
             v = oldEquation.v.drop(leftPart.size).dropLast(rightPart.size),
         )
 
-        state.history?.put(
+        state.history?.putApplication(
             oldEquation = oldEquation,
             action = this,
             newEquation = state.equation,
@@ -53,11 +53,9 @@ internal data class CropAction(
             v = leftPart + oldEquation.v + rightPart,
         )
 
-        state.history?.put(
+        state.history?.putReversion(
             oldEquation = oldEquation,
-            action = this,
             newEquation = state.equation,
-            reversion = true,
         )
         return true
     }

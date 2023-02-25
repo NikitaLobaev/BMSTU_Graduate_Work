@@ -20,24 +20,26 @@ private val stubGeneratedConstant = JezGeneratedConstant(listOf())
  * Tries to find minimal solution of this [JezEquation].
  */
 fun JezEquation.tryFindMinimalSolution(
-    storeHistory: Boolean = false,
+    allowRevert: Boolean = false,
+    storeHistory: Boolean = allowRevert,
     dot: Boolean = false,
     dotHTMLLabels: Boolean = false,
     maxIterationsCount: Int = (u.size + v.size) * 2, //TODO: this value might be too small for some cases, increase it
 ): JezResult {
     val state = JezState(
         equation = this,
-        storeHistory = storeHistory,
+        storeHistory = storeHistory || allowRevert,
         dot = dot,
         dotHTMLLabels = dotHTMLLabels,
     )
-    return state.tryFindMinimalSolution(maxIterationsCount)
+    return state.tryFindMinimalSolution(allowRevert, maxIterationsCount)
 }
 
 /**
  * Tries to find minimal solution of [this.equation].
  */
 internal fun JezState.tryFindMinimalSolution(
+    allowRevert: Boolean,
     maxIterationsCount: Int,
 ): JezResult {
     sigmaLeft.clear()
@@ -48,23 +50,28 @@ internal fun JezState.tryFindMinimalSolution(
         sigmaRight[variable] = mutableListOf()
     }
 
-    history?.put(newEquation = equation)
+    history?.init(equation)
 
     trySolveTrivial()
 
     var iteration = 0
     while (
         (equation.u.size > 1 || equation.v.size > 1) &&
-        !equation.findSideContradictions() &&
         !equation.checkEmptySolution() &&
-        iteration < maxIterationsCount
+        iteration++ < maxIterationsCount
     ) {
+        val currentEquation = equation
+
+        if (equation.findSideContradictions() && (!allowRevert || !revertUntilNoSolution())) break
+
         blockComp().trySolveTrivial()
 
-        if (equation.findSideContradictions() || equation.checkEmptySolution()) break
+        if (equation.checkEmptySolution()) break
+        if (equation.findSideContradictions()) continue
 
         pairComp().trySolveTrivial()
-        iteration++
+
+        if (equation == currentEquation && (!allowRevert || !revertUntilNoSolution())) break
     }
 
     val isSolved = equation.checkEmptySolution()
@@ -120,7 +127,13 @@ internal fun JezState.blockComp(): JezState {
  */
 internal fun JezState.pairComp(): JezState {
     var constants = equation.getSideLetters()
-    pop(constants.first, constants.second)
+    val usedConstants = equation.getUsedConstants().toMutableSet()
+    usedConstants.removeAll(constants.first)
+    val constantsLeft = constants.first + usedConstants.toList()
+    usedConstants.addAll(constants.first)
+    usedConstants.removeAll(constants.second)
+    val constantsRight = constants.second + usedConstants.toList()
+    pop(constantsLeft, constantsRight)
 
     constants = equation.getSideLetters()
     for (a in constants.first) {
@@ -169,48 +182,56 @@ internal fun JezState.pop(
     }
 
     /**
-     * Tries to assume which constant could we use for popping via checking prefixes (or postfixes, according to [left]
-     * respectively).
+     * Tries to assume which variable and constant could we use for popping first via checking prefixes (or postfixes,
+     * according to [left] respectively).
      */
-    fun JezEquation.assumeConstant(
-        variable: JezVariable,
-        constants: Collection<JezConstant>,
+    fun JezEquation.assume(
+        allowedConstants: Collection<JezConstant>,
         left: Boolean,
-    ): JezConstant? {
-        val uConstant: JezElement?
-        val vConstant: JezElement?
+    ): Pair<JezVariable, JezConstant>? {
+        val uElement: JezElement?
+        val vElement: JezElement?
         if (left) {
-            uConstant = u.firstOrNull()
-            vConstant = v.firstOrNull()
+            uElement = u.firstOrNull()
+            vElement = v.firstOrNull()
         } else {
-            uConstant = u.lastOrNull()
-            vConstant = v.lastOrNull()
+            uElement = u.lastOrNull()
+            vElement = v.lastOrNull()
         }
-        if (uConstant == variable && vConstant is JezConstant && constants.contains(vConstant)) {
-            return vConstant
-        } else if (vConstant == variable && uConstant is JezConstant && constants.contains(uConstant)) {
-            return uConstant
+        if (uElement is JezVariable && vElement is JezConstant && allowedConstants.contains(vElement)) {
+            return Pair(uElement, vElement)
+        } else if (vElement is JezVariable && uElement is JezConstant && allowedConstants.contains(uElement)) {
+            return Pair(vElement, uElement)
         }
-        return constants.firstOrNull()
+        return null
     }
 
-    for (variable in equation.getUsedVariables()) {
-        for (side in listOf(true, false)) { //true value for left side of the equation, false value for right
-            val constant = equation.assumeConstant(
-                variable = variable,
-                constants = if (side) constantsLeft else constantsRight,
-                left = side,
-            )
-            constant?.let {
+    for (side in listOf(true, false)) { //true value for left side constants of the equation, false value for right
+        val allowedConstants = if (side) constantsLeft else constantsRight
+        val assumption = equation.assume(allowedConstants, side)
+        val variables = listOfNotNull(assumption?.first) + equation.getUsedVariables().filterNot { variable ->
+            variable == assumption?.first
+        }
+        val constants = listOfNotNull(assumption?.second) + allowedConstants.filterNot { constant ->
+            constant == assumption?.second
+        }
+        for (variable in variables) {
+            constants.filterNot { assumedConstant ->
+                history?.currentGraphNode?.childNodes?.find { childNode ->
+                    childNode.action is VariableRepAction &&
+                            ((side && childNode.action.leftRepPart == listOf(assumedConstant)) ||
+                                    (!side && childNode.action.rightRepPart == listOf(assumedConstant)))
+                } != null
+            }.firstOrNull()?.let { assumedConstant ->
                 val newPossibleEquation = equation.copy(
-                    u = equation.u.popPart(variable, constant, side),
-                    v = equation.v.popPart(variable, constant, side),
+                    u = equation.u.popPart(variable, assumedConstant, side),
+                    v = equation.v.popPart(variable, assumedConstant, side),
                 )
                 val action = VariableRepAction(
                     state = this,
                     variable = variable,
-                    leftRepPart = if (side) listOf(constant) else listOf(),
-                    rightRepPart = if (side) listOf() else listOf(constant),
+                    leftRepPart = if (side) listOf(assumedConstant) else listOf(),
+                    rightRepPart = if (side) listOf() else listOf(assumedConstant),
                 )
                 if (!newPossibleEquation.findSideContradictions()) {
                     apply(action)
@@ -219,12 +240,29 @@ internal fun JezState.pop(
 
                     if (equation.findSideContradictions() || equation.checkEmptySolution()) return this else {}
                 } else {
-                    history?.put(equation, action, newPossibleEquation, true)
+                    history?.putApplication(equation, action, newPossibleEquation, true)
                 }
             }
         }
     }
     return this
+}
+
+/**
+ * Reverts actions (via addressing to a history) until it is able to move another way (until there can be no solution
+ * yet).
+ * @return true, if there was found node, through which we can try to find a solution, false otherwise.
+ */
+internal fun JezState.revertUntilNoSolution(): Boolean {
+    while (true) {
+        val revertedAction = history?.currentGraphNode?.action
+        if (!revert()) return false
+
+        when (revertedAction) {
+            is VariableRepAction -> return true
+            else -> {}
+        }
+    }
 }
 
 /**

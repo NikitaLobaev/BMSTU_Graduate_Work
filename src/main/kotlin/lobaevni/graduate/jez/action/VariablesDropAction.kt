@@ -18,7 +18,7 @@ internal data class VariablesDropAction(
             v = oldEquation.v.filterIsInstance<JezConstant>(),
         )
 
-        state.history?.put(
+        state.history?.putApplication(
             oldEquation,
             this,
             state.equation,

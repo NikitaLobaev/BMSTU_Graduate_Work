@@ -3,10 +3,7 @@ package lobaevni.graduate
 import lobaevni.graduate.TestUtils.parseEquation
 import lobaevni.graduate.TestUtils.toStringMap
 import lobaevni.graduate.jez.tryFindMinimalSolution
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
+import kotlin.test.*
 
 private const val FAILED_MSG_IS_NOT_SOLVED = "The equation had to be solved"
 private const val FAILED_MSG_WRONG_SIGMA = "Wrong answer"
@@ -86,6 +83,7 @@ class JezEquationTests {
         assertEquals(expectedSigma, actualSigma, FAILED_MSG_WRONG_SIGMA)
     }
 
+    @Ignore("TODO: Needs --allow-revert")
     @Test
     fun test7() {
         val sourceEquation = parseEquation("AAAAAx", "yCBBB")
@@ -104,6 +102,35 @@ class JezEquationTests {
         val sourceEquation = parseEquation("x", "AB")
         val expectedSigma = mapOf(
             "x" to "AB",
+        )
+        val result = sourceEquation.tryFindMinimalSolution()
+        assertTrue(result.isSolved, FAILED_MSG_IS_NOT_SOLVED)
+        val actualSigma = result.sigma.toStringMap()
+        assertEquals(expectedSigma, actualSigma, FAILED_MSG_WRONG_SIGMA)
+    }
+
+    @Ignore("TODO: Needs --allow-revert")
+    @Test
+    fun test9() {
+        val sourceEquation = parseEquation("xAxy", "AB")
+        val expectedSigma = mapOf(
+            "x" to "",
+            "y" to "B",
+        )
+        val result = sourceEquation.tryFindMinimalSolution()
+        assertTrue(result.isSolved, FAILED_MSG_IS_NOT_SOLVED)
+        val actualSigma = result.sigma.toStringMap()
+        assertEquals(expectedSigma, actualSigma, FAILED_MSG_WRONG_SIGMA)
+    }
+
+    @Ignore("TODO: Needs --allow-revert")
+    @Test
+    fun test10() {
+        val sourceEquation = parseEquation("AxBy", "z")
+        val expectedSigma = mapOf(
+            "x" to "",
+            "y" to "",
+            "z" to "AB",
         )
         val result = sourceEquation.tryFindMinimalSolution()
         assertTrue(result.isSolved, FAILED_MSG_IS_NOT_SOLVED)

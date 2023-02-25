@@ -6,5 +6,4 @@ internal data class JezHistoryGraphNode(
     internal val action: JezAction? = null,
     internal val parentNode: JezHistoryGraphNode? = null,
     internal val childNodes: MutableList<JezHistoryGraphNode> = mutableListOf(),
-    //TODO: isVisited
 )
