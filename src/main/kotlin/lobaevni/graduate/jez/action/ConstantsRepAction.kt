@@ -17,7 +17,7 @@ internal data class ConstantsRepAction(
     }
 
     override fun toString(): String {
-        return "${repPart.convertToHTMLString()} -> $constant"
+        return "${repPart.convertToString()} -> $constant"
     }
 
     override fun toHTMLString(): String {

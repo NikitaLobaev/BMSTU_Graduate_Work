@@ -3,8 +3,8 @@ package lobaevni.graduate.jez.history
 import lobaevni.graduate.jez.action.JezAction
 
 internal data class JezHistoryGraphNode(
-    val action: JezAction? = null,
-    val parentNode: JezHistoryGraphNode? = null,
-    val childNodes: MutableList<JezHistoryGraphNode> = mutableListOf(),
+    internal val action: JezAction? = null,
+    internal val parentNode: JezHistoryGraphNode? = null,
+    internal val childNodes: MutableList<JezHistoryGraphNode> = mutableListOf(),
     //TODO: isVisited
 )

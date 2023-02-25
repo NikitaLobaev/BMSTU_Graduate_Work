@@ -5,6 +5,7 @@ import lobaevni.graduate.jez.JezHeuristics.findSideContradictions
 import lobaevni.graduate.jez.JezHeuristics.getSideLetters
 import lobaevni.graduate.jez.JezHeuristics.tryShorten
 import lobaevni.graduate.jez.action.ConstantsRepAction
+import lobaevni.graduate.jez.action.VariablesDropAction
 import lobaevni.graduate.jez.action.VariableRepAction
 
 data class JezResult(
@@ -69,6 +70,10 @@ internal fun JezState.tryFindMinimalSolution(
     val isSolved = equation.checkEmptySolution()
     val sigma: JezSigma = variables.associateWith { variable ->
         sigmaLeft[variable]!! + sigmaRight[variable]!!
+    }
+
+    if (isSolved) {
+        apply(VariablesDropAction(this))
     }
 
     return JezResult(
