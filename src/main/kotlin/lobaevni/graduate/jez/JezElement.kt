@@ -8,6 +8,8 @@ internal typealias JezSourceConstant = JezElement.Constant.Source
 internal typealias JezGeneratedConstant = JezElement.Constant.Generated
 internal typealias JezVariable = JezElement.Variable
 
+internal val stubGeneratedConstant = JezGeneratedConstant(listOf())
+
 sealed class JezElement {
 
     abstract class Constant : JezElement() {

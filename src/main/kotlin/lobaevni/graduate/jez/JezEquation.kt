@@ -58,11 +58,11 @@ internal fun JezEquationPart.convertToHTMLString(
         val count: Int,
     )
 
-    return this
+    return (this + stubGeneratedConstant)
         .map { element ->
             Acc("", element, 1)
         }
-        .reduceOrNull { lastAcc, currentAcc ->
+        .reduce { lastAcc, currentAcc ->
             if (lastAcc.element == currentAcc.element) {
                 Acc(lastAcc.total, currentAcc.element, lastAcc.count + 1)
             } else {
@@ -73,8 +73,5 @@ internal fun JezEquationPart.convertToHTMLString(
                     Acc(lastAcc.total + elementStr, currentAcc.element, 1)
                 }
             }
-        }?.let { acc ->
-            val elementStr = acc.element.toHTMLString()
-            Acc(acc.total + elementStr, acc.element, 0)
-        }?.total ?: if (epsilonIfEmpty) "&epsilon;" else ""
+        }.total.takeIf { it.isNotEmpty() } ?: if (epsilonIfEmpty) "&epsilon;" else ""
 }

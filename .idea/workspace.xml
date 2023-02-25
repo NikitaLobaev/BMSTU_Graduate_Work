@@ -7,6 +7,9 @@
     <list default="true" id="85e7987e-bcf2-4b0a-8323-009184876a50" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/Jez.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/Jez.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/JezElement.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/JezElement.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/JezEquation.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/JezEquation.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/VariablesDropAction.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/VariablesDropAction.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -67,6 +70,11 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
+  <component name="Push.Settings">
+    <force-push-targets>
+      <force-push-target remote-path="origin" branch="main" />
+    </force-push-targets>
+  </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate" />
@@ -80,7 +88,7 @@
       <recent name="lobaevni.graduate.jez.history" />
     </key>
   </component>
-  <component name="RunManager" selected="Gradle.JezEquationTests">
+  <component name="RunManager" selected="Kotlin.MainKt">
     <configuration name="JezEquationTests" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -167,8 +175,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Gradle.JezEquationTests" />
         <item itemvalue="Kotlin.MainKt" />
+        <item itemvalue="Gradle.JezEquationTests" />
         <item itemvalue="Gradle.PrefixFunctionTests" />
         <item itemvalue="Gradle.JezEquationTests.test6" />
       </list>
@@ -186,7 +194,7 @@
       <workItem from="1676126189464" duration="18452000" />
       <workItem from="1676320940636" duration="1027000" />
       <workItem from="1676650288410" duration="17152000" />
-      <workItem from="1676754990767" duration="52816000" />
+      <workItem from="1676754990767" duration="55107000" />
     </task>
     <servers />
   </component>

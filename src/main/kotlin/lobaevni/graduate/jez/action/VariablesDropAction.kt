@@ -31,11 +31,11 @@ internal data class VariablesDropAction(
     }
 
     override fun toString(): String {
-        return "empty solution"
+        return "empty substitution"
     }
 
     override fun toHTMLString(): String {
-        return "&epsilon;-solution"
+        return "&epsilon;-subst"
     }
 
 }

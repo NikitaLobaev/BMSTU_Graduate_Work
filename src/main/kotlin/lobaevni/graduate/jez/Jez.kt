@@ -14,8 +14,6 @@ data class JezResult(
     val historyDotGraph: DotRootGraph?,
 )
 
-private val stubGeneratedConstant = JezGeneratedConstant(listOf())
-
 /**
  * Tries to find minimal solution of this [JezEquation].
  */
