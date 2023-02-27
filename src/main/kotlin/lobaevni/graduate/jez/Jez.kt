@@ -214,7 +214,10 @@ internal fun JezState.pop(
             constant == assumption?.second
         }
         for (variable in variables) {
-            constants.filterNot { assumedConstant ->
+            val usedConstants = equation.getUsedConstants().toSet()
+            constants.filter { constant ->
+                usedConstants.contains(constant)
+            }.filterNot { assumedConstant ->
                 history?.currentGraphNode?.childNodes?.find { childNode ->
                     childNode.action is VariableRepAction &&
                             ((side && childNode.action.leftRepPart == listOf(assumedConstant)) ||

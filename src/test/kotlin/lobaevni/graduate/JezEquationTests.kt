@@ -83,7 +83,6 @@ class JezEquationTests {
         assertEquals(expectedSigma, actualSigma, FAILED_MSG_WRONG_SIGMA)
     }
 
-    @Ignore("TODO: Needs --allow-revert")
     @Test
     fun test7() {
         val sourceEquation = parseEquation("AAAAAx", "yCBBB")
