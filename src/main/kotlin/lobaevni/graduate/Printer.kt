@@ -2,6 +2,8 @@ package lobaevni.graduate
 
 import io.github.rchowell.dotlin.DotRootGraph
 import lobaevni.graduate.jez.JezResult
+import lobaevni.graduate.jez.JezSourceConstant
+import lobaevni.graduate.jez.JezVariable
 import java.io.File
 
 /**
@@ -9,11 +11,21 @@ import java.io.File
  */
 internal fun printResult(
     result: JezResult,
+    variables: List<JezVariable>,
 ) {
+    fun printVariable(variable: JezVariable, value: List<JezSourceConstant>) {
+        println("$variable = $value")
+    }
+
     if (!result.isSolved) return
 
     for (mapEntry in result.sigma) {
-        println("${mapEntry.key} = ${mapEntry.value}")
+        printVariable(mapEntry.key, mapEntry.value)
+    }
+    for (variable in variables) {
+        if (!result.sigma.containsKey(variable)) {
+            printVariable(variable, listOf())
+        }
     }
 }
 

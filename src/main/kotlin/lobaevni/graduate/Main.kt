@@ -64,7 +64,7 @@ fun main(args: Array<String>) {
 
     try {
         if (result.isSolved) {
-            printResult(result)
+            printResult(result, variables)
         } else {
             println(NOT_SOLVED_MESSAGE)
         }
