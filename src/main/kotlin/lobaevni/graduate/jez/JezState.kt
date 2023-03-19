@@ -12,25 +12,34 @@ internal class JezState(
 
     val sigmaLeft: JezMutableSigma = mutableMapOf()
     val sigmaRight: JezMutableSigma = mutableMapOf()
+
     val replaces: JezReplaces = mutableMapOf()
+    private var blocksCount: Int = 0
+
     val history: JezHistory? = if (storeHistory) JezHistory(dot, dotHTMLLabels) else null
 
     /**
-     * TODO @return @see...
+     * @see JezAction.applyAction
      */
     fun apply(action: JezAction): Boolean {
         return action.applyAction()
     }
 
     /**
-     * TODO @return @see...
+     * @see JezAction.revertAction
      */
     fun revert(): Boolean {
         return history?.currentGraphNode?.action?.revertAction() ?: false
     }
 
     fun getOrGenerateConstant(repPart: List<JezConstant>): JezGeneratedConstant {
-        return replaces.getOrPut(repPart.toJezSourceConstants()) { JezGeneratedConstant(repPart, replaces.size) }
+        return replaces.getOrPut(repPart.toJezSourceConstants()) {
+            val constant = JezGeneratedConstant(repPart, replaces.size - blocksCount)
+            if (constant.isBlock) {
+                blocksCount++
+            }
+            return constant
+        }
     }
 
 }

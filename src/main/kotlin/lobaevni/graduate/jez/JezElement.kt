@@ -30,14 +30,34 @@ sealed class JezElement {
 
         data class Generated(
             val value: List<JezConstant>,
-            val number: Int = (Math.random() * Int.MAX_VALUE).toInt(),
+            private val preferredNumber: Int = (Math.random() * Int.MAX_VALUE).toInt(),
         ) : Constant() {
+
+            val isBlock: Boolean = value.all { it == value.first() }
+
+            val number: Int = if (isBlock) {
+                value.size
+            } else {
+                preferredNumber
+            }
 
             override val source = value.map { it.source }.flatten()
 
-            override fun toString(): String = "GENCONST($number)"
+            override fun toString(): String {
+                return if (isBlock) {
+                    "BLOCK(${value.firstOrNull()}, ${value.size})"
+                } else {
+                    "GENCONST($number)"
+                }
+            }
 
-            override fun toHTMLString(): String = "&zeta;<sub>$number</sub>"
+            override fun toHTMLString(): String {
+                return if (isBlock) {
+                    "${value.firstOrNull()?.toHTMLString()}<sub>${value.size}</sub>"
+                } else {
+                    "&xi;<sub>$number</sub>"
+                }
+            }
 
         }
 
