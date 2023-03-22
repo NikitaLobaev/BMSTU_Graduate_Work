@@ -11,10 +11,13 @@ internal data class VariablesDropAction(
         if (variables.isEmpty()) return false
 
         val oldEquation = state.equation
-        state.equation = JezEquation(
+        val newEquation = JezEquation(
             u = oldEquation.u.filterNot { variables.contains(it) },
             v = oldEquation.v.filterNot { variables.contains(it) },
         )
+        if (oldEquation == newEquation) return false
+
+        state.equation = newEquation
 
         state.history?.putApplication(
             oldEquation,

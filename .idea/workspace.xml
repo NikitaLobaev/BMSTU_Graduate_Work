@@ -6,20 +6,13 @@
   <component name="ChangeListManager">
     <list default="true" id="85e7987e-bcf2-4b0a-8323-009184876a50" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/Main.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/Main.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/Jez.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/Jez.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/JezElement.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/JezElement.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/JezEquation.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/JezEquation.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/JezHeuristics.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/JezHeuristics.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/JezState.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/JezState.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/ConstantsRepAction.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/ConstantsRepAction.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/CropAction.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/CropAction.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/JezAction.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/JezAction.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/VariableRepAction.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/VariableRepAction.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/VariablesDropAction.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/VariablesDropAction.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/history/JezHistory.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/history/JezHistory.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/history/JezHistoryGraphNode.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/history/JezHistoryGraphNode.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/kotlin/lobaevni/graduate/JezEquationTests.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/kotlin/lobaevni/graduate/JezEquationTests.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -98,7 +91,7 @@
       <recent name="lobaevni.graduate.jez.history" />
     </key>
   </component>
-  <component name="RunManager" selected="Kotlin.MainKt">
+  <component name="RunManager" selected="Gradle.JezEquationTests">
     <configuration name="JezEquationTests" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -171,7 +164,7 @@
     <configuration name="MainKt" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="lobaevni.graduate.MainKt" />
       <module name="BMSTU_Graduate_Work.main" />
-      <option name="PROGRAM_PARAMETERS" value="--dot-filename output/representation --dot-html-labels --allow-revert --max-iters-count 15 --prevent-cycles --dot-max-stmts-count 200" />
+      <option name="PROGRAM_PARAMETERS" value="--dot-filename output/representation --dot-html-labels --allow-revert --max-iters-count 20 --prevent-cycles --dot-max-stmts-count 200" />
       <shortenClasspath name="NONE" />
       <option name="VM_PARAMETERS" value="-ea" />
       <method v="2">
@@ -186,8 +179,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Kotlin.MainKt" />
         <item itemvalue="Gradle.JezEquationTests" />
+        <item itemvalue="Kotlin.MainKt" />
         <item itemvalue="Gradle.PrefixFunctionTests" />
         <item itemvalue="Gradle.JezEquationTests.test6" />
       </list>
@@ -226,5 +219,12 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="XDebuggerManager">
+    <pin-to-top-manager>
+      <pinned-members>
+        <PinnedItemInfo parentTag="lobaevni.graduate.jez.JezState" memberName="blocksCount" />
+      </pinned-members>
+    </pin-to-top-manager>
   </component>
 </project>

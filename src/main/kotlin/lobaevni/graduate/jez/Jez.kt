@@ -179,7 +179,7 @@ internal fun JezState.pairCompCr(): JezState {
                 return@firstOrNull true
             }?.let {
                 trySolveTrivial()
-                if (equation.checkEmptySolution()) return this
+                return this
             }
         }
     }

@@ -17,7 +17,15 @@ internal data class VariableRepAction(
         val newEquation = oldEquation.replace(listOf(variable), repPart)
 
         if (oldEquation == newEquation) return false
-        if (state.history?.graphNodes?.containsKey(newEquation) == true) return false
+        if (state.history?.graphNodes?.containsKey(newEquation) == true) {
+            state.history.putApplication(
+                oldEquation = oldEquation,
+                action = this,
+                newEquation = newEquation,
+                ignored = true,
+            )
+            return false
+        }
 
         state.equation = newEquation
 

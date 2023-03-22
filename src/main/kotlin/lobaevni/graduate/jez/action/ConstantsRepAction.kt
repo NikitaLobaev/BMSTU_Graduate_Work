@@ -15,7 +15,15 @@ internal data class ConstantsRepAction(
         val newEquation = oldEquation.replace(repPart, listOf(constant))
 
         if (oldEquation == newEquation) return false
-        if (state.history?.graphNodes?.containsKey(newEquation) == true) return false
+        if (state.history?.graphNodes?.containsKey(newEquation) == true) {
+            state.history.putApplication(
+                oldEquation = oldEquation,
+                action = this,
+                newEquation = newEquation,
+                ignored = true,
+            )
+            return false
+        }
 
         state.equation = newEquation
 

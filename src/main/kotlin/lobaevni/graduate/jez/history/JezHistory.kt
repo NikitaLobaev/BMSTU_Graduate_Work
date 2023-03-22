@@ -9,8 +9,8 @@ import lobaevni.graduate.jez.JezEquation
 private const val DOT_GRAPH_NAME = "recompression"
 private const val DOT_ROOT_NODE_STYLE = "bold"
 private const val DOT_NODE_DEFAULT_COLOR = "black"
-//private const val DOT_NODE_IGNORED_COLOR = "gray"
 private const val DOT_NODE_REVERTED_COLOR = "red"
+private const val DOT_EDGE_IGNORED_COLOR = "gray"
 
 internal class JezHistory(
     storeEquations: Boolean,
@@ -43,6 +43,7 @@ internal class JezHistory(
     fun init(
         equation: JezEquation,
     ) {
+        graphNodes?.put(equation, rootGraphNode)
         dotRootGraph?.apply {
             val equationStrBr = "\"$equation\""
             +equationStrBr + {
@@ -61,7 +62,7 @@ internal class JezHistory(
         oldEquation: JezEquation,
         action: JezAction,
         newEquation: JezEquation,
-        //ignored: Boolean = false,
+        ignored: Boolean = false,
     ) {
         val newGraphNode = JezHistoryGraphNode(
             action = action,
@@ -69,25 +70,26 @@ internal class JezHistory(
         )
         currentGraphNode.childNodes[action] = newGraphNode
         graphNodes?.let { graphNodes ->
-            assert(!graphNodes.containsKey(newEquation))
+            assert(ignored || !graphNodes.containsKey(newEquation))
             graphNodes.put(newEquation, newGraphNode)
         }
-        //if (!ignored) {
+        if (!ignored) {
             currentGraphNode = newGraphNode
-        //}
+        }
 
         dotRootGraph?.apply {
             if (stmts.size >= dotMaxStatementsCount) return@apply
 
             val newEquationStrBr = "\"$newEquation\""
             val oldEquationStrBr = "\"$oldEquation\""
-            +newEquationStrBr + {
-                label = if (dotHTMLLabels) newEquation.toHTMLString().formatHTMLLabel() else newEquation.toString()
-                //if (ignored) color = DOT_NODE_IGNORED_COLOR
+            if (!ignored) {
+                +newEquationStrBr + {
+                    label = if (dotHTMLLabels) newEquation.toHTMLString().formatHTMLLabel() else newEquation.toString()
+                }
             }
             oldEquationStrBr - newEquationStrBr + {
                 label = if (dotHTMLLabels) action.toHTMLString().formatHTMLLabel() else action.toString()
-                //if (ignored) color = DOT_NODE_IGNORED_COLOR
+                if (ignored) color = DOT_EDGE_IGNORED_COLOR
             }
         }
     }

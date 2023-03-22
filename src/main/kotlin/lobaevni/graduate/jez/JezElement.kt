@@ -64,7 +64,15 @@ sealed class JezElement {
 
             override fun toHTMLString(): String {
                 return if (isBlock) {
-                    "${value.first().toHTMLString()}<sub>$number</sub>"
+                    var constant = value.first()
+                    while ((constant as? JezGeneratedConstant)?.isBlock == true) {
+                        constant = constant.value.first()
+                    }
+                    if (constant is JezGeneratedConstant) {
+                        "(${constant.toHTMLString()})<sub>$number</sub>"
+                    } else {
+                        "${constant.toHTMLString()}<sub>$number</sub>"
+                    }
                 } else {
                     "&xi;<sub>$number</sub>"
                 }
