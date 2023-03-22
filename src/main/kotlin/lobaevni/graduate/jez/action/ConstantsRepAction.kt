@@ -3,16 +3,21 @@ package lobaevni.graduate.jez.action
 import lobaevni.graduate.jez.*
 
 internal data class ConstantsRepAction(
-    val state: JezState,
     val repPart: List<JezConstant>,
-    val constant: JezGeneratedConstant = state.getOrGenerateConstant(repPart),
+    val constant: JezGeneratedConstant,
 ) : JezAction() {
 
-    override fun applyAction(): Boolean {
+    override fun applyAction(state: JezState): Boolean {
         if (repPart.isEmpty()) return false
+        if (state.history?.currentGraphNode?.childNodes?.containsKey(this) == true) return false
 
         val oldEquation = state.equation
-        state.equation = oldEquation.replace(repPart, listOf(constant))
+        val newEquation = oldEquation.replace(repPart, listOf(constant))
+
+        if (oldEquation == newEquation) return false
+        if (state.history?.graphNodes?.containsKey(newEquation) == true) return false
+
+        state.equation = newEquation
 
         state.replaces[repPart.toJezSourceConstants()] = constant
 
@@ -24,7 +29,7 @@ internal data class ConstantsRepAction(
         return true
     }
 
-    override fun revertAction(): Boolean {
+    override fun revertAction(state: JezState): Boolean {
         if (repPart.isEmpty()) return false
 
         val oldEquation = state.equation

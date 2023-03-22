@@ -4,18 +4,16 @@ import lobaevni.graduate.jez.*
 import lobaevni.graduate.jez.JezState
 
 internal data class VariablesDropAction(
-    val state: JezState,
+    val variables: Set<JezVariable>,
 ) : JezAction() {
 
-    private val variables = state.equation.getUsedVariables()
-
-    override fun applyAction(): Boolean {
+    override fun applyAction(state: JezState): Boolean {
         if (variables.isEmpty()) return false
 
         val oldEquation = state.equation
         state.equation = JezEquation(
-            u = oldEquation.u.filterIsInstance<JezConstant>(),
-            v = oldEquation.v.filterIsInstance<JezConstant>(),
+            u = oldEquation.u.filterNot { variables.contains(it) },
+            v = oldEquation.v.filterNot { variables.contains(it) },
         )
 
         state.history?.putApplication(
@@ -26,7 +24,7 @@ internal data class VariablesDropAction(
         return true
     }
 
-    override fun revertAction(): Boolean {
+    override fun revertAction(state: JezState): Boolean {
         throw NotImplementedError()
     }
 

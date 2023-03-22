@@ -2,12 +2,15 @@ package lobaevni.graduate
 
 import lobaevni.graduate.TestUtils.parseEquation
 import lobaevni.graduate.TestUtils.toStringMap
+import lobaevni.graduate.jez.JezEquation
 import lobaevni.graduate.jez.tryFindMinimalSolution
 import kotlin.test.*
 
 private const val FAILED_MSG_IS_NOT_SOLVED = "The equation had to be solved"
 private const val FAILED_MSG_WRONG_SIGMA = "Wrong answer"
 private const val FAILED_MSG_IS_SOLVED = "The equation shouldn't have been solved"
+
+private const val MAX_ITERATIONS_COUNT = 15
 
 class JezEquationTests {
 
@@ -108,35 +111,6 @@ class JezEquationTests {
         assertEquals(expectedSigma, actualSigma, FAILED_MSG_WRONG_SIGMA)
     }
 
-    @Ignore("TODO: Needs --allow-revert")
-    @Test
-    fun test9() {
-        val sourceEquation = parseEquation("xAxy", "AB")
-        val expectedSigma = mapOf(
-            "x" to "",
-            "y" to "B",
-        )
-        val result = sourceEquation.tryFindMinimalSolution()
-        assertTrue(result.isSolved, FAILED_MSG_IS_NOT_SOLVED)
-        val actualSigma = result.sigma.toStringMap()
-        assertEquals(expectedSigma, actualSigma, FAILED_MSG_WRONG_SIGMA)
-    }
-
-    @Ignore("TODO: Needs --allow-revert")
-    @Test
-    fun test10() {
-        val sourceEquation = parseEquation("AxBy", "z")
-        val expectedSigma = mapOf(
-            "x" to "",
-            "y" to "",
-            "z" to "AB",
-        )
-        val result = sourceEquation.tryFindMinimalSolution()
-        assertTrue(result.isSolved, FAILED_MSG_IS_NOT_SOLVED)
-        val actualSigma = result.sigma.toStringMap()
-        assertEquals(expectedSigma, actualSigma, FAILED_MSG_WRONG_SIGMA)
-    }
-
     @Test
     fun testNoSolution1() {
         val sourceEquation = parseEquation("A", "B")
@@ -150,5 +124,15 @@ class JezEquationTests {
         val result = sourceEquation.tryFindMinimalSolution()
         assertFalse(result.isSolved, FAILED_MSG_IS_SOLVED)
     }
+
+    private fun JezEquation.tryFindMinimalSolution() = tryFindMinimalSolution(
+        allowRevert = true,
+        storeHistory = true,
+        storeEquations = true,
+        maxIterationsCount = MAX_ITERATIONS_COUNT,
+        dot = false,
+        dotHTMLLabels = false,
+        dotMaxStatementsCount = Int.MAX_VALUE,
+    )
 
 }

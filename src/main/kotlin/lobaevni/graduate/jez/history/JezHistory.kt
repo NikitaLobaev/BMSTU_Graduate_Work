@@ -7,20 +7,25 @@ import lobaevni.graduate.jez.action.JezAction
 import lobaevni.graduate.jez.JezEquation
 
 private const val DOT_GRAPH_NAME = "recompression"
+private const val DOT_ROOT_NODE_STYLE = "bold"
 private const val DOT_NODE_DEFAULT_COLOR = "black"
-private const val DOT_NODE_IGNORED_COLOR = "gray"
+//private const val DOT_NODE_IGNORED_COLOR = "gray"
 private const val DOT_NODE_REVERTED_COLOR = "red"
 
-private const val DOT_MAX_STMTS_COUNT = 300
-
 internal class JezHistory(
-    dot: Boolean = false,
-    private val dotHTMLLabels: Boolean = false,
+    storeEquations: Boolean,
+    dot: Boolean,
+    private val dotHTMLLabels: Boolean,
+    private val dotMaxStatementsCount: Int,
 ) {
 
     private val rootGraphNode: JezHistoryGraphNode = JezHistoryGraphNode()
     var currentGraphNode: JezHistoryGraphNode = rootGraphNode
     private set
+
+    val graphNodes: MutableMap<JezEquation, JezHistoryGraphNode>? = if (storeEquations) {
+        mutableMapOf()
+    } else null
 
     val dotRootGraph: DotRootGraph? = if (dot) {
         digraph(DOT_GRAPH_NAME) {
@@ -42,7 +47,7 @@ internal class JezHistory(
             val equationStrBr = "\"$equation\""
             +equationStrBr + {
                 label = if (dotHTMLLabels) equation.toHTMLString().formatHTMLLabel() else equation.toString()
-                style = "bold"
+                style = DOT_ROOT_NODE_STYLE
             }
         }
     }
@@ -56,29 +61,33 @@ internal class JezHistory(
         oldEquation: JezEquation,
         action: JezAction,
         newEquation: JezEquation,
-        ignored: Boolean = false,
+        //ignored: Boolean = false,
     ) {
         val newGraphNode = JezHistoryGraphNode(
             action = action,
             parentNode = currentGraphNode,
         )
-        currentGraphNode.childNodes.add(newGraphNode)
-        if (!ignored) {
-            currentGraphNode = newGraphNode
+        currentGraphNode.childNodes[action] = newGraphNode
+        graphNodes?.let { graphNodes ->
+            assert(!graphNodes.containsKey(newEquation))
+            graphNodes.put(newEquation, newGraphNode)
         }
+        //if (!ignored) {
+            currentGraphNode = newGraphNode
+        //}
 
         dotRootGraph?.apply {
-            if (stmts.size >= DOT_MAX_STMTS_COUNT) return@apply
+            if (stmts.size >= dotMaxStatementsCount) return@apply
 
             val newEquationStrBr = "\"$newEquation\""
             val oldEquationStrBr = "\"$oldEquation\""
             +newEquationStrBr + {
                 label = if (dotHTMLLabels) newEquation.toHTMLString().formatHTMLLabel() else newEquation.toString()
-                if (ignored) color = DOT_NODE_IGNORED_COLOR
+                //if (ignored) color = DOT_NODE_IGNORED_COLOR
             }
             oldEquationStrBr - newEquationStrBr + {
                 label = if (dotHTMLLabels) action.toHTMLString().formatHTMLLabel() else action.toString()
-                if (ignored) color = DOT_NODE_IGNORED_COLOR
+                //if (ignored) color = DOT_NODE_IGNORED_COLOR
             }
         }
     }
@@ -94,7 +103,7 @@ internal class JezHistory(
         currentGraphNode = currentGraphNode.parentNode ?: return
 
         dotRootGraph?.apply {
-            if (stmts.size >= DOT_MAX_STMTS_COUNT) return@apply
+            if (stmts.size >= dotMaxStatementsCount) return@apply
 
             val oldEquationStrBr = "\"$oldEquation\""
             val newEquationStrBr = "\"$newEquation\""

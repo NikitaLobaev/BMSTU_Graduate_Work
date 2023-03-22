@@ -7,7 +7,19 @@
     <list default="true" id="85e7987e-bcf2-4b0a-8323-009184876a50" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/Main.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/Main.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/Printer.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/Printer.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/Jez.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/Jez.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/JezElement.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/JezElement.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/JezEquation.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/JezEquation.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/JezHeuristics.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/JezHeuristics.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/JezState.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/JezState.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/ConstantsRepAction.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/ConstantsRepAction.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/CropAction.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/CropAction.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/JezAction.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/JezAction.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/VariableRepAction.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/VariableRepAction.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/VariablesDropAction.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/VariablesDropAction.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/history/JezHistory.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/history/JezHistory.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/history/JezHistoryGraphNode.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/history/JezHistoryGraphNode.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/kotlin/lobaevni/graduate/JezEquationTests.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/kotlin/lobaevni/graduate/JezEquationTests.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -58,13 +70,13 @@
     &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/lobaevni/Desktop/МГТУ/8 семестр/Дипломная работа/BMSTU_Graduate_Work/src/main/kotlin/lobaevni/graduate&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/lobaevni/Desktop/МГТУ/8 семестр/Дипломная работа/BMSTU_Graduate_Work&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;inlay.hints&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
@@ -159,8 +171,9 @@
     <configuration name="MainKt" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="lobaevni.graduate.MainKt" />
       <module name="BMSTU_Graduate_Work.main" />
-      <option name="PROGRAM_PARAMETERS" value="--dot-filename output/representation --dot-html-labels --allow-revert" />
+      <option name="PROGRAM_PARAMETERS" value="--dot-filename output/representation --dot-html-labels --allow-revert --max-iters-count 15 --prevent-cycles --dot-max-stmts-count 200" />
       <shortenClasspath name="NONE" />
+      <option name="VM_PARAMETERS" value="-ea" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>

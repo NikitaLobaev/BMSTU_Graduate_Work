@@ -8,8 +8,6 @@ internal typealias JezSourceConstant = JezElement.Constant.Source
 internal typealias JezGeneratedConstant = JezElement.Constant.Generated
 internal typealias JezVariable = JezElement.Variable
 
-internal val stubGeneratedConstant = JezGeneratedConstant(listOf())
-
 sealed class JezElement {
 
     abstract class Constant : JezElement() {
@@ -21,6 +19,10 @@ sealed class JezElement {
         ) : Constant() {
 
             override val source = listOf(this)
+
+            init {
+                assert(source.isNotEmpty())
+            }
 
             override fun toString(): String = "CONST($value)"
 
@@ -36,12 +38,21 @@ sealed class JezElement {
             val isBlock: Boolean = value.all { it == value.first() }
 
             val number: Int = if (isBlock) {
-                value.size
+                val constant = value.firstOrNull()
+                if (constant is JezGeneratedConstant && constant.isBlock) {
+                    constant.number * value.size
+                } else {
+                    value.size
+                }
             } else {
                 preferredNumber
             }
 
             override val source = value.map { it.source }.flatten()
+
+            init {
+                assert(source.isNotEmpty())
+            }
 
             override fun toString(): String {
                 return if (isBlock) {
@@ -53,7 +64,7 @@ sealed class JezElement {
 
             override fun toHTMLString(): String {
                 return if (isBlock) {
-                    "${value.firstOrNull()?.toHTMLString()}<sub>${value.size}</sub>"
+                    "${value.first().toHTMLString()}<sub>$number</sub>"
                 } else {
                     "&xi;<sub>$number</sub>"
                 }

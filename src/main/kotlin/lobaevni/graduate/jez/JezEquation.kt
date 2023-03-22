@@ -12,26 +12,26 @@ data class JezEquation(
     /**
      * @return all used in this [JezEquation] constants.
      */
-    fun getUsedConstants(): List<JezConstant> =
-        (u + v).toSet().filterIsInstance<JezConstant>()
+    fun getUsedConstants(): Set<JezConstant> =
+        (u + v).filterIsInstance<JezConstant>().toSet()
 
     /**
      * @return all used in this [JezEquation] source constants.
      */
-    fun getUsedSourceConstants(): List<JezSourceConstant> =
-        (u + v).toSet().filterIsInstance<JezSourceConstant>()
+    fun getUsedSourceConstants(): Set<JezSourceConstant> =
+        (u + v).filterIsInstance<JezSourceConstant>().toSet()
 
     /**
      * @return all used in this [JezEquation] generated constants.
      */
-    fun getUsedGeneratedConstants(): List<JezGeneratedConstant> =
-        (u + v).toSet().filterIsInstance<JezGeneratedConstant>()
+    fun getUsedGeneratedConstants(): Set<JezGeneratedConstant> =
+        (u + v).filterIsInstance<JezGeneratedConstant>().toSet()
 
     /**
      * @return all used in this [JezEquation] variables.
      */
-    fun getUsedVariables(): List<JezVariable> =
-        (u + v).toSet().filterIsInstance<JezVariable>()
+    fun getUsedVariables(): Set<JezVariable> =
+        (u + v).filterIsInstance<JezVariable>().toSet()
 
     override fun toString(): String = u.convertToString() + " = " + v.convertToString()
 
@@ -41,7 +41,7 @@ data class JezEquation(
 
 typealias JezEquationPart = List<JezElement>
 
-internal fun JezEquationPart.convertToString(): String {
+internal fun JezEquationPart.convertToString(): String { //TODO: toString()?
     return this.map {
         "$it "
     }.joinToString("") {
@@ -54,11 +54,11 @@ internal fun JezEquationPart.convertToHTMLString(
 ): String {
     data class Acc(
         val total: String,
-        val element: JezElement,
+        val element: JezElement?,
         val count: Int,
     )
 
-    return (this + stubGeneratedConstant)
+    return (this + null)
         .map { element ->
             Acc("", element, 1)
         }
@@ -66,7 +66,7 @@ internal fun JezEquationPart.convertToHTMLString(
             if (lastAcc.element == currentAcc.element) {
                 Acc(lastAcc.total, currentAcc.element, lastAcc.count + 1)
             } else {
-                val elementStr = lastAcc.element.toHTMLString()
+                val elementStr = lastAcc.element!!.toHTMLString()
                 if (lastAcc.count > 1) {
                     Acc(lastAcc.total + "$elementStr<sup>${lastAcc.count}</sup>", currentAcc.element, 1)
                 } else {

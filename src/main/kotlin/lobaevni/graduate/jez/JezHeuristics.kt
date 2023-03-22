@@ -18,9 +18,9 @@ object JezHeuristics {
         }.takeIf { it != -1 } ?: minOf(equation.u.size, equation.v.size)
 
         apply(CropAction(
-            state = this,
-            leftPart = equation.u.subList(0, leftIndex),
-            rightPart = equation.v.subList(equation.v.size - rightIndex, equation.v.size),
+            equation = equation,
+            leftSize = leftIndex,
+            rightSize = rightIndex,
         ))
 
         return leftIndex > 0 || rightIndex > 0
@@ -41,38 +41,61 @@ object JezHeuristics {
      * Heuristic to determine what pairs of constants we might count as non-crossing.
      * @return pair of left and right constants lists respectively.
      */
-    internal fun JezEquation.getSideLetters(): Pair<Set<JezConstant>, Set<JezConstant>> {
-        fun JezEquationPart.findExcludedLetters(): Pair<Set<JezConstant>, Set<JezConstant>> {
-            val lettersLeftExcluded = mutableSetOf<JezConstant>()
-            val lettersRightExcluded = mutableSetOf<JezConstant>()
+    internal fun JezEquation.getSideConstants(): Pair<Set<JezConstant>, Set<JezConstant>> {
+        fun JezEquationPart.findExcludedConstants(): Pair<Set<JezConstant>, Set<JezConstant>> {
+            val constantsLeftExcluded = mutableSetOf<JezConstant>()
+            val constantsRightExcluded = mutableSetOf<JezConstant>()
             forEachIndexed { index, element ->
-                if (element !is JezConstant) {
-                    return@forEachIndexed
-                }
+                if (element !is JezConstant) return@forEachIndexed
 
-                if (index > 0 && elementAt(index - 1) is JezVariable) {
-                    lettersRightExcluded += element
+                if (elementAtOrNull(index - 1) is JezVariable) {
+                    constantsRightExcluded += element
                 }
-                if (index + 1 < size && elementAt(index + 1) is JezVariable) {
-                    lettersLeftExcluded += element
+                if (elementAtOrNull(index + 1) is JezVariable) {
+                    constantsLeftExcluded += element
                 }
             }
-            return Pair(lettersLeftExcluded, lettersRightExcluded)
+            return Pair(constantsLeftExcluded, constantsRightExcluded)
         }
 
-        val letters = getUsedConstants()
-        val uExcludedLetters = u.findExcludedLetters()
-        val vExcludedLetters = v.findExcludedLetters()
-        val leftLetters = letters.toMutableSet().apply {
-            removeAll(uExcludedLetters.first)
-            removeAll(vExcludedLetters.first)
+        val usedConstants = getUsedConstants()
+        val uExcludedConstants = u.findExcludedConstants()
+        val vExcludedConstants = v.findExcludedConstants()
+        val leftConstants = usedConstants.toMutableSet().apply {
+            removeAll(uExcludedConstants.first)
+            removeAll(vExcludedConstants.first)
         }
-        val rightLetters = letters.toMutableSet().apply {
-            removeAll(uExcludedLetters.second)
-            removeAll(vExcludedLetters.second)
+        val rightConstants = usedConstants.toMutableSet().apply {
+            removeAll(uExcludedConstants.second)
+            removeAll(vExcludedConstants.second)
         }
 
-        return Pair(leftLetters, rightLetters)
+        return Pair(leftConstants, rightConstants)
+    }
+
+    /**
+     * Heuristic of assuming variable and constant that we could use for popping first via checking prefixes
+     * (or postfixes, according to [left] respectively).
+     */
+    internal fun JezEquation.assume(
+        allowedConstants: Collection<JezConstant>,
+        left: Boolean,
+    ): Pair<JezVariable, JezConstant>? {
+        val uElement: JezElement?
+        val vElement: JezElement?
+        if (left) {
+            uElement = u.firstOrNull()
+            vElement = v.firstOrNull()
+        } else {
+            uElement = u.lastOrNull()
+            vElement = v.lastOrNull()
+        }
+        if (uElement is JezVariable && vElement is JezConstant && allowedConstants.contains(vElement)) {
+            return Pair(uElement, vElement)
+        } else if (vElement is JezVariable && uElement is JezConstant && allowedConstants.contains(uElement)) {
+            return Pair(vElement, uElement)
+        }
+        return null
     }
 
 }
