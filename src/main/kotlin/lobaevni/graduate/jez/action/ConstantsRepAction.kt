@@ -25,9 +25,9 @@ internal data class ConstantsRepAction(
             return false
         }
 
-        state.equation = newEquation
+        if (!state.putGeneratedConstant(constant)) return false
 
-        state.replaces[repPart.toJezSourceConstants()] = constant
+        state.equation = newEquation
 
         state.history?.putApplication(
             oldEquation = oldEquation,
@@ -41,9 +41,12 @@ internal data class ConstantsRepAction(
         if (repPart.isEmpty()) return false
 
         val oldEquation = state.equation
-        state.equation = oldEquation.replace(listOf(constant), repPart)
+        val newEquation = oldEquation.replace(listOf(constant), repPart)
+        if (oldEquation == newEquation) return false
 
-        state.replaces.remove(repPart.toJezSourceConstants())
+        if (!state.removeGeneratedConstant(constant)) return false
+
+        state.equation = newEquation
 
         state.history?.putReversion(
             oldEquation = oldEquation,

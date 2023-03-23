@@ -15,8 +15,8 @@ internal class JezState(
     val sigmaLeft: JezMutableSigma = mutableMapOf()
     val sigmaRight: JezMutableSigma = mutableMapOf()
 
-    val replaces: JezReplaces = mutableMapOf()
-    private var blocksCount: Int = 0
+    private val replaces: JezReplaces = mutableMapOf()
+    private var replacedBlocksCount: Int = 0
 
     val history: JezHistory? = if (storeHistory) {
         JezHistory(storeEquations, dot, dotHTMLLabels, dotMaxStatementsCount)
@@ -36,14 +36,39 @@ internal class JezState(
         return history?.currentGraphNode?.action?.revertAction(this) ?: false
     }
 
+    /**
+     * @return [JezGeneratedConstant] for [repPart] from [replaces] or generates new constant, if it is not present.
+     */
     fun getOrGenerateConstant(repPart: List<JezConstant>): JezGeneratedConstant {
-        return replaces.getOrPut(repPart.toJezSourceConstants()) {
-            val constant = JezGeneratedConstant(repPart, replaces.size - blocksCount)
+        return replaces.getOrElse(repPart.toJezSourceConstants()) {
+            val constant = JezGeneratedConstant(repPart, replaces.size - replacedBlocksCount)
             if (constant.isBlock) {
-                blocksCount++
+                replacedBlocksCount++
             }
             return constant
         }
+    }
+
+    /**
+     * @return whether new [constant] was put successfully.
+     */
+    fun putGeneratedConstant(constant: JezGeneratedConstant): Boolean {
+        if (constant.source in replaces) return false
+
+        replaces[constant.source] = constant
+        return true
+    }
+
+    /**
+     * @return whether existing [constant] was removed successfully.
+     */
+    fun removeGeneratedConstant(constant: JezGeneratedConstant): Boolean {
+        if (constant.source !in replaces) return false
+
+        if (replaces[constant.source]!!.isBlock) {
+            replacedBlocksCount--
+        }
+        return replaces.remove(constant.source) != null
     }
 
 }
