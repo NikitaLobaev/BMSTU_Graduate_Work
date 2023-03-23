@@ -77,7 +77,7 @@ internal fun JezState.tryFindMinimalSolution(
         if (equation.checkEmptySolution()) break
         if (equation.findSideContradictions()) continue
 
-        pairCompCr()
+        pairCompCr(equation == currentEquation)
         trySolveTrivial()
         if (equation.checkEmptySolution()) break
         if (equation.findSideContradictions()) continue
@@ -134,59 +134,6 @@ internal fun JezState.blockCompNCr(): JezState {
 }
 
 /**
- * Compression for a crossing pairs.
- */
-internal fun JezState.pairCompCr(): JezState {
-    val sideConstantsNCr = equation.getSideConstants()
-    val usedConstants = equation.getUsedConstants()
-    val leftConstantsCr = sideConstantsNCr.first.toList() + usedConstants.filterNot { constant ->
-        sideConstantsNCr.first.contains(constant)
-    }
-    val rightConstantsCr = sideConstantsNCr.second.toList() + usedConstants.filterNot { constant ->
-        sideConstantsNCr.second.contains(constant)
-    }
-
-    for (side in listOf(true, false)) { //true value for left side constants of the equation, false value for right
-        val sideConstants = if (side) leftConstantsCr else rightConstantsCr
-        val assumption = equation.assume(sideConstants, side)
-        val variables = listOfNotNull(assumption?.first) + equation.getUsedVariables().filterNot { variable ->
-            variable == assumption?.first
-        }
-        val constants = listOfNotNull(assumption?.second) + sideConstants.filterNot { constant ->
-            constant == assumption?.second
-        }
-        for (variable in variables) {
-            val curUsedConstants = equation.getUsedConstants().toSet()
-            constants.firstOrNull { assumedConstant ->
-                if (!curUsedConstants.contains(assumedConstant)) {
-                    return@firstOrNull false
-                }
-
-                val action = VariableRepAction(
-                    variable = variable,
-                    leftRepPart = if (side) listOf(assumedConstant) else listOf(),
-                    rightRepPart = if (side) listOf() else listOf(assumedConstant),
-                )
-                if (!apply(action)) {
-                    return@firstOrNull false
-                }
-
-                if (equation.findSideContradictions()) {
-                    assert(revert())
-                    return@firstOrNull false
-                }
-
-                return@firstOrNull true
-            }?.let {
-                trySolveTrivial()
-                return this
-            }
-        }
-    }
-    return this
-}
-
-/**
  * Compression for non-crossing pairs.
  */
 internal fun JezState.pairCompNCr(): JezState {
@@ -201,6 +148,50 @@ internal fun JezState.pairCompNCr(): JezState {
             trySolveTrivial()
 
             if (equation.findSideContradictions() || equation.checkEmptySolution()) return this
+        }
+    }
+    return this
+}
+
+/**
+ * Compression for a crossing pairs.
+ * @param necComp a trick whether should we necessarily perform compression for a random possibly crossing pair if
+ * there really is no way to compress the equation at the algorithm iteration.
+ */
+internal fun JezState.pairCompCr(necComp: Boolean): JezState {
+    /**
+     * Tries to assume which pair we really may count as crossing and then applies appropriate action, if one has been
+     * found.
+     */
+    fun tryAssumeAndApply(sideConstants: Set<JezConstant>, left: Boolean): Boolean {
+        val assumption = equation.assume(sideConstants, left) ?: return false
+        val action = VariableRepAction(
+            variable = assumption.first,
+            leftRepPart = if (left) listOf(assumption.second) else listOf(),
+            rightRepPart = if (left) listOf() else listOf(assumption.second),
+        )
+        return apply(action)
+    }
+
+    val sideConstantsNCr = equation.getSideConstants()
+    for (left in listOf(true, false)) {
+        tryAssumeAndApply(sideConstantsNCr.second, left)
+        trySolveTrivial()
+        if (equation.checkEmptySolution()) return this
+    }
+
+    if (!necComp) return this
+
+    for (left in listOf(true, false)) {
+        for (variable in equation.getUsedVariables()) {
+            for (constant in equation.getUsedConstants()) {
+                val action = VariableRepAction(
+                    variable = variable,
+                    leftRepPart = if (left) listOf(constant) else listOf(),
+                    rightRepPart = if (left) listOf() else listOf(constant),
+                )
+                if (apply(action)) return this
+            }
         }
     }
     return this
