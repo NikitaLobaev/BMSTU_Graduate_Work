@@ -92,8 +92,6 @@ sealed class JezElement {
 
     }
 
-    //TODO: open fun toString()? same problem with JezAction.toString()
-
     open fun toHTMLString(): String {
         return toString()
     }
@@ -103,7 +101,7 @@ sealed class JezElement {
 /**
  * Reveals source constants values and returns list of these [JezSourceConstant].
  */
-internal fun List<JezConstant>.toJezSourceConstants(): List<JezSourceConstant> {
+internal fun Collection<JezConstant>.toJezSourceConstants(): List<JezSourceConstant> {
     return map { constant ->
         constant.source
     }.flatten()

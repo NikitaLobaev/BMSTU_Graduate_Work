@@ -77,6 +77,8 @@ internal fun JezState.tryFindMinimalSolution(
         if (equation.checkEmptySolution()) break
         if (equation.findSideContradictions()) continue
 
+        //TODO: assumeEmptyVariables() - сделать эвристику тут...
+
         pairCompCr(equation == currentEquation)
         trySolveTrivial()
         if (equation.checkEmptySolution()) break
@@ -146,7 +148,6 @@ internal fun JezState.pairCompNCr(): JezState {
             if (!apply(ConstantsRepAction(pair, getOrGenerateConstant(pair)))) continue
 
             trySolveTrivial()
-
             if (equation.findSideContradictions() || equation.checkEmptySolution()) return this
         }
     }

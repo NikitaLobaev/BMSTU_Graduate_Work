@@ -22,8 +22,6 @@ internal sealed class JezAction {
      */
     internal abstract fun revertAction(state: JezState): Boolean
 
-    abstract override fun toString(): String //TODO: somewhy it doesn't forces to implement this method by inheritors, fix it
-
     open fun toHTMLString(): String {
         return toString()
     }

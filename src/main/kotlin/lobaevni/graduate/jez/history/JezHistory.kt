@@ -28,7 +28,7 @@ internal class JezHistory(
     } else null
 
     val dotRootGraph: DotRootGraph? = if (dot) {
-        digraph(DOT_GRAPH_NAME) {
+        digraph(name = DOT_GRAPH_NAME, strict = true) {
             node {
                 color = DOT_NODE_DEFAULT_COLOR
                 shape = DotNodeShape.BOX

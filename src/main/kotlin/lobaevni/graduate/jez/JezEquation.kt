@@ -41,7 +41,7 @@ data class JezEquation(
 
 typealias JezEquationPart = List<JezElement>
 
-internal fun JezEquationPart.convertToString(): String { //TODO: toString()?
+internal fun JezEquationPart.convertToString(): String {
     return this.map {
         "$it "
     }.joinToString("") {
