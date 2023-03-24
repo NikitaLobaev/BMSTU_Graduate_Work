@@ -1,6 +1,5 @@
 package lobaevni.graduate.jez
 
-import io.github.rchowell.dotlin.DotRootGraph
 import lobaevni.graduate.jez.JezHeuristics.assume
 import lobaevni.graduate.jez.JezHeuristics.findSideContradictions
 import lobaevni.graduate.jez.JezHeuristics.getSideConstants
@@ -8,12 +7,6 @@ import lobaevni.graduate.jez.JezHeuristics.tryShorten
 import lobaevni.graduate.jez.action.ConstantsRepAction
 import lobaevni.graduate.jez.action.VariablesDropAction
 import lobaevni.graduate.jez.action.VariableRepAction
-
-data class JezResult(
-    val sigma: JezSigma,
-    val isSolved: Boolean,
-    val historyDotGraph: DotRootGraph?,
-)
 
 /**
  * Tries to find minimal solution of this [JezEquation].
@@ -87,18 +80,27 @@ internal fun JezState.tryFindMinimalSolution(
         if (equation == currentEquation && (!allowRevert || !revertUntilNoSolution())) break
     }
 
-    val isSolved = equation.checkEmptySolution()
     val sigma: JezSigma = variables.associateWith { variable ->
         sigmaLeft[variable]!! + sigmaRight[variable]!!
     }
 
-    if (isSolved) {
+    val solutionState = if (equation.checkEmptySolution()) {
+        JezResult.SolutionState.Found
+    } else {
+        if (iteration > maxIterationsCount) {
+            JezResult.SolutionState.NoSolution.NotEnoughIterations
+        } else {
+            JezResult.SolutionState.NoSolution.Absolutely
+        }
+    }
+
+    if (solutionState is JezResult.SolutionState.Found) {
         apply(VariablesDropAction(equation.getUsedVariables()))
     }
 
     return JezResult(
         sigma = sigma,
-        isSolved = isSolved,
+        solutionState = solutionState,
         historyDotGraph = history?.dotRootGraph,
     )
 }

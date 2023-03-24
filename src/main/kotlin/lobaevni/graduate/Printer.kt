@@ -7,17 +7,17 @@ import lobaevni.graduate.jez.JezVariable
 import java.io.File
 
 /**
- * Prints result (substitution) of equation, if it was successfully solved, otherwise does nothing.
+ * Prints solution (substitution) of equation, if it was successfully solved, otherwise does nothing.
  */
-internal fun printResult(
+internal fun printSolution(
     result: JezResult,
     variables: List<JezVariable>,
 ) {
+    assert(result.solutionState is JezResult.SolutionState.Found)
+
     fun printVariable(variable: JezVariable, value: List<JezSourceConstant>) {
         println("$variable = $value")
     }
-
-    if (!result.isSolved) return
 
     for (mapEntry in result.sigma) {
         printVariable(mapEntry.key, mapEntry.value)

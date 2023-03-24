@@ -18,6 +18,7 @@ Usage:
 {x, y, ...}
 U = V
 """
+private const val SOLUTION_STATE_MESSAGE = "Solution state: "
 private const val NOT_SOLVED_MESSAGE = "Unfortunately, solution wasn't found."
 private const val ERROR_MESSAGE = "Unfortunately, exception was thrown while solving the equation."
 
@@ -84,11 +85,12 @@ fun main(args: Array<String>) {
     }
 
     try {
-        if (result.isSolved) {
-            printResult(result, variables)
+        if (result.solutionState is JezResult.SolutionState.Found) {
+            printSolution(result, variables)
         } else {
             println(NOT_SOLVED_MESSAGE)
         }
+        println("$SOLUTION_STATE_MESSAGE${result.solutionState.javaClass.simpleName}")
 
         dotFilename?.let { df ->
             result.historyDotGraph?.let {
