@@ -36,41 +36,54 @@ internal sealed class JezAction {
     ): JezEquation {
         if (repPart.isEmpty()) return this
 
-        val p = repPart.prefixFunction()
+        val repPartArray = ArrayList(repPart)
+        val prefixFunctionValues = repPart.prefixFunction()
         return JezEquation(
-            u = u.replace(repPart, newPart, p),
-            v = v.replace(repPart, newPart, p),
+            u = u.replace(repPartArray, newPart, prefixFunctionValues),
+            v = v.replace(repPartArray, newPart, prefixFunctionValues),
         )
     }
 
     /**
      * @return [JezEquationPart] with specified [newPart] replacement of all [repPart] occurrences.
      */
-    private fun JezEquationPart.replace( //TODO: try to rewrite this function in functional style
-        repPart: List<JezElement>,
-        newPart: List<JezElement>,
-        p: Collection<Int>? = null,
+    private fun JezEquationPart.replace(
+        repPart: Collection<JezElement>,
+        newPart: Collection<JezElement>,
+        prefixFunctionValues: Collection<Int>? = null,
     ): JezEquationPart {
-        var k = 0
-        var l = 0
-        var result: MutableList<JezElement> = mutableListOf()
-        while (k < size) {
-            if (elementAt(k) == repPart[l]) {
-                l++
-                if (l == repPart.size) {
-                    result = (result.dropLast(repPart.size - 1) + newPart).toMutableList() //TODO: create extension?
-                    l = 0
-                } else {
-                    result += elementAt(k)
+        if (isEmpty() || repPart.isEmpty() || repPart == newPart) return this
+
+        data class Acc(
+            val element: JezElement? = null,
+            val buffer: MutableList<JezElement> = mutableListOf(),
+            val result: MutableList<JezElement> = mutableListOf(),
+        )
+
+        val result = (listOf(Acc(null)) + map { element ->
+            Acc(element)
+        }).reduce { lastAcc, curAcc ->
+            while (lastAcc.buffer.isNotEmpty() && lastAcc.buffer.last() != curAcc.element) {
+                val dropCount = lastAcc.buffer.size - (prefixFunctionValues?.elementAt(lastAcc.buffer.size - 1) ?: 0)
+                for (i in 0 until dropCount) {
+                    lastAcc.result.add(lastAcc.buffer.removeFirst())
                 }
-                k++
-            } else if (l == 0) {
-                result += elementAt(k)
-                k++
-            } else {
-                l = p?.elementAt(l - 1) ?: 0
             }
-        }
+
+            if (curAcc.element == repPart.elementAt(lastAcc.buffer.size)) {
+                if (lastAcc.buffer.size + 1 == repPart.size) {
+                    lastAcc.result.addAll(newPart)
+                    lastAcc.buffer.clear()
+                } else {
+                    lastAcc.buffer.add(curAcc.element)
+                }
+            } else {
+                lastAcc.result.add(curAcc.element!!)
+            }
+            lastAcc
+        }.also { acc ->
+            acc.result.addAll(acc.buffer)
+        }.result
         return result
     }
 

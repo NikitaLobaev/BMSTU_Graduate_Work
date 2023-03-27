@@ -18,6 +18,14 @@ class PrefixFunctionTests {
 
     @Test
     fun test2() {
+        val collection = "A".chunked(1)
+        val actualPValues = collection.prefixFunction()
+        val expectedPValues = listOf<Int>(0)
+        assertEquals(expectedPValues, actualPValues, FAILED_MSG_WRONG_PREFIX_FUNC)
+    }
+
+    @Test
+    fun test3() {
         val collection = "ABC".chunked(1)
         val actualPValues = collection.prefixFunction()
         val expectedPValues = listOf(0, 0, 0)
@@ -25,7 +33,7 @@ class PrefixFunctionTests {
     }
 
     @Test
-    fun test3() {
+    fun test4() {
         val collection = "AABCA".chunked(1)
         val actualPValues = collection.prefixFunction()
         val expectedPValues = listOf(0, 1, 0, 0, 1)
@@ -33,7 +41,7 @@ class PrefixFunctionTests {
     }
 
     @Test
-    fun test4() {
+    fun test5() {
         val collection = "ABRACADABRA".chunked(1)
         val actualPValues = collection.prefixFunction()
         val expectedPValues = listOf(0, 0, 0, 1, 0, 1, 0, 1, 2, 3, 4)
@@ -41,7 +49,7 @@ class PrefixFunctionTests {
     }
 
     @Test
-    fun test5() {
+    fun test6() {
         val collection = "ABCABCAABCABD".chunked(1)
         val actualPValues = collection.prefixFunction()
         val expectedPValues = listOf(0, 0, 0, 1, 2, 3, 4, 1, 2, 3, 4, 5, 0)

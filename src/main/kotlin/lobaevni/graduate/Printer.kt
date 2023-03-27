@@ -51,7 +51,7 @@ internal fun writeDOT(
     val resultPNGFile = File("$filename.png")
     "dot -Tpng ${graphDOTFile.path} -o ${resultPNGFile.path}".runCommand()
 
-    println(" SUCCESS")
+    println(" OK")
 }
 
 /**

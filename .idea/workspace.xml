@@ -6,10 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="85e7987e-bcf2-4b0a-8323-009184876a50" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/Main.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/Main.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/Printer.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/Printer.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/Jez.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/Jez.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/kotlin/lobaevni/graduate/JezEquationTests.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/kotlin/lobaevni/graduate/JezEquationTests.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/JezAction.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/JezAction.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -88,7 +85,7 @@
       <recent name="lobaevni.graduate.jez.history" />
     </key>
   </component>
-  <component name="RunManager" selected="Gradle.JezEquationTests">
+  <component name="RunManager" selected="Kotlin.MainKt">
     <configuration name="JezEquationTests" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -103,6 +100,29 @@
             <option value=":test" />
             <option value="--tests" />
             <option value="&quot;lobaevni.graduate.JezEquationTests&quot;" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <method v="2" />
+    </configuration>
+    <configuration name="JezEquationTests.test3" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":test" />
+            <option value="--tests" />
+            <option value="&quot;lobaevni.graduate.JezEquationTests.test3&quot;" />
           </list>
         </option>
         <option name="vmOptions" />
@@ -169,6 +189,7 @@
       </method>
     </configuration>
     <list>
+      <item itemvalue="Gradle.JezEquationTests.test3" />
       <item itemvalue="Gradle.JezEquationTests.test6" />
       <item itemvalue="Gradle.PrefixFunctionTests" />
       <item itemvalue="Gradle.JezEquationTests" />
@@ -176,8 +197,9 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Gradle.JezEquationTests" />
         <item itemvalue="Kotlin.MainKt" />
+        <item itemvalue="Gradle.JezEquationTests" />
+        <item itemvalue="Gradle.JezEquationTests.test3" />
         <item itemvalue="Gradle.PrefixFunctionTests" />
         <item itemvalue="Gradle.JezEquationTests.test6" />
       </list>
