@@ -1,7 +1,7 @@
 package lobaevni.graduate.jez
 
 import lobaevni.graduate.jez.JezHeuristics.assume
-import lobaevni.graduate.jez.JezHeuristics.findSideContradictions
+import lobaevni.graduate.jez.JezHeuristics.checkSideContradictions
 import lobaevni.graduate.jez.JezHeuristics.getSideConstants
 import lobaevni.graduate.jez.JezHeuristics.tryShorten
 import lobaevni.graduate.jez.action.ConstantsRepAction
@@ -48,34 +48,31 @@ internal fun JezState.tryFindMinimalSolution(
 
     history?.init(equation)
 
-    trySolveTrivial()
-
     var iteration = 0
     while (
-        (equation.u.size > 1 || equation.v.size > 1) &&
         !equation.checkEmptySolution() &&
         iteration++ < maxIterationsCount
     ) {
-        if (equation.findSideContradictions() && (!allowRevert || !revertUntilNoSolution())) break
+        if (!tryShorten() || equation.checkSideContradictions()) {
+            if (!allowRevert || !revertUntilNoSolution()) break
+        }
 
         val currentEquation = equation
 
         blockCompNCr()
-        trySolveTrivial()
+        if (!tryShorten()) continue
         if (equation.checkEmptySolution()) break
-        if (equation.findSideContradictions()) continue
+        if (equation.checkSideContradictions()) continue
 
         pairCompNCr()
-        trySolveTrivial()
+        if (!tryShorten()) continue
         if (equation.checkEmptySolution()) break
-        if (equation.findSideContradictions()) continue
-
-        //TODO: assumeEmptyVariables() - сделать эвристику тут...
+        if (equation.checkSideContradictions()) continue
 
         pairCompCr(equation == currentEquation)
-        trySolveTrivial()
+        if (!tryShorten()) continue
         if (equation.checkEmptySolution()) break
-        if (equation.findSideContradictions()) continue
+        if (equation.checkSideContradictions()) continue
 
         if (equation == currentEquation && (!allowRevert || !revertUntilNoSolution())) break
     }
@@ -149,8 +146,7 @@ internal fun JezState.pairCompNCr(): JezState {
             val pair = listOf(a, b)
             if (!apply(ConstantsRepAction(pair, getOrGenerateConstant(pair)))) continue
 
-            trySolveTrivial()
-            if (equation.findSideContradictions() || equation.checkEmptySolution()) return this
+            if (!tryShorten() || equation.checkSideContradictions() || equation.checkEmptySolution()) return this
         }
     }
     return this
@@ -179,8 +175,7 @@ internal fun JezState.pairCompCr(necComp: Boolean): JezState {
     val sideConstantsNCr = equation.getSideConstants()
     for (left in listOf(true, false)) {
         tryAssumeAndApply(sideConstantsNCr.second, left)
-        trySolveTrivial()
-        if (equation.checkEmptySolution()) return this
+        if (!tryShorten() || equation.checkEmptySolution() || equation.checkSideContradictions()) return this
     }
 
     if (!necComp) return this
@@ -218,26 +213,6 @@ internal fun JezState.revertUntilNoSolution(): Boolean {
 }
 
 /**
- * Tries to find trivial solutions in current [JezEquation].
- * @return modified [JezEquation], if trivial solutions were successfully found, otherwise source [JezEquation] (but
- * shortened).
- */
-internal fun JezState.trySolveTrivial() {
-    tryShorten()
-
-    if (equation.checkEmptySolution() || equation.u.size != 1 || equation.v.size != 1) return
-
-    val uFirst = equation.u.first()
-    val vFirst = equation.v.first()
-    if (equation.u.size == 1 && uFirst is JezVariable && vFirst is JezConstant) {
-        apply(VariableRepAction(uFirst, listOf(vFirst), listOf()))
-    } else if (equation.v.size == 1 && vFirst is JezVariable && uFirst is JezConstant) {
-        apply(VariableRepAction(vFirst, listOf(uFirst), listOf()))
-    }
-}
-
-/**
  * @return whether an empty solution is suitable for this [JezEquation].
  */
-fun JezEquation.checkEmptySolution(): Boolean =
-    u.filterIsInstance<JezConstant>() == v.filterIsInstance<JezConstant>()
+fun JezEquation.checkEmptySolution(): Boolean = u.filterIsInstance<JezConstant>() == v.filterIsInstance<JezConstant>()

@@ -63,22 +63,19 @@ internal sealed class JezAction {
         val result = (listOf(Acc(null)) + map { element ->
             Acc(element)
         }).reduce { lastAcc, curAcc ->
-            while (lastAcc.buffer.isNotEmpty() && lastAcc.buffer.last() != curAcc.element) {
+            lastAcc.buffer.add(curAcc.element!!)
+
+            val repPartElement = repPart.elementAt(lastAcc.buffer.size - 1)
+            while (lastAcc.buffer.isNotEmpty() && lastAcc.buffer.last() != repPartElement) {
                 val dropCount = lastAcc.buffer.size - (prefixFunctionValues?.elementAt(lastAcc.buffer.size - 1) ?: 0)
                 for (i in 0 until dropCount) {
                     lastAcc.result.add(lastAcc.buffer.removeFirst())
                 }
             }
 
-            if (curAcc.element == repPart.elementAt(lastAcc.buffer.size)) {
-                if (lastAcc.buffer.size + 1 == repPart.size) {
-                    lastAcc.result.addAll(newPart)
-                    lastAcc.buffer.clear()
-                } else {
-                    lastAcc.buffer.add(curAcc.element)
-                }
-            } else {
-                lastAcc.result.add(curAcc.element!!)
+            if (lastAcc.buffer.size == repPart.size) {
+                lastAcc.buffer.clear()
+                lastAcc.result.addAll(newPart)
             }
             lastAcc
         }.also { acc ->

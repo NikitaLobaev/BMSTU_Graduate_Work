@@ -24,7 +24,8 @@ internal data class CropAction(
             state.equation.u.subList(0, leftPart.size) != leftPart ||
             state.equation.v.subList(0, leftPart.size) != leftPart ||
             state.equation.u.subList(state.equation.u.size - rightPart.size, state.equation.u.size) != rightPart ||
-            state.equation.v.subList(state.equation.v.size - rightPart.size, state.equation.v.size) != rightPart) {
+            state.equation.v.subList(state.equation.v.size - rightPart.size, state.equation.v.size) != rightPart ||
+            state.history?.currentGraphNode?.childNodes?.containsKey(this) == true) {
             return false
         }
 
@@ -34,7 +35,6 @@ internal data class CropAction(
             v = oldEquation.v.drop(leftPart.size).dropLast(rightPart.size),
         )
 
-        if (state.history?.currentGraphNode?.childNodes?.containsKey(this) == true) return false
         if (state.history?.graphNodes?.containsKey(newEquation) == true) {
             state.history.putApplication(
                 oldEquation = oldEquation,

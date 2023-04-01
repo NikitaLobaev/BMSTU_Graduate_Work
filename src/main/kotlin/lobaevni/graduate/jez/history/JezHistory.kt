@@ -64,6 +64,8 @@ internal class JezHistory(
         newEquation: JezEquation,
         ignored: Boolean = false,
     ) {
+        assert(!ignored || !currentGraphNode.childNodes.contains(action))
+
         val newGraphNode = JezHistoryGraphNode(
             action = action,
             parentNode = currentGraphNode,
@@ -113,9 +115,6 @@ internal class JezHistory(
                 color = DOT_NODE_REVERTED_COLOR
             }
             oldEquationStrBr - newEquationStrBr + {
-                color = DOT_NODE_REVERTED_COLOR
-            }
-            +newEquationStrBr + {
                 color = DOT_NODE_REVERTED_COLOR
             }
         }

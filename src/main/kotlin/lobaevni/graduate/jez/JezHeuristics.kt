@@ -7,30 +7,27 @@ object JezHeuristics {
     /**
      * Heuristic of shortening of the [JezEquation]. Cuts similar starts and ends of the left and right side of the
      * [JezEquation].
+     * @return TODO
      */
     internal fun JezState.tryShorten(): Boolean {
         val leftIndex = equation.u.zip(equation.v).indexOfFirst { (uElement, vElement) ->
             uElement != vElement
         }.takeIf { it != -1 } ?: minOf(equation.u.size, equation.v.size)
-
         val rightIndex = equation.u.reversed().zip(equation.v.reversed()).indexOfFirst { (uElement, vElement) ->
             uElement != vElement
         }.takeIf { it != -1 } ?: minOf(equation.u.size, equation.v.size)
-
-        apply(CropAction(
+        return leftIndex + rightIndex == 0 || apply(CropAction(
             equation = equation,
             leftSize = leftIndex,
             rightSize = rightIndex,
         ))
-
-        return leftIndex > 0 || rightIndex > 0
     }
 
     /**
-     * Heuristic of finding contradictions in the [JezEquation] at left and at right sides of both parts of it.
+     * Heuristic of checking contradictions in the [JezEquation] at left and at right sides of both parts of it.
      * @return true, if contradiction was found, false otherwise.
      */
-    internal fun JezEquation.findSideContradictions(): Boolean {
+    internal fun JezEquation.checkSideContradictions(): Boolean {
         return (u.firstOrNull() is JezConstant && v.firstOrNull() is JezConstant && u.first() != v.first()) ||
                 (u.lastOrNull() is JezConstant && v.lastOrNull() is JezConstant && u.last() != v.last()) ||
                 (u.isEmpty() && v.find { it is JezConstant } != null) ||
