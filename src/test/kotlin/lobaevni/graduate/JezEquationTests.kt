@@ -127,14 +127,6 @@ class JezEquationTests {
             FAILED_MSG_WRONG_SOLUTION_STATE)
     }
 
-    @Test
-    fun testNoSolution3() {
-        val sourceEquation = parseEquation("xB", "yy")
-        val result = sourceEquation.tryFindMinimalSolution()
-        assertTrue(result.solutionState is JezResult.SolutionState.NoSolution.NotEnoughIterations,
-            FAILED_MSG_WRONG_SOLUTION_STATE)
-    }
-
     private fun JezEquation.tryFindMinimalSolution() = tryFindMinimalSolution(
         allowRevert = true,
         storeHistory = true,

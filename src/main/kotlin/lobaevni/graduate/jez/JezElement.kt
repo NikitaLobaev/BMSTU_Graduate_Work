@@ -1,11 +1,14 @@
 package lobaevni.graduate.jez
 
 typealias JezSigma = Map<JezVariable, List<JezSourceConstant>>
-internal typealias JezMutableSigma = MutableMap<JezVariable, MutableList<JezSourceConstant>>
+internal typealias JezMutableSigma = MutableMap<JezVariable, MutableList<JezConstant>>
+internal typealias JezNegativeSigma = Map<JezVariable, Set<JezSourceConstant>>
+internal typealias JezMutableNegativeSigma = MutableMap<JezVariable, MutableSet<JezSourceConstant>>
 internal typealias JezReplaces = MutableMap<List<JezSourceConstant>, JezGeneratedConstant>
 internal typealias JezConstant = JezElement.Constant
 internal typealias JezSourceConstant = JezElement.Constant.Source
 internal typealias JezGeneratedConstant = JezElement.Constant.Generated
+internal typealias JezGeneratedConstantBlock = JezElement.Constant.GeneratedBlock
 internal typealias JezVariable = JezElement.Variable
 
 sealed class JezElement {
@@ -76,6 +79,34 @@ sealed class JezElement {
                 } else {
                     "&xi;<sub>$number</sub>"
                 }
+            }
+
+        }
+
+        data class GeneratedBlock(
+            val constant: JezConstant,
+            val powerIndexes: List<Int>,
+            val additionalPower: Int = 0,
+        ) : Constant() {
+
+            constructor(
+                constant: JezConstant,
+                powerIndexes: Int,
+                additionalPower: Int = 0,
+            ) : this(constant, listOf(powerIndexes), additionalPower)
+
+            override val source = constant.source
+
+            override fun toString(): String {
+                val powerIndexesStr = powerIndexes.joinToString(" + ") { "i_$it" } +
+                        if (additionalPower > 0) " + $additionalPower" else ""
+                return "BLOCK($constant, $powerIndexesStr)"
+            }
+
+            override fun toHTMLString(): String {
+                val powerIndexesStr = powerIndexes.joinToString(" + ") { "i<sub>$it</sub>" } +
+                        if (additionalPower > 0) " + $additionalPower" else ""
+                return "${constant.toHTMLString()}<sup>$powerIndexesStr&nbsp;</sup>"
             }
 
         }

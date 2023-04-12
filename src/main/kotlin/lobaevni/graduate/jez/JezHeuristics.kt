@@ -1,6 +1,6 @@
 package lobaevni.graduate.jez
 
-import lobaevni.graduate.jez.action.CropAction
+import lobaevni.graduate.jez.action.JezCropAction
 
 object JezHeuristics {
 
@@ -10,13 +10,14 @@ object JezHeuristics {
      * @return TODO
      */
     internal fun JezState.tryShorten(): Boolean {
+        //TODO: схлопывать блоки
         val leftIndex = equation.u.zip(equation.v).indexOfFirst { (uElement, vElement) ->
             uElement != vElement
         }.takeIf { it != -1 } ?: minOf(equation.u.size, equation.v.size)
         val rightIndex = equation.u.reversed().zip(equation.v.reversed()).indexOfFirst { (uElement, vElement) ->
             uElement != vElement
         }.takeIf { it != -1 } ?: minOf(equation.u.size, equation.v.size)
-        return leftIndex + rightIndex == 0 || apply(CropAction(
+        return leftIndex + rightIndex == 0 || apply(JezCropAction(
             equation = equation,
             leftSize = leftIndex,
             rightSize = rightIndex,
@@ -28,10 +29,23 @@ object JezHeuristics {
      * @return true, if contradiction was found, false otherwise.
      */
     internal fun JezEquation.checkSideContradictions(): Boolean {
-        return (u.firstOrNull() is JezConstant && v.firstOrNull() is JezConstant && u.first() != v.first()) ||
-                (u.lastOrNull() is JezConstant && v.lastOrNull() is JezConstant && u.last() != v.last()) ||
-                (u.isEmpty() && v.find { it is JezConstant } != null) ||
-                (v.isEmpty() && u.find { it is JezConstant } != null)
+        if ((u.isEmpty() && v.find { it is JezConstant } != null) ||
+                (v.isEmpty() && u.find { it is JezConstant } != null)) return false
+
+        fun JezElement.retrieveConstant(): JezConstant? {
+            return when (this) {
+                is JezGeneratedConstantBlock -> constant
+                is JezConstant -> this
+                else -> null
+            }
+        }
+
+        return (u.firstOrNull()?.retrieveConstant() is JezConstant &&
+                v.firstOrNull()?.retrieveConstant() is JezConstant &&
+                u.first().retrieveConstant() != v.first().retrieveConstant()) ||
+                (u.lastOrNull()?.retrieveConstant() is JezConstant &&
+                        v.lastOrNull()?.retrieveConstant() is JezConstant &&
+                        u.last().retrieveConstant() != v.last().retrieveConstant())
     }
 
     /**
@@ -43,7 +57,7 @@ object JezHeuristics {
             val constantsLeftExcluded = mutableSetOf<JezConstant>()
             val constantsRightExcluded = mutableSetOf<JezConstant>()
             forEachIndexed { index, element ->
-                if (element !is JezConstant) return@forEachIndexed
+                if (element !is JezConstant || element is JezGeneratedConstantBlock) return@forEachIndexed
 
                 if (elementAtOrNull(index - 1) is JezVariable) {
                     constantsRightExcluded += element
@@ -55,7 +69,7 @@ object JezHeuristics {
             return Pair(constantsLeftExcluded, constantsRightExcluded)
         }
 
-        val usedConstants = getUsedConstants()
+        val usedConstants = getUsedSourceConstants() + getUsedGeneratedConstants()
         val uExcludedConstants = u.findExcludedConstants()
         val vExcludedConstants = v.findExcludedConstants()
         val leftConstants = usedConstants.toMutableSet().apply {

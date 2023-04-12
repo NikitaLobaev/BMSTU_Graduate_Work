@@ -28,6 +28,12 @@ data class JezEquation(
         (u + v).filterIsInstance<JezGeneratedConstant>().toSet()
 
     /**
+     * @return all used in this [JezEquation] generated blocks of constants.
+     */
+    fun getUsedGeneratedConstantBlocks(): Set<JezGeneratedConstantBlock> =
+        (u + v).filterIsInstance<JezGeneratedConstantBlock>().toSet()
+
+    /**
      * @return all used in this [JezEquation] variables.
      */
     fun getUsedVariables(): Set<JezVariable> =

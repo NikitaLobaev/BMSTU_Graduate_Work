@@ -15,8 +15,13 @@ internal class JezState(
     val sigmaLeft: JezMutableSigma = mutableMapOf()
     val sigmaRight: JezMutableSigma = mutableMapOf()
 
+    val negativeSigmaLeft: JezMutableNegativeSigma = mutableMapOf()
+    val negativeSigmaRight: JezMutableNegativeSigma = mutableMapOf()
+    val nonEmptyVariables: MutableSet<JezVariable> = mutableSetOf()
+
     private val replaces: JezReplaces = mutableMapOf()
-    private var replacedBlocksCount: Int = 0
+    private var generatedBlocksCount: Int = 0
+    private var generatedBlocksPowersCount: Int = 0
 
     val history: JezHistory? = if (storeHistory) {
         JezHistory(storeEquations, dot, dotHTMLLabels, dotMaxStatementsCount)
@@ -26,14 +31,16 @@ internal class JezState(
      * @see JezAction.applyAction
      */
     fun apply(action: JezAction): Boolean {
+        if (history?.currentGraphNode?.childNodes?.containsKey(action) == true) return false
         return action.applyAction(this)
     }
 
     /**
      * @see JezAction.revertAction
      */
-    fun revert(): Boolean {
-        return history?.currentGraphNode?.action?.revertAction(this) ?: false
+    fun revert(action: JezAction): Boolean {
+        if (history?.currentGraphNode?.action != action) return false
+        return action.revertAction(this)
     }
 
     /**
@@ -41,11 +48,7 @@ internal class JezState(
      */
     fun getOrGenerateConstant(repPart: List<JezConstant>): JezGeneratedConstant {
         return replaces.getOrElse(repPart.toJezSourceConstants()) {
-            val constant = JezGeneratedConstant(repPart, replaces.size - replacedBlocksCount)
-            if (constant.isBlock) {
-                replacedBlocksCount++
-            }
-            return constant
+            JezGeneratedConstant(repPart, replaces.size - generatedBlocksCount)
         }
     }
 
@@ -56,6 +59,9 @@ internal class JezState(
         if (constant.source in replaces) return false
 
         replaces[constant.source] = constant
+        if (constant.isBlock) {
+            generatedBlocksCount++
+        }
         return true
     }
 
@@ -65,10 +71,17 @@ internal class JezState(
     fun removeGeneratedConstant(constant: JezGeneratedConstant): Boolean {
         if (constant.source !in replaces) return false
 
-        if (replaces[constant.source]!!.isBlock) {
-            replacedBlocksCount--
+        if (constant.isBlock) {
+            generatedBlocksCount--
         }
         return replaces.remove(constant.source) != null
+    }
+
+    /**
+     * TODO
+     */
+    fun generateConstantBlock(constant: JezConstant): JezGeneratedConstantBlock {
+        return JezGeneratedConstantBlock(constant, generatedBlocksPowersCount++)
     }
 
 }

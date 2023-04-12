@@ -1,12 +1,12 @@
 package lobaevni.graduate.jez
 
+import lobaevni.graduate.Utils.cartesianProduct
 import lobaevni.graduate.jez.JezHeuristics.assume
 import lobaevni.graduate.jez.JezHeuristics.checkSideContradictions
 import lobaevni.graduate.jez.JezHeuristics.getSideConstants
 import lobaevni.graduate.jez.JezHeuristics.tryShorten
-import lobaevni.graduate.jez.action.ConstantsRepAction
-import lobaevni.graduate.jez.action.VariablesDropAction
-import lobaevni.graduate.jez.action.VariableRepAction
+import lobaevni.graduate.jez.action.JezReplaceConstantsAction
+import lobaevni.graduate.jez.action.JezReplaceVariablesAction
 
 /**
  * Tries to find minimal solution of this [JezEquation].
@@ -27,7 +27,16 @@ fun JezEquation.tryFindMinimalSolution(
         dot = dot,
         dotHTMLLabels = dotHTMLLabels,
         dotMaxStatementsCount = dotMaxStatementsCount
-    )
+    ).apply {
+        val variables = equation.getUsedVariables()
+        for (variable in variables) {
+            sigmaLeft[variable] = mutableListOf()
+            sigmaRight[variable] = mutableListOf()
+            negativeSigmaLeft[variable] = mutableSetOf()
+            negativeSigmaRight[variable] = mutableSetOf()
+        }
+        history?.init(equation)
+    }
     return state.tryFindMinimalSolution(allowRevert, maxIterationsCount)
 }
 
@@ -38,16 +47,6 @@ internal fun JezState.tryFindMinimalSolution(
     allowRevert: Boolean,
     maxIterationsCount: Int,
 ): JezResult {
-    sigmaLeft.clear()
-    sigmaRight.clear()
-    val variables = equation.getUsedVariables()
-    for (variable in variables) {
-        sigmaLeft[variable] = mutableListOf()
-        sigmaRight[variable] = mutableListOf()
-    }
-
-    history?.init(equation)
-
     var iteration = 0
     while (
         !equation.checkEmptySolution() &&
@@ -59,17 +58,16 @@ internal fun JezState.tryFindMinimalSolution(
 
         val currentEquation = equation
 
-        blockCompNCr()
-        if (!tryShorten()) continue
-        if (equation.checkEmptySolution()) break
-        if (equation.checkSideContradictions()) continue
-
-        pairCompNCr()
-        if (!tryShorten()) continue
-        if (equation.checkEmptySolution()) break
-        if (equation.checkSideContradictions()) continue
-
-        pairCompCr(equation == currentEquation)
+        val compressions = listOf(
+            { blockCompNCr() },
+            { blockCompCr() },
+            { pairCompNCr() },
+            { pairCompCr(equation == currentEquation) }
+        )
+        for (compression in compressions) {
+            compression()
+            if (!tryShorten() || equation.checkEmptySolution() || equation.checkSideContradictions()) break
+        }
         if (!tryShorten()) continue
         if (equation.checkEmptySolution()) break
         if (equation.checkSideContradictions()) continue
@@ -77,8 +75,8 @@ internal fun JezState.tryFindMinimalSolution(
         if (equation == currentEquation && (!allowRevert || !revertUntilNoSolution())) break
     }
 
-    val sigma: JezSigma = variables.associateWith { variable ->
-        sigmaLeft[variable]!! + sigmaRight[variable]!!
+    val sigma: JezSigma = equation.getUsedVariables().associateWith { variable ->
+        (sigmaLeft[variable]!! + sigmaRight[variable]!!).toJezSourceConstants()
     }
 
     val solutionState = if (equation.checkEmptySolution()) {
@@ -92,7 +90,11 @@ internal fun JezState.tryFindMinimalSolution(
     }
 
     if (solutionState is JezResult.SolutionState.Found) {
-        apply(VariablesDropAction(equation.getUsedVariables()))
+        apply(JezReplaceVariablesAction(
+            replaces = equation.getUsedVariables().map { variable ->
+                Pair(listOf(variable), listOf())
+            },
+        ))
     }
 
     return JezResult(
@@ -100,6 +102,74 @@ internal fun JezState.tryFindMinimalSolution(
         solutionState = solutionState,
         historyDotGraph = history?.dotRootGraph,
     )
+}
+
+/**
+ * TODO
+ */
+internal fun JezState.blockCompCr(): JezState {
+    val suggestedBlockComps = mutableMapOf<JezVariable, MutableList<JezConstant>>() //duplicates allowed, because order is more important than space complexity
+    for (equationPart in listOf(equation.u, equation.v)) {
+        equationPart.forEachIndexed { index, element ->
+            if (element !is JezVariable) return@forEachIndexed
+
+            val previous = equationPart.elementAtOrNull(index - 1)
+            val next = equationPart.elementAtOrNull(index + 1)
+            listOfNotNull(previous, next)
+                .filterIsInstance<JezGeneratedConstant>()
+                .filter { it.isBlock }
+                .forEach { constant ->
+                    suggestedBlockComps.getOrPut(element) { mutableListOf() }.add(constant.source.first())
+                }
+        }
+    }
+
+    val connectedBlocks = mutableMapOf<JezConstant, MutableSet<JezConstant>>()
+    for (equationPart in listOf(equation.u, equation.v)) {
+        equationPart.forEachIndexed { index, element ->
+            if ((element as? JezGeneratedConstant)?.isBlock != true) return@forEachIndexed
+
+            val previous = equationPart.elementAtOrNull(index - 1)
+            val next = equationPart.elementAtOrNull(index + 1)
+            listOfNotNull(previous, next)
+                .filterIsInstance<JezGeneratedConstant>()
+                .filter { it.isBlock }
+                .forEach { constant ->
+                    connectedBlocks.getOrPut(element.value.first()) { mutableSetOf() }.add(constant.value.first())
+                    connectedBlocks.getOrPut(constant.value.first()) { mutableSetOf() }.add(element.value.first())
+                }
+        }
+    }
+    for (suggestedBlockComp in suggestedBlockComps) {
+        for (constant in suggestedBlockComp.value.toList()) { //need a copy, because we modify it same time
+            suggestedBlockComp.value.addAll(connectedBlocks.getOrDefault(constant, null) ?: listOf())
+        }
+    }
+
+    suggestedBlockComps.forEach { (variable, constants) ->
+        constants.any { constant ->
+            if (negativeSigmaLeft[variable]!!.contains(constant) &&
+                negativeSigmaRight[variable]!!.contains(constant)) return@any false
+
+            val leftBlock = if (!negativeSigmaLeft[variable]!!.contains(constant)) {
+                listOf(generateConstantBlock(constant))
+            } else listOf()
+            val rightBlock = if (!negativeSigmaRight[variable]!!.contains(constant)) {
+                listOf(generateConstantBlock(constant))
+            } else listOf()
+            if (!apply(JezReplaceVariablesAction(
+                    variable,
+                    leftPart = leftBlock,
+                    rightPart = rightBlock,
+                    subNegativeSigmaLeft = mapOf(variable to negativeSigmaLeft[variable]!!),
+                    subNegativeSigmaRight = mapOf(variable to negativeSigmaRight[variable]!!),
+                ))) return@any false
+
+            nonEmptyVariables.add(variable)
+            return@any true
+        }
+    }
+    return this
 }
 
 /**
@@ -128,9 +198,9 @@ internal fun JezState.blockCompNCr(): JezState {
         }
     }
 
-    for (block in blocks) {
-        apply(ConstantsRepAction(block, getOrGenerateConstant(block)))
-    }
+    apply(JezReplaceConstantsAction(blocks.map { block ->
+        Pair(block, listOf(getOrGenerateConstant(block)))
+    }))
     return this
 }
 
@@ -139,16 +209,10 @@ internal fun JezState.blockCompNCr(): JezState {
  */
 internal fun JezState.pairCompNCr(): JezState {
     val constants = equation.getSideConstants()
-    for (a in constants.first) {
-        for (b in constants.second) {
-            if (a == b) continue //we don't compress blocks here
-
-            val pair = listOf(a, b)
-            if (!apply(ConstantsRepAction(pair, getOrGenerateConstant(pair)))) continue
-
-            if (!tryShorten() || equation.checkSideContradictions() || equation.checkEmptySolution()) return this
-        }
-    }
+    val pairs = cartesianProduct(constants.first, constants.second)
+    apply(JezReplaceConstantsAction(pairs.map { pair ->
+        Pair(pair.toList(), listOf(getOrGenerateConstant(pair.toList())))
+    }))
     return this
 }
 
@@ -164,11 +228,23 @@ internal fun JezState.pairCompCr(necComp: Boolean): JezState {
      */
     fun tryAssumeAndApply(sideConstants: Set<JezConstant>, left: Boolean): Boolean {
         val assumption = equation.assume(sideConstants, left) ?: return false
-        val action = VariableRepAction(
-            variable = assumption.first,
-            leftRepPart = if (left) listOf(assumption.second) else listOf(),
-            rightRepPart = if (left) listOf() else listOf(assumption.second),
-        )
+        val action = if (left) {
+            JezReplaceVariablesAction(
+                variable = assumption.first,
+                leftPart = listOf(assumption.second),
+                rightPart = listOf(),
+                subNegativeSigmaLeft = mapOf(assumption.first to negativeSigmaLeft[assumption.first]!!),
+                subNonEmptyVariables = if (assumption.first in nonEmptyVariables) listOf(assumption.first) else listOf(),
+            )
+        } else {
+            JezReplaceVariablesAction(
+                variable = assumption.first,
+                leftPart = listOf(),
+                rightPart = listOf(assumption.second),
+                subNegativeSigmaRight = mapOf(assumption.first to negativeSigmaRight[assumption.first]!!),
+                subNonEmptyVariables = if (assumption.first in nonEmptyVariables) listOf(assumption.first) else listOf(),
+            )
+        }
         return apply(action)
     }
 
@@ -182,12 +258,24 @@ internal fun JezState.pairCompCr(necComp: Boolean): JezState {
 
     for (left in listOf(true, false)) {
         for (variable in equation.getUsedVariables()) {
-            for (constant in equation.getUsedConstants()) {
-                val action = VariableRepAction(
-                    variable = variable,
-                    leftRepPart = if (left) listOf(constant) else listOf(),
-                    rightRepPart = if (left) listOf() else listOf(constant),
-                )
+            for (constant in (equation.getUsedSourceConstants() + equation.getUsedGeneratedConstants())) {
+                val action = if (left) {
+                    JezReplaceVariablesAction(
+                        variable,
+                        leftPart = listOf(constant),
+                        rightPart = listOf(),
+                        subNegativeSigmaLeft = mapOf(variable to negativeSigmaLeft[variable]!!),
+                        subNonEmptyVariables = if (variable in nonEmptyVariables) listOf(variable) else listOf(),
+                    )
+                } else {
+                    JezReplaceVariablesAction(
+                        variable,
+                        leftPart = listOf(),
+                        rightPart = listOf(constant),
+                        subNegativeSigmaRight = mapOf(variable to negativeSigmaRight[variable]!!),
+                        subNonEmptyVariables = if (variable in nonEmptyVariables) listOf(variable) else listOf(),
+                    )
+                }
                 if (apply(action)) return this
             }
         }
@@ -202,11 +290,11 @@ internal fun JezState.pairCompCr(necComp: Boolean): JezState {
  */
 internal fun JezState.revertUntilNoSolution(): Boolean {
     while (true) {
-        val revertedAction = history?.currentGraphNode?.action
-        if (!revert()) return false
+        val action = history?.currentGraphNode?.action ?: return false
+        if (!revert(action)) return false
 
-        when (revertedAction) {
-            is VariableRepAction -> return true
+        when (action) {
+            is JezReplaceVariablesAction -> return true
             else -> {}
         }
     }
@@ -215,4 +303,14 @@ internal fun JezState.revertUntilNoSolution(): Boolean {
 /**
  * @return whether an empty solution is suitable for this [JezEquation].
  */
-fun JezEquation.checkEmptySolution(): Boolean = u.filterIsInstance<JezConstant>() == v.filterIsInstance<JezConstant>()
+fun JezEquation.checkEmptySolution(): Boolean {
+    val u = u.filterIsInstance<JezConstant>()
+    val v = v.filterIsInstance<JezConstant>()
+
+    /*val a = mk.ndarray(mk[mk[2, 3, -7, -11]])
+    val b = mk.ndarray(mk[8])
+    val result = mk.linalg.solve(a, b)
+    print(result)*/
+
+    return u == v
+}

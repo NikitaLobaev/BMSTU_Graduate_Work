@@ -4,7 +4,7 @@ import lobaevni.graduate.jez.JezElement
 import lobaevni.graduate.jez.JezEquation
 import lobaevni.graduate.jez.JezState
 
-internal data class CropAction(
+internal data class JezCropAction(
     val leftPart: List<JezElement>,
     val rightPart: List<JezElement>,
 ) : JezAction() {
@@ -18,14 +18,17 @@ internal data class CropAction(
         rightPart = equation.v.subList(equation.v.size - rightSize, equation.v.size),
     )
 
+    init {
+        assert(leftPart.size + rightPart.size > 0)
+    }
+
     override fun applyAction(state: JezState): Boolean {
         val cropSize = leftPart.size + rightPart.size
-        if (cropSize == 0 || cropSize > state.equation.u.size || cropSize > state.equation.v.size ||
+        if (cropSize > state.equation.u.size || cropSize > state.equation.v.size ||
             state.equation.u.subList(0, leftPart.size) != leftPart ||
             state.equation.v.subList(0, leftPart.size) != leftPart ||
             state.equation.u.subList(state.equation.u.size - rightPart.size, state.equation.u.size) != rightPart ||
-            state.equation.v.subList(state.equation.v.size - rightPart.size, state.equation.v.size) != rightPart ||
-            state.history?.currentGraphNode?.childNodes?.containsKey(this) == true) {
+            state.equation.v.subList(state.equation.v.size - rightPart.size, state.equation.v.size) != rightPart) {
             return false
         }
 
@@ -56,11 +59,6 @@ internal data class CropAction(
     }
 
     override fun revertAction(state: JezState): Boolean {
-        val cropSize = leftPart.size + rightPart.size
-        if (cropSize == 0) {
-            return false
-        }
-
         val oldEquation = state.equation
         state.equation = JezEquation(
             u = leftPart + oldEquation.u + rightPart,
@@ -75,14 +73,10 @@ internal data class CropAction(
     }
 
     override fun toString(): String {
-        val sb = StringBuilder("crop")
-        if (leftPart.isNotEmpty()) {
-            sb.append(" ${leftPart.size} left")
-        }
-        if (rightPart.isNotEmpty()) {
-            sb.append(" ${rightPart.size} right")
-        }
-        return sb.toString()
+        return StringBuilder("crop").apply {
+            if (leftPart.isNotEmpty()) append(" ${leftPart.size} left")
+            if (rightPart.isNotEmpty()) append(" ${rightPart.size} right")
+        }.toString()
     }
 
 }
