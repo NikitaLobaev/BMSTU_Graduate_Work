@@ -60,25 +60,17 @@ internal class JezState(
     }
 
     /**
-     * @return [JezGeneratedConstant] for [repPart] from [replaces] or generates new constant, if it is not present.
+     * @return TODO
      */
-    fun getOrGenerateConstant(repPart: List<JezConstant>): JezGeneratedConstant {
+    fun getOrPutGeneratedConstant(repPart: List<JezConstant>): JezGeneratedConstant {
         return replaces.getOrElse(repPart.toJezSourceConstants()) {
-            JezGeneratedConstant(repPart, replaces.size - generatedBlocksCount)
+            val newConstant = JezGeneratedConstant(repPart, replaces.size - generatedBlocksCount)
+            replaces[newConstant.source] = newConstant
+            if (newConstant.isBlock) {
+                generatedBlocksCount++
+            }
+            return newConstant
         }
-    }
-
-    /**
-     * @return whether new [constant] was put successfully.
-     */
-    fun putGeneratedConstant(constant: JezGeneratedConstant): Boolean {
-        if (constant.source in replaces) return false
-
-        replaces[constant.source] = constant
-        if (constant.isBlock) {
-            generatedBlocksCount++
-        }
-        return true
     }
 
     /**

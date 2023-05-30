@@ -19,7 +19,7 @@ internal data class JezReplaceConstantsAction(
 
         replaces.forEach { (_, to) ->
             val constant = to.first()
-            assert(state.putGeneratedConstant(constant))
+            assert(state.getOrPutGeneratedConstant(constant.source) == constant)
         }
         return true
     }

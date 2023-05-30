@@ -11,6 +11,9 @@ import org.jetbrains.kotlinx.multik.api.mk
 import org.jetbrains.kotlinx.multik.api.ndarray
 import org.jetbrains.kotlinx.multik.ndarray.data.D1Array
 import org.jetbrains.kotlinx.multik.ndarray.data.D2Array
+import kotlin.math.E
+import kotlin.math.pow
+import kotlin.math.roundToInt
 
 /**
  * Tries to find minimal solution of this [JezEquation].
@@ -46,6 +49,7 @@ internal fun JezState.tryFindMinimalSolution(
     val variables = equation.getUsedVariables()
 
     var iteration = 0
+    val maxSolutionLength = (E.pow(equation.u.size + equation.v.size)).roundToInt() //TODO
     while (
         iteration++ < maxIterationsCount &&
         tryShorten() &&
@@ -63,14 +67,16 @@ internal fun JezState.tryFindMinimalSolution(
         try {
             for (compression in compressions) {
                 compression()
-                if (!tryShorten() || checkEmptySolution() || checkSideContradictions()) break
+                if (!tryShorten() || checkEmptySolution() || checkSideContradictions() ||
+                    !validateSolutionLength(maxSolutionLength)) break
             }
         } catch (e: JezContradictionException) {
             if (!allowRevert || !revertUntilNoSolution()) break
             continue
         }
 
-        if ((equation == currentEquation || !tryShorten() || checkSideContradictions()) &&
+        if ((equation == currentEquation || !tryShorten() || checkSideContradictions() ||
+                    !validateSolutionLength(maxSolutionLength)) &&
             (!allowRevert || !revertUntilNoSolution())) break
     }
 
@@ -198,7 +204,7 @@ internal fun JezState.blockCompNCr(): JezState {
     }
 
     apply(JezReplaceConstantsAction(blocks.map { block ->
-        Pair(block, listOf(getOrGenerateConstant(block)))
+        Pair(block, listOf(getOrPutGeneratedConstant(block)))
     }))
     return this
 }
@@ -209,8 +215,9 @@ internal fun JezState.blockCompNCr(): JezState {
 internal fun JezState.pairCompNCr(): JezState {
     val sideConstants = getSideConstants()
     val pairs = cartesianProduct(sideConstants.first, sideConstants.second)
+    //TODO: maybe filter existing pairs from cartesian product
     apply(JezReplaceConstantsAction(pairs.map { pair ->
-        Pair(pair.toList(), listOf(getOrGenerateConstant(pair.toList())))
+        Pair(pair.toList(), listOf(getOrPutGeneratedConstant(pair.toList())))
     }))
     return this
 }
@@ -353,4 +360,13 @@ internal fun JezState.checkEmptySolution(): Boolean {
     print(rrr)*/
 
     return u == v
+}
+
+/**
+ * TODO
+ */
+internal fun JezState.validateSolutionLength(maxSolutionLength: Int): Boolean {
+    val currentLength =
+        equation.u.filterIsInstance<JezConstant>().size + equation.v.filterIsInstance<JezConstant>().size
+    return currentLength <= maxSolutionLength
 }
