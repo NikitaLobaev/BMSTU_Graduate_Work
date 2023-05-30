@@ -1,58 +1,14 @@
 package lobaevni.graduate.jez
 
-import lobaevni.graduate.jez.action.JezCropAction
+import lobaevni.graduate.jez.action.JezReplaceVariablesAction
 
 object JezHeuristics {
-
-    /**
-     * Heuristic of shortening of the [JezEquation]. Cuts similar starts and ends of the left and right side of the
-     * [JezEquation].
-     * @return TODO
-     */
-    internal fun JezState.tryShorten(): Boolean {
-        //TODO: схлопывать блоки
-        val leftIndex = equation.u.zip(equation.v).indexOfFirst { (uElement, vElement) ->
-            uElement != vElement
-        }.takeIf { it != -1 } ?: minOf(equation.u.size, equation.v.size)
-        val rightIndex = equation.u.reversed().zip(equation.v.reversed()).indexOfFirst { (uElement, vElement) ->
-            uElement != vElement
-        }.takeIf { it != -1 } ?: minOf(equation.u.size, equation.v.size)
-        return leftIndex + rightIndex == 0 || apply(JezCropAction(
-            equation = equation,
-            leftSize = leftIndex,
-            rightSize = rightIndex,
-        ))
-    }
-
-    /**
-     * Heuristic of checking contradictions in the [JezEquation] at left and at right sides of both parts of it.
-     * @return true, if contradiction was found, false otherwise.
-     */
-    internal fun JezEquation.checkSideContradictions(): Boolean {
-        if ((u.isEmpty() && v.find { it is JezConstant } != null) ||
-                (v.isEmpty() && u.find { it is JezConstant } != null)) return false
-
-        fun JezElement.retrieveConstant(): JezConstant? {
-            return when (this) {
-                is JezGeneratedConstantBlock -> constant
-                is JezConstant -> this
-                else -> null
-            }
-        }
-
-        return (u.firstOrNull()?.retrieveConstant() is JezConstant &&
-                v.firstOrNull()?.retrieveConstant() is JezConstant &&
-                u.first().retrieveConstant() != v.first().retrieveConstant()) ||
-                (u.lastOrNull()?.retrieveConstant() is JezConstant &&
-                        v.lastOrNull()?.retrieveConstant() is JezConstant &&
-                        u.last().retrieveConstant() != v.last().retrieveConstant())
-    }
 
     /**
      * Heuristic to determine what pairs of constants we might count as non-crossing.
      * @return pair of left and right constants lists respectively.
      */
-    internal fun JezEquation.getSideConstants(): Pair<Set<JezConstant>, Set<JezConstant>> {
+    internal fun JezState.getSideConstants(): Pair<Set<JezConstant>, Set<JezConstant>> {
         fun JezEquationPart.findExcludedConstants(): Pair<Set<JezConstant>, Set<JezConstant>> {
             val constantsLeftExcluded = mutableSetOf<JezConstant>()
             val constantsRightExcluded = mutableSetOf<JezConstant>()
@@ -69,9 +25,9 @@ object JezHeuristics {
             return Pair(constantsLeftExcluded, constantsRightExcluded)
         }
 
-        val usedConstants = getUsedSourceConstants() + getUsedGeneratedConstants()
-        val uExcludedConstants = u.findExcludedConstants()
-        val vExcludedConstants = v.findExcludedConstants()
+        val usedConstants = equation.getUsedSourceConstants() + equation.getUsedGeneratedConstants()
+        val uExcludedConstants = equation.u.findExcludedConstants()
+        val vExcludedConstants = equation.v.findExcludedConstants()
         val leftConstants = usedConstants.toMutableSet().apply {
             removeAll(uExcludedConstants.first)
             removeAll(vExcludedConstants.first)
@@ -85,28 +41,34 @@ object JezHeuristics {
     }
 
     /**
-     * Heuristic of assuming variable and constant that we could use for popping first via checking prefixes
-     * (or postfixes, according to [left] respectively).
+     * Heuristic of assuming variable and constant that we could use for popping first via checking prefixes and
+     * suffixes.
+     * @return TODO
      */
-    internal fun JezEquation.assume(
-        allowedConstants: Collection<JezConstant>,
-        left: Boolean,
-    ): Pair<JezVariable, JezConstant>? {
-        val uElement: JezElement?
-        val vElement: JezElement?
-        if (left) {
-            uElement = u.firstOrNull()
-            vElement = v.firstOrNull()
-        } else {
-            uElement = u.lastOrNull()
-            vElement = v.lastOrNull()
+    internal fun JezState.tryAssumeAndApply(): Boolean {
+        val pairs = listOf( //((y, A), left=true)
+            Pair(Pair(equation.u.firstOrNull(), equation.v.firstOrNull()), true),
+            Pair(Pair(equation.u.lastOrNull(), equation.v.lastOrNull()), false),
+        ).map { pair ->
+            if (pair.first.first !is JezVariable) {
+                Pair(Pair(pair.first.second, pair.first.first), pair.second)
+            } else pair
+        }.mapNotNull { pair ->
+            Pair(Pair(
+                pair.first.first as? JezVariable ?: return@mapNotNull null,
+                pair.first.second as? JezConstant ?: return@mapNotNull null,
+            ), pair.second)
         }
-        if (uElement is JezVariable && vElement is JezConstant && allowedConstants.contains(vElement)) {
-            return Pair(uElement, vElement)
-        } else if (vElement is JezVariable && uElement is JezConstant && allowedConstants.contains(uElement)) {
-            return Pair(vElement, uElement)
+        return pairs.any { pair ->
+            if (!(apply(JezReplaceVariablesAction(
+                    variable = pair.first.first,
+                    leftPart = if (pair.second) listOf(pair.first.second) else listOf(),
+                    rightPart = if (pair.second) listOf() else listOf(pair.first.second),
+                )) || apply(JezReplaceVariablesAction(variable = pair.first.first)))) {
+                throw JezContradictionException()
+            }
+            return@any true
         }
-        return null
     }
 
 }

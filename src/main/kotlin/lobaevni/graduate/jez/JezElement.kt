@@ -85,7 +85,7 @@ sealed class JezElement {
 
         data class GeneratedBlock(
             val constant: JezConstant,
-            val powerIndexes: List<Int>,
+            val powerIndexes: List<Int>, //TODO: remove list if unused...
             val additionalPower: Int = 0,
         ) : Constant() {
 

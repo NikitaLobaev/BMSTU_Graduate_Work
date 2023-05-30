@@ -3,8 +3,12 @@ package lobaevni.graduate.jez
 import lobaevni.graduate.jez.action.JezAction
 import lobaevni.graduate.jez.history.JezHistory
 
+class JezContradictionException : Exception()
+
 internal class JezState(
     var equation: JezEquation,
+    val allowRevert: Boolean,
+    val allowBlockCompCr: Boolean,
     storeHistory: Boolean,
     storeEquations: Boolean,
     dot: Boolean,
@@ -26,6 +30,17 @@ internal class JezState(
     val history: JezHistory? = if (storeHistory) {
         JezHistory(storeEquations, dot, dotHTMLLabels, dotMaxStatementsCount)
     } else null
+
+    init {
+        val variables = equation.getUsedVariables()
+        for (variable in variables) {
+            sigmaLeft[variable] = mutableListOf()
+            sigmaRight[variable] = mutableListOf()
+            negativeSigmaLeft[variable] = mutableSetOf()
+            negativeSigmaRight[variable] = mutableSetOf()
+        }
+        history?.init(equation)
+    }
 
     /**
      * @see JezAction.applyAction

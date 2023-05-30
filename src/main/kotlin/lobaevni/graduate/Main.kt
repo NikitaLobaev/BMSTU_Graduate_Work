@@ -5,12 +5,15 @@ import kotlinx.cli.ArgType
 import kotlinx.cli.default
 import lobaevni.graduate.jez.*
 
+private const val PROGRAM_NAME = "jez"
+
 private const val OPTION_ALLOW_REVERT_DESCRIPTION = "Allow reverting of recompression actions until no solution found"
-private const val OPTION_PREVENT_CYCLES_DESCRIPTION = "Try preventing of cycles by storing the equations themselves in the history"
+private const val OPTION_DISALLOW_CYCLES_DESCRIPTION = "Try preventing of cycles by storing the equations themselves in the history"
+private const val OPTION_ALLOW_BLOCK_COMP_CR = "Allow compression of crossing blocks with parametrized blocks"
 private const val OPTION_MAX_ITERATIONS_COUNT_DESCRIPTION = "Max iterations count"
 private const val OPTION_DOT_FILENAME_DESCRIPTION = "Output DOT-representation filename (without extension)"
-private const val OPTION_DOT_SHORTEN_LABELS_DESCRIPTION = "Shorten labels in DOT-representation"
-private const val OPTION_DOT_MAX_STATEMENTS_COUNT_DESCRIPTION = "Max statements count in DOT-representation"
+private const val OPTION_DOT_SHORTEN_LABELS_DESCRIPTION = "Shorten labels in output DOT-representation"
+private const val OPTION_DOT_MAX_STATEMENTS_COUNT_DESCRIPTION = "Max statements count in output DOT-representation"
 
 private const val USAGE_MESSAGE = """
 Usage:
@@ -23,15 +26,20 @@ private const val NOT_SOLVED_MESSAGE = "Unfortunately, solution wasn't found."
 private const val ERROR_MESSAGE = "Unfortunately, exception was thrown while solving the equation."
 
 fun main(args: Array<String>) {
-    val parser = ArgParser("jez")
+    val parser = ArgParser(PROGRAM_NAME)
     val allowRevert by parser.option(
         description = OPTION_ALLOW_REVERT_DESCRIPTION,
         fullName = "allow-revert",
         type = ArgType.Boolean,
     ).default(false)
-    val preventCycles by parser.option(
-        description = OPTION_PREVENT_CYCLES_DESCRIPTION,
-        fullName = "prevent-cycles",
+    val disallowCycles by parser.option(
+        description = OPTION_DISALLOW_CYCLES_DESCRIPTION,
+        fullName = "disallow-cycles",
+        type = ArgType.Boolean,
+    ).default(false)
+    val allowBlockCompCr by parser.option(
+        description = OPTION_ALLOW_BLOCK_COMP_CR,
+        fullName = "allow-block-comp-cr",
         type = ArgType.Boolean,
     ).default(false)
     val maxIterationsCount by parser.option(
@@ -71,8 +79,9 @@ fun main(args: Array<String>) {
     val result = try {
         equation.tryFindMinimalSolution(
             allowRevert = allowRevert,
-            storeHistory = dotFilename != null || preventCycles,
-            storeEquations = preventCycles,
+            allowBlockCompCr = allowBlockCompCr,
+            storeHistory = allowRevert || disallowCycles || dotFilename != null,
+            storeEquations = disallowCycles,
             maxIterationsCount = maxIterationsCount,
             dot = dotFilename != null,
             dotHTMLLabels = dotHTMLLabels,
