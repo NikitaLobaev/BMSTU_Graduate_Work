@@ -4,29 +4,28 @@ import lobaevni.graduate.jez.*
 
 internal data class JezReplaceVariablesAction(
     override val replaces: Collection<Pair<List<JezVariable>, List<JezElement>>>,
-    val subNegativeSigmaLeft: JezNegativeSigma = mapOf(),
-    val subNegativeSigmaRight: JezNegativeSigma = mapOf(),
-    val subNonEmptyVariables: List<JezVariable> = listOf(),
+    val oldNegativeSigmaLeft: JezNegativeSigma? = null,
+    val oldNegativeSigmaRight: JezNegativeSigma? = null,
 ) : JezReplaceAction() {
 
     constructor(
         variable: JezVariable,
         leftPart: List<JezConstant> = listOf(),
         rightPart: List<JezConstant> = listOf(),
-        subNegativeSigmaLeft: JezNegativeSigma = mapOf(),
-        subNegativeSigmaRight: JezNegativeSigma = mapOf(),
-        subNonEmptyVariables: List<JezVariable> = listOf(),
+        oldNegativeSigmaLeft: JezNegativeSigma? = null,
+        oldNegativeSigmaRight: JezNegativeSigma? = null,
     ) : this(
         replaces = listOf(Pair(listOf(variable), leftPart + listOf(variable) + rightPart)),
-        subNegativeSigmaLeft,
-        subNegativeSigmaRight,
-        subNonEmptyVariables,
+        oldNegativeSigmaLeft,
+        oldNegativeSigmaRight,
     )
 
     init {
         assert(replaces.all { (from, to) ->
             val variables = to.filterIsInstance<JezVariable>()
-            from.size == 1 && variables.size <= 1 && variables.all { it == from.first() }
+            from.size == 1 &&
+                    ((variables.size == 1 && variables.first() == from.first()) ||
+                            (variables.isEmpty() && to.isEmpty()))
         })
     }
 
@@ -34,8 +33,9 @@ internal data class JezReplaceVariablesAction(
         if (replaces.any { (from, to) ->
                 val first = (to.firstOrNull() as? JezConstant)?.source?.first()
                 val last = (to.lastOrNull() as? JezConstant)?.source?.last()
-                (first != null && state.negativeSigmaLeft[from.first()]!!.contains(first)) ||
-                        (last != null && state.negativeSigmaRight[from.last()]!!.contains(last))
+                (first != null && state.negativeSigmaLeft?.get(from.first())?.contains(first) == true) ||
+                        (last != null && state.negativeSigmaRight?.get(from.last())?.contains(last) == true) ||
+                        (to.any { it is JezConstant } && state.nonEmptyVariables.contains(from.first()))
         }) return false
 
         if (!super.applyAction(state)) return false
@@ -46,16 +46,17 @@ internal data class JezReplaceVariablesAction(
             state.sigmaLeft[variable]!!.addAll(leftReplacedPart)
             state.sigmaRight[variable]!!.addAll(rightReplacedPart)
 
-            leftReplacedPart.firstOrNull()?.let { constant ->
-                state.negativeSigmaLeft[variable]!!.clear()
-                state.negativeSigmaLeft[variable]!!.add(constant.source.first())
+            state.negativeSigmaLeft?.get(variable)?.apply {
+                leftReplacedPart.firstOrNull()?.let { constant ->
+                    clear()
+                    add(constant)
+                }
             }
-            rightReplacedPart.lastOrNull()?.let { constant ->
-                state.negativeSigmaRight[variable]!!.clear()
-                state.negativeSigmaLeft[variable]!!.add(constant.source.last())
-            }
-            if (leftReplacedPart.isNotEmpty() || rightReplacedPart.isNotEmpty()) {
-                state.nonEmptyVariables.remove(variable)
+            state.negativeSigmaRight?.get(variable)?.apply {
+                rightReplacedPart.lastOrNull()?.let { constant ->
+                    clear()
+                    add(constant)
+                }
             }
         }
         return true
@@ -70,28 +71,23 @@ internal data class JezReplaceVariablesAction(
             leftReplacedPart.indices.forEach { _ -> state.sigmaLeft[variable]!!.removeLast() }
             rightReplacedPart.indices.forEach { _ -> state.sigmaRight[variable]!!.removeLast() }
 
-            state.negativeSigmaLeft[variable]!!.apply {
-                clear()
-                subNegativeSigmaLeft[variable]?.let { sourceConstants ->
-                    addAll(sourceConstants)
-                }
-                leftReplacedPart.firstOrNull()?.source?.first()?.let { sourceConstant ->
-                    add(sourceConstant)
-                }
-            }
-            state.negativeSigmaRight[variable]!!.apply {
-                clear()
-                subNegativeSigmaRight[variable]?.let { sourceConstants ->
-                    addAll(sourceConstants)
-                }
-                rightReplacedPart.lastOrNull()?.source?.last()?.let { sourceConstant ->
-                    add(sourceConstant)
+            state.negativeSigmaLeft?.get(variable)?.apply {
+                if (leftReplacedPart.isNotEmpty()) {
+                    clear()
+                    oldNegativeSigmaLeft?.get(variable)?.let { oldNegativeSigma ->
+                        addAll(oldNegativeSigma)
+                    }
                 }
             }
-            state.nonEmptyVariables.remove(variable)
+            state.negativeSigmaRight?.get(variable)?.apply {
+                if (rightReplacedPart.isNotEmpty()) {
+                    clear()
+                    oldNegativeSigmaRight?.get(variable)?.let { oldNegativeSigma ->
+                        addAll(oldNegativeSigma)
+                    }
+                }
+            }
         }
-
-        state.nonEmptyVariables.addAll(subNonEmptyVariables)
 
         return true
     }

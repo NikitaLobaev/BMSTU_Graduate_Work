@@ -20,6 +20,7 @@ fun JezEquation.tryFindMinimalSolution(
     allowBlockCompCr: Boolean,
     storeHistory: Boolean,
     storeEquations: Boolean,
+    heurExtNegRest: Boolean,
     maxIterationsCount: Int,
     dot: Boolean,
     dotHTMLLabels: Boolean,
@@ -30,6 +31,7 @@ fun JezEquation.tryFindMinimalSolution(
     allowBlockCompCr = allowBlockCompCr,
     storeHistory = storeHistory || allowRevert,
     storeEquations = storeEquations,
+    heurExtNegRest = heurExtNegRest,
     dot = dot,
     dotHTMLLabels = dotHTMLLabels,
     dotMaxStatementsCount = dotMaxStatementsCount
@@ -145,21 +147,21 @@ internal fun JezState.blockCompCr(): JezState {
 
     suggestedBlockComps.forEach { (variable, constants) ->
         constants.any { constant ->
-            if (negativeSigmaLeft[variable]!!.contains(constant) &&
-                negativeSigmaRight[variable]!!.contains(constant)) return@any false
+            if (negativeSigmaLeft?.get(variable)?.contains(constant) == true &&
+                negativeSigmaRight?.get(variable)?.contains(constant) == true) return@any false
 
-            val leftBlock = if (!negativeSigmaLeft[variable]!!.contains(constant)) {
+            val leftBlock = if (negativeSigmaLeft?.get(variable)?.contains(constant) != true) {
                 listOf(generateConstantBlock(constant))
             } else listOf()
-            val rightBlock = if (!negativeSigmaRight[variable]!!.contains(constant)) {
+            val rightBlock = if (negativeSigmaRight?.get(variable)?.contains(constant) != true) {
                 listOf(generateConstantBlock(constant))
             } else listOf()
             if (!apply(JezReplaceVariablesAction(
                     variable,
                     leftPart = leftBlock,
                     rightPart = rightBlock,
-                    subNegativeSigmaLeft = mapOf(variable to negativeSigmaLeft[variable]!!),
-                    subNegativeSigmaRight = mapOf(variable to negativeSigmaRight[variable]!!),
+                    oldNegativeSigmaLeft = negativeSigmaLeft?.toJezNegativeSigma()?.filterKeys { it == variable },
+                    oldNegativeSigmaRight = negativeSigmaRight?.toJezNegativeSigma()?.filterKeys { it == variable },
                 ))) return@any false
 
             nonEmptyVariables.add(variable)
@@ -224,15 +226,13 @@ internal fun JezState.pairCompCr(necComp: Boolean): JezState {
     for (left in listOf(true, false)) {
         for (variable in equation.getUsedVariables()) {
             for (constant in (equation.getUsedSourceConstants() + equation.getUsedGeneratedConstants())) {
-                val negativeSigma = if (left) negativeSigmaLeft else negativeSigmaRight
-                val action = JezReplaceVariablesAction(
-                    variable,
-                    leftPart = if (left) listOf(constant) else listOf(),
-                    rightPart = if (left) listOf() else listOf(constant),
-                    subNegativeSigmaLeft = mapOf(variable to negativeSigma[variable]!!),
-                    subNonEmptyVariables = if (variable in nonEmptyVariables) listOf(variable) else listOf(),
-                )
-                if (apply(action)) return this
+                if (apply(JezReplaceVariablesAction(
+                        variable,
+                        leftPart = if (left) listOf(constant) else listOf(),
+                        rightPart = if (left) listOf() else listOf(constant),
+                        oldNegativeSigmaLeft = negativeSigmaLeft?.toJezNegativeSigma()?.filterKeys { it == variable },
+                        oldNegativeSigmaRight = negativeSigmaRight?.toJezNegativeSigma()?.filterKeys { it == variable },
+                ))) return this
             }
         }
     }

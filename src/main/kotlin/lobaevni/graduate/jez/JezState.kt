@@ -11,6 +11,7 @@ internal class JezState(
     val allowBlockCompCr: Boolean,
     storeHistory: Boolean,
     storeEquations: Boolean,
+    val heurExtNegRest: Boolean,
     dot: Boolean,
     dotHTMLLabels: Boolean,
     dotMaxStatementsCount: Int,
@@ -19,8 +20,8 @@ internal class JezState(
     val sigmaLeft: JezMutableSigma = mutableMapOf()
     val sigmaRight: JezMutableSigma = mutableMapOf()
 
-    val negativeSigmaLeft: JezMutableNegativeSigma = mutableMapOf()
-    val negativeSigmaRight: JezMutableNegativeSigma = mutableMapOf()
+    val negativeSigmaLeft: JezMutableNegativeSigma? = if (heurExtNegRest) mutableMapOf() else null
+    val negativeSigmaRight: JezMutableNegativeSigma? = if (heurExtNegRest) mutableMapOf() else null
     val nonEmptyVariables: MutableSet<JezVariable> = mutableSetOf()
 
     private val replaces: JezReplaces = mutableMapOf()
@@ -36,8 +37,8 @@ internal class JezState(
         for (variable in variables) {
             sigmaLeft[variable] = mutableListOf()
             sigmaRight[variable] = mutableListOf()
-            negativeSigmaLeft[variable] = mutableSetOf()
-            negativeSigmaRight[variable] = mutableSetOf()
+            negativeSigmaLeft?.put(variable, mutableSetOf())
+            negativeSigmaRight?.put(variable, mutableSetOf())
         }
         history?.init(equation)
     }

@@ -7,9 +7,13 @@ import lobaevni.graduate.jez.*
 
 private const val PROGRAM_NAME = "jez"
 
-private const val OPTION_ALLOW_REVERT_DESCRIPTION = "Allow reverting of recompression actions until no solution found"
-private const val OPTION_DISALLOW_CYCLES_DESCRIPTION = "Try preventing of cycles by storing the equations themselves in the history"
+private const val OPTION_ALLOW_REVERT_DESCRIPTION =
+    "Allow reverting of recompression actions until no solution found"
+private const val OPTION_DISALLOW_CYCLES_DESCRIPTION =
+    "Try preventing of cycles by storing the equations themselves in the history"
 private const val OPTION_ALLOW_BLOCK_COMP_CR = "Allow compression of crossing blocks with parametrized blocks"
+private const val OPTION_HEURISTIC_EXTENDED_NEGATIVE_RESTRICTIONS =
+    "Use heuristic of extended negative sigma restrictions"
 private const val OPTION_MAX_ITERATIONS_COUNT_DESCRIPTION = "Max iterations count"
 private const val OPTION_DOT_FILENAME_DESCRIPTION = "Output DOT-representation filename (without extension)"
 private const val OPTION_DOT_SHORTEN_LABELS_DESCRIPTION = "Shorten labels in output DOT-representation"
@@ -40,6 +44,11 @@ fun main(args: Array<String>) {
     val allowBlockCompCr by parser.option(
         description = OPTION_ALLOW_BLOCK_COMP_CR,
         fullName = "allow-block-comp-cr",
+        type = ArgType.Boolean,
+    ).default(false)
+    val heurExtNegRest by parser.option(
+        description = OPTION_HEURISTIC_EXTENDED_NEGATIVE_RESTRICTIONS,
+        fullName = "heur-ext-neg-rest",
         type = ArgType.Boolean,
     ).default(false)
     val maxIterationsCount by parser.option(
@@ -82,6 +91,7 @@ fun main(args: Array<String>) {
             allowBlockCompCr = allowBlockCompCr,
             storeHistory = allowRevert || disallowCycles || dotFilename != null,
             storeEquations = disallowCycles,
+            heurExtNegRest = heurExtNegRest,
             maxIterationsCount = maxIterationsCount,
             dot = dotFilename != null,
             dotHTMLLabels = dotHTMLLabels,

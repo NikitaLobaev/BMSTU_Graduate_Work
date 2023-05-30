@@ -2,8 +2,8 @@ package lobaevni.graduate.jez
 
 typealias JezSigma = Map<JezVariable, List<JezSourceConstant>>
 internal typealias JezMutableSigma = MutableMap<JezVariable, MutableList<JezConstant>>
-internal typealias JezNegativeSigma = Map<JezVariable, Set<JezSourceConstant>>
-internal typealias JezMutableNegativeSigma = MutableMap<JezVariable, MutableSet<JezSourceConstant>>
+internal typealias JezNegativeSigma = Map<JezVariable, Set<JezConstant>>
+internal typealias JezMutableNegativeSigma = MutableMap<JezVariable, MutableSet<JezConstant>>
 internal typealias JezReplaces = MutableMap<List<JezSourceConstant>, JezGeneratedConstant>
 internal typealias JezConstant = JezElement.Constant
 internal typealias JezSourceConstant = JezElement.Constant.Source
@@ -136,4 +136,13 @@ internal fun Collection<JezConstant>.toJezSourceConstants(): List<JezSourceConst
     return map { constant ->
         constant.source
     }.flatten()
+}
+
+/**
+ * TODO
+ */
+internal fun JezMutableNegativeSigma.toJezNegativeSigma(): JezNegativeSigma {
+    return toMap().mapValues { entry ->
+        entry.value.toSet()
+    }
 }
