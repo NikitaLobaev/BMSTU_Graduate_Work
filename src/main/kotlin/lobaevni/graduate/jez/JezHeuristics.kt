@@ -1,5 +1,6 @@
 package lobaevni.graduate.jez
 
+import lobaevni.graduate.jez.action.JezDropVariablesAction
 import lobaevni.graduate.jez.action.JezReplaceVariablesAction
 
 object JezHeuristics {
@@ -60,11 +61,20 @@ object JezHeuristics {
             ), pair.second)
         }
         return pairs.any { pair ->
+            val variable = pair.first.first
             if (!(apply(JezReplaceVariablesAction(
-                    variable = pair.first.first,
+                    variable,
                     leftPart = if (pair.second) listOf(pair.first.second) else listOf(),
                     rightPart = if (pair.second) listOf() else listOf(pair.first.second),
-                )) || apply(JezReplaceVariablesAction(variable = pair.first.first)))) {
+                    oldNegativeSigmaLeft = negativeSigmaLeft?.toJezNegativeSigma()?.filterKeys { it == variable },
+                    oldNegativeSigmaRight = negativeSigmaRight?.toJezNegativeSigma()?.filterKeys { it == variable },
+                )) || apply(JezDropVariablesAction(
+                    replaces = listOf(Pair(listOf(variable), listOf())),
+                    indexes = mapOf(variable to Pair(
+                        equation.u.withIndex().filter { it.value == variable }.map { it.index }.toSet(),
+                        equation.v.withIndex().filter { it.value == variable }.map { it.index }.toSet(),
+                    )),
+                )))) {
                 throw JezContradictionException()
             }
             return@any true

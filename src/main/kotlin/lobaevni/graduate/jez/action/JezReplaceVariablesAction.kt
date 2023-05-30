@@ -23,9 +23,7 @@ internal data class JezReplaceVariablesAction(
     init {
         assert(replaces.all { (from, to) ->
             val variables = to.filterIsInstance<JezVariable>()
-            from.size == 1 &&
-                    ((variables.size == 1 && variables.first() == from.first()) ||
-                            (variables.isEmpty() && to.isEmpty()))
+            from.size == 1 && variables.size == 1 && variables.first() == from.first()
         })
     }
 
@@ -34,8 +32,7 @@ internal data class JezReplaceVariablesAction(
                 val first = (to.firstOrNull() as? JezConstant)?.source?.first()
                 val last = (to.lastOrNull() as? JezConstant)?.source?.last()
                 (first != null && state.negativeSigmaLeft?.get(from.first())?.contains(first) == true) ||
-                        (last != null && state.negativeSigmaRight?.get(from.last())?.contains(last) == true) ||
-                        (to.any { it is JezConstant } && state.nonEmptyVariables.contains(from.first()))
+                        (last != null && state.negativeSigmaRight?.get(from.last())?.contains(last) == true)
         }) return false
 
         if (!super.applyAction(state)) return false
@@ -90,14 +87,6 @@ internal data class JezReplaceVariablesAction(
         }
 
         return true
-    }
-
-    override fun equals(other: Any?): Boolean {
-        return super.equals(other) || (other as? JezReplaceVariablesAction)?.replaces == replaces
-    }
-
-    override fun hashCode(): Int {
-        return replaces.hashCode()
     }
 
     private fun getReplacedParts(

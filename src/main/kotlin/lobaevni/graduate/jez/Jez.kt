@@ -4,13 +4,9 @@ import lobaevni.graduate.Utils.cartesianProduct
 import lobaevni.graduate.jez.JezHeuristics.getSideConstants
 import lobaevni.graduate.jez.JezHeuristics.tryAssumeAndApply
 import lobaevni.graduate.jez.action.JezCropAction
+import lobaevni.graduate.jez.action.JezDropVariablesAction
 import lobaevni.graduate.jez.action.JezReplaceConstantsAction
 import lobaevni.graduate.jez.action.JezReplaceVariablesAction
-import org.jetbrains.kotlinx.multik.api.linalg.solve
-import org.jetbrains.kotlinx.multik.api.mk
-import org.jetbrains.kotlinx.multik.api.ndarray
-import org.jetbrains.kotlinx.multik.ndarray.data.D1Array
-import org.jetbrains.kotlinx.multik.ndarray.data.D2Array
 import kotlin.math.E
 import kotlin.math.pow
 import kotlin.math.roundToInt
@@ -54,7 +50,7 @@ internal fun JezState.tryFindMinimalSolution(
         iteration++ < maxIterationsCount &&
         tryShorten() &&
         !checkEmptySolution() &&
-        !checkSideContradictions()
+        !checkTrivialContradictions()
     ) {
         val currentEquation = equation
 
@@ -67,17 +63,28 @@ internal fun JezState.tryFindMinimalSolution(
         try {
             for (compression in compressions) {
                 compression()
-                if (!tryShorten() || checkEmptySolution() || checkSideContradictions() ||
-                    !validateSolutionLength(maxSolutionLength)) break
+                if (!tryShorten() || checkEmptySolution() || checkTrivialContradictions() ||
+                    !validateEquationLength(maxSolutionLength)) break
             }
         } catch (e: JezContradictionException) {
-            if (!allowRevert || !revertUntilNoSolution()) break
+            if (!allowRevert) break
+            do {
+                if (!revertUntilNoSolution()) {
+                    break
+                }
+            } while (!tryShorten() || checkTrivialContradictions() || !validateEquationLength(maxSolutionLength))
             continue
         }
 
-        if ((equation == currentEquation || !tryShorten() || checkSideContradictions() ||
-                    !validateSolutionLength(maxSolutionLength)) &&
-            (!allowRevert || !revertUntilNoSolution())) break
+        if (equation == currentEquation || !tryShorten() || checkTrivialContradictions() ||
+            !validateEquationLength(maxSolutionLength)) {
+            if (!allowRevert) break
+            while (!tryShorten() || checkTrivialContradictions() || !validateEquationLength(maxSolutionLength)) {
+                if (!revertUntilNoSolution()) {
+                    break
+                }
+            }
+        }
     }
 
     val sigma: JezSigma = variables.associateWith { variable ->
@@ -95,7 +102,7 @@ internal fun JezState.tryFindMinimalSolution(
     }
 
     if (solutionState is JezResult.SolutionState.Found) {
-        apply(JezReplaceVariablesAction(
+        apply(JezDropVariablesAction(
             replaces = equation.getUsedVariables().map { variable ->
                 Pair(listOf(variable), listOf())
             },
@@ -269,12 +276,12 @@ internal fun JezState.tryShorten(): Boolean {
 }
 
 /**
- * Checking contradictions in the [JezEquation] at left and at right sides of both parts of it.
+ * Checking trivial and side contradictions in the [JezEquation] at left and at right sides of both parts of it.
  * @return true, if contradiction was found, false otherwise.
  */
-internal fun JezState.checkSideContradictions(): Boolean {
+internal fun JezState.checkTrivialContradictions(): Boolean {
     if ((equation.u.isEmpty() && equation.v.find { it is JezConstant } != null) ||
-        (equation.v.isEmpty() && equation.u.find { it is JezConstant } != null)) return false
+        (equation.v.isEmpty() && equation.u.find { it is JezConstant } != null)) return true
 
     fun JezElement.retrieveConstant(): JezConstant? {
         return when (this) {
@@ -303,7 +310,7 @@ internal fun JezState.revertUntilNoSolution(): Boolean {
         if (!revert(action)) return false
 
         when (action) {
-            is JezReplaceVariablesAction -> return true
+            is JezReplaceVariablesAction, is JezDropVariablesAction -> return true
             else -> {}
         }
     }
@@ -365,8 +372,12 @@ internal fun JezState.checkEmptySolution(): Boolean {
 /**
  * TODO
  */
-internal fun JezState.validateSolutionLength(maxSolutionLength: Int): Boolean {
-    val currentLength =
-        equation.u.filterIsInstance<JezConstant>().size + equation.v.filterIsInstance<JezConstant>().size
+internal fun JezState.validateEquationLength(maxSolutionLength: Int): Boolean {
+    /**
+     * TODO
+     */
+    fun JezEquationPart.getLength(): Int = filterIsInstance<JezConstant>().sumOf { it.source.size }
+
+    val currentLength = equation.u.getLength() + equation.v.getLength()
     return currentLength <= maxSolutionLength
 }

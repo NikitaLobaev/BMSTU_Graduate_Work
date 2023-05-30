@@ -63,6 +63,14 @@ internal abstract class JezReplaceAction : JezAction() {
         return true
     }
 
+    override fun equals(other: Any?): Boolean {
+        return super.equals(other) || (other as? JezReplaceAction)?.replaces == replaces
+    }
+
+    override fun hashCode(): Int {
+        return replaces.hashCode()
+    }
+
     override fun toString(): String {
         return replaces.joinToString(", ") { (from, to) ->
             "${from.convertToString()} -> ${to.convertToString()}"
