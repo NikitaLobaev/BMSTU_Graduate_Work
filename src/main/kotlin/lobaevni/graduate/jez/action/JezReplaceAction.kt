@@ -9,10 +9,6 @@ internal abstract class JezReplaceAction : JezAction() {
 
     abstract val replaces: Collection<Pair<JezEquationPart, JezEquationPart>>
 
-    init {
-        //assert(replaces.isNotEmpty()) //TODO
-    }
-
     override fun applyAction(state: JezState): Boolean {
         if (replaces.isEmpty()) return false
 

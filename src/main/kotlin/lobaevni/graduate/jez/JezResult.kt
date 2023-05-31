@@ -11,7 +11,7 @@ data class JezResult(
     val historyDotGraph: DotRootGraph?,
 ) {
 
-    sealed class SolutionState { //JezSolutionState
+    sealed class SolutionState {
 
         /**
          * Describes state, when equation was successfully solved.

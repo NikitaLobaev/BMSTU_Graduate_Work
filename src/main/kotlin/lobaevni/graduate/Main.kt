@@ -55,7 +55,7 @@ fun main(args: Array<String>) {
         description = OPTION_MAX_ITERATIONS_COUNT_DESCRIPTION,
         fullName = "max-iters-count",
         type = ArgType.Int,
-    ).default(Int.MAX_VALUE)
+    ).default(Int.MAX_VALUE) //TODO: добавить ограничение на минимальное значение (что не меньше нуля)
     val dotFilename by parser.option(
         description = OPTION_DOT_FILENAME_DESCRIPTION,
         fullName = "dot-filename",
@@ -104,12 +104,12 @@ fun main(args: Array<String>) {
     }
 
     try {
+        println("$SOLUTION_STATE_MESSAGE${result.solutionState.javaClass.simpleName}")
         if (result.solutionState is JezResult.SolutionState.Found) {
             printSolution(result, variables)
         } else {
             println(NOT_SOLVED_MESSAGE)
         }
-        println("$SOLUTION_STATE_MESSAGE${result.solutionState.javaClass.simpleName}")
 
         dotFilename?.let { df ->
             result.historyDotGraph?.let {

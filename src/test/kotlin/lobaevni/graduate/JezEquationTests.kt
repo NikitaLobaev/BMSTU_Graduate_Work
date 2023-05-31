@@ -132,6 +132,7 @@ class JezEquationTests {
         allowBlockCompCr = false,
         storeHistory = true,
         storeEquations = true,
+        heurExtNegRest = false,
         maxIterationsCount = MAX_ITERATIONS_COUNT,
         dot = false,
         dotHTMLLabels = false,
