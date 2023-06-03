@@ -3,7 +3,7 @@ package lobaevni.graduate.jez.data
 import lobaevni.graduate.jez.action.JezAction
 import lobaevni.graduate.jez.history.JezHistory
 
-class JezContradictionException : Exception()
+class JezEquationNotConvergesException : Exception()
 
 internal class JezState(
     var equation: JezEquation,

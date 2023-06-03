@@ -80,7 +80,7 @@ object JezHeuristics {
                         equation.v.withIndex().filter { it.value == variable }.map { it.index }.toSet(),
                     )),
                 )))) {
-                throw JezContradictionException()
+                throw JezEquationNotConvergesException()
             }
             return@any true
         }

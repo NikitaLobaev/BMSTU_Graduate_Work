@@ -70,7 +70,8 @@ internal sealed class JezAction {
 
             val repPartElement = repPart.elementAt(lastAcc.buffer.size - 1)
             while (lastAcc.buffer.isNotEmpty() && lastAcc.buffer.last() != repPartElement) {
-                val dropCount = lastAcc.buffer.size - (prefixFunctionValues?.elementAt(lastAcc.buffer.size - 1) ?: 0)
+                val dropCount = lastAcc.buffer.size -
+                        (prefixFunctionValues?.elementAt(lastAcc.buffer.size - 1) ?: 0)
                 for (i in 0 until dropCount) {
                     lastAcc.result.add(lastAcc.buffer.removeFirst())
                 }

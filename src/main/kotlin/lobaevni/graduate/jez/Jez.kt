@@ -8,10 +8,6 @@ import lobaevni.graduate.jez.action.JezDropVariablesAction
 import lobaevni.graduate.jez.action.JezReplaceConstantsAction
 import lobaevni.graduate.jez.action.JezReplaceVariablesAction
 import lobaevni.graduate.jez.data.*
-import org.jetbrains.kotlinx.multik.api.mk
-import org.jetbrains.kotlinx.multik.api.ndarray
-import org.jetbrains.kotlinx.multik.ndarray.data.D2Array
-import org.jetbrains.kotlinx.multik.ndarray.data.set
 import kotlin.math.E
 import kotlin.math.pow
 import kotlin.math.roundToLong
@@ -56,7 +52,7 @@ internal fun JezState.tryFindMinimalSolution(
     mainLoop@ while (maxIterationsCount == null || iteration++ < maxIterationsCount) {
         try {
             tryShorten()
-        } catch (e: JezContradictionException) {
+        } catch (e: JezEquationNotConvergesException) {
             break@mainLoop
         }
         if (checkTrivialContradictions() || checkEmptySolution()) break@mainLoop
@@ -73,21 +69,19 @@ internal fun JezState.tryFindMinimalSolution(
             compressionLoop@ for (compression in compressions) {
                 compression()
 
-                try {
-                    tryShorten()
-                } catch (e: JezContradictionException) {
-                    break@compressionLoop
+                tryShorten()
+                if (checkEmptySolution()) break@mainLoop
+                if (checkTrivialContradictions() || !checkEquationLength(maxSolutionLength)) {
+                    throw JezEquationNotConvergesException()
                 }
-                if (checkTrivialContradictions() || checkEmptySolution() ||
-                    !checkEquationLength(maxSolutionLength)) break
             }
-        } catch (e: JezContradictionException) {
+        } catch (e: JezEquationNotConvergesException) {
             if (!allowRevert || !revertUntilNoSolution()) break@mainLoop
             continue@mainLoop
         }
 
         if (equation == currentEquation) {
-            if (!allowRevert || !revertUntilNoSolution(skips = 1)) break
+            if (!allowRevert || !revertUntilNoSolution(skips = 1)) break@mainLoop
         }
     }
 
@@ -279,7 +273,7 @@ internal fun JezState.tryShorten(): Boolean {
             equation = equation,
             leftSize = leftIndex,
             rightSize = rightIndex,
-        ))) throw JezContradictionException()
+        ))) throw JezEquationNotConvergesException()
 
     return true
 }
