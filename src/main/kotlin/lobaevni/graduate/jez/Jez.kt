@@ -7,6 +7,13 @@ import lobaevni.graduate.jez.action.JezCropAction
 import lobaevni.graduate.jez.action.JezDropVariablesAction
 import lobaevni.graduate.jez.action.JezReplaceConstantsAction
 import lobaevni.graduate.jez.action.JezReplaceVariablesAction
+import lobaevni.graduate.jez.data.*
+import lobaevni.graduate.jez.data.JezConstant
+import lobaevni.graduate.jez.data.JezGeneratedConstant
+import lobaevni.graduate.jez.data.JezGeneratedConstantBlock
+import lobaevni.graduate.jez.data.JezSourceConstant
+import lobaevni.graduate.jez.data.JezState
+import lobaevni.graduate.jez.data.JezVariable
 import kotlin.math.E
 import kotlin.math.pow
 import kotlin.math.roundToInt

@@ -1,4 +1,4 @@
-package lobaevni.graduate.jez
+package lobaevni.graduate.jez.data
 
 /**
  * @property u left equation part.

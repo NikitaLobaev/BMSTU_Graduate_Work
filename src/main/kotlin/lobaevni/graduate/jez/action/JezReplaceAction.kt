@@ -1,9 +1,9 @@
 package lobaevni.graduate.jez.action
 
-import lobaevni.graduate.jez.JezEquationPart
-import lobaevni.graduate.jez.JezState
-import lobaevni.graduate.jez.convertToHTMLString
-import lobaevni.graduate.jez.convertToString
+import lobaevni.graduate.jez.data.JezEquationPart
+import lobaevni.graduate.jez.data.JezState
+import lobaevni.graduate.jez.data.convertToHTMLString
+import lobaevni.graduate.jez.data.convertToString
 
 internal abstract class JezReplaceAction : JezAction() {
 

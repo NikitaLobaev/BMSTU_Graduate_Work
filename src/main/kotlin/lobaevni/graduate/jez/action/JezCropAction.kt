@@ -1,8 +1,8 @@
 package lobaevni.graduate.jez.action
 
-import lobaevni.graduate.jez.JezElement
-import lobaevni.graduate.jez.JezEquation
-import lobaevni.graduate.jez.JezState
+import lobaevni.graduate.jez.data.JezElement
+import lobaevni.graduate.jez.data.JezEquation
+import lobaevni.graduate.jez.data.JezState
 
 internal data class JezCropAction(
     val leftPart: List<JezElement>,

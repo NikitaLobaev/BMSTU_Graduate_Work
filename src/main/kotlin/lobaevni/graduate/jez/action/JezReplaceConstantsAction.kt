@@ -1,8 +1,8 @@
 package lobaevni.graduate.jez.action
 
-import lobaevni.graduate.jez.JezConstant
-import lobaevni.graduate.jez.JezGeneratedConstant
-import lobaevni.graduate.jez.JezState
+import lobaevni.graduate.jez.data.JezConstant
+import lobaevni.graduate.jez.data.JezGeneratedConstant
+import lobaevni.graduate.jez.data.JezState
 
 internal data class JezReplaceConstantsAction(
     override val replaces: Collection<Pair<List<JezConstant>, List<JezGeneratedConstant>>>,

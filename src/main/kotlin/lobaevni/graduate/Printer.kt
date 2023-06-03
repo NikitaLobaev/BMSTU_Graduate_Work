@@ -1,9 +1,9 @@
 package lobaevni.graduate
 
 import io.github.rchowell.dotlin.DotRootGraph
-import lobaevni.graduate.jez.JezResult
-import lobaevni.graduate.jez.JezSourceConstant
-import lobaevni.graduate.jez.JezVariable
+import lobaevni.graduate.jez.data.JezResult
+import lobaevni.graduate.jez.data.JezSourceConstant
+import lobaevni.graduate.jez.data.JezVariable
 import java.io.File
 
 /**

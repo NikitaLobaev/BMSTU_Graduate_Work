@@ -1,4 +1,4 @@
-package lobaevni.graduate.jez
+package lobaevni.graduate.jez.data
 
 import io.github.rchowell.dotlin.DotRootGraph
 

@@ -1,4 +1,4 @@
-package lobaevni.graduate.jez
+package lobaevni.graduate.jez.data
 
 typealias JezSigma = Map<JezVariable, List<JezSourceConstant>>
 internal typealias JezMutableSigma = MutableMap<JezVariable, MutableList<JezConstant>>

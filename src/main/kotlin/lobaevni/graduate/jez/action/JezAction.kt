@@ -1,7 +1,10 @@
 package lobaevni.graduate.jez.action
 
 import lobaevni.graduate.Utils.prefixFunction
-import lobaevni.graduate.jez.*
+import lobaevni.graduate.jez.data.JezElement
+import lobaevni.graduate.jez.data.JezEquation
+import lobaevni.graduate.jez.data.JezEquationPart
+import lobaevni.graduate.jez.data.JezState
 
 /**
  * Action of recompression for [JezEquation].

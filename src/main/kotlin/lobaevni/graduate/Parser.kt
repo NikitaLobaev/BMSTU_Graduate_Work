@@ -1,8 +1,8 @@
 package lobaevni.graduate
 
-import lobaevni.graduate.jez.*
-import lobaevni.graduate.jez.JezSourceConstant
-import lobaevni.graduate.jez.JezVariable
+import lobaevni.graduate.jez.data.*
+import lobaevni.graduate.jez.data.JezSourceConstant
+import lobaevni.graduate.jez.data.JezVariable
 
 private val letterRegex = "^[A-Z][A-Z0-9]*$".toRegex()
 private val variableRegex = "^[a-z][a-z0-9]*$".toRegex()

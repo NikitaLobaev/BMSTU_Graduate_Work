@@ -2,8 +2,8 @@ package lobaevni.graduate
 
 import lobaevni.graduate.TestUtils.parseEquation
 import lobaevni.graduate.TestUtils.toStringMap
-import lobaevni.graduate.jez.JezEquation
-import lobaevni.graduate.jez.JezResult
+import lobaevni.graduate.jez.data.JezEquation
+import lobaevni.graduate.jez.data.JezResult
 import lobaevni.graduate.jez.tryFindMinimalSolution
 import kotlin.test.*
 

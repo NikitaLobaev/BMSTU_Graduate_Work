@@ -4,7 +4,7 @@ import io.github.rchowell.dotlin.DotNodeShape
 import io.github.rchowell.dotlin.DotRootGraph
 import io.github.rchowell.dotlin.digraph
 import lobaevni.graduate.jez.action.JezAction
-import lobaevni.graduate.jez.JezEquation
+import lobaevni.graduate.jez.data.JezEquation
 
 private const val DOT_GRAPH_NAME = "recompression"
 private const val DOT_ROOT_NODE_STYLE = "bold"

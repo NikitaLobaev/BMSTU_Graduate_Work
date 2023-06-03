@@ -1,4 +1,4 @@
-package lobaevni.graduate.jez
+package lobaevni.graduate.jez.data
 
 import lobaevni.graduate.jez.action.JezAction
 import lobaevni.graduate.jez.history.JezHistory

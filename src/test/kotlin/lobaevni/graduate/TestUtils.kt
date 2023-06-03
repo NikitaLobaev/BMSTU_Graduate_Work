@@ -1,6 +1,8 @@
 package lobaevni.graduate
 
-import lobaevni.graduate.jez.*
+import lobaevni.graduate.jez.data.*
+import lobaevni.graduate.jez.data.JezSourceConstant
+import lobaevni.graduate.jez.data.JezVariable
 
 object TestUtils {
 

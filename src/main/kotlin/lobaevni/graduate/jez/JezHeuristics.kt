@@ -2,6 +2,11 @@ package lobaevni.graduate.jez
 
 import lobaevni.graduate.jez.action.JezDropVariablesAction
 import lobaevni.graduate.jez.action.JezReplaceVariablesAction
+import lobaevni.graduate.jez.data.*
+import lobaevni.graduate.jez.data.JezConstant
+import lobaevni.graduate.jez.data.JezGeneratedConstantBlock
+import lobaevni.graduate.jez.data.JezState
+import lobaevni.graduate.jez.data.JezVariable
 
 object JezHeuristics {
 

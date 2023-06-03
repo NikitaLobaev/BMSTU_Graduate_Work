@@ -4,6 +4,10 @@ import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
 import kotlinx.cli.default
 import lobaevni.graduate.jez.*
+import lobaevni.graduate.jez.data.JezEquation
+import lobaevni.graduate.jez.data.JezResult
+import lobaevni.graduate.jez.data.JezSourceConstant
+import lobaevni.graduate.jez.data.JezVariable
 
 private const val PROGRAM_NAME = "jez"
 
