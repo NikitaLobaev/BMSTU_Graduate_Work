@@ -10,7 +10,7 @@ import kotlin.test.*
 private const val FAILED_MSG_WRONG_SOLUTION_STATE = "Wrong solution state"
 private const val FAILED_MSG_WRONG_SIGMA = "Wrong answer"
 
-private const val MAX_ITERATIONS_COUNT = 15
+private const val MAX_ITERATIONS_COUNT: Long = 15
 
 class JezEquationTests {
 
@@ -115,7 +115,7 @@ class JezEquationTests {
     fun testNoSolution1() {
         val sourceEquation = parseEquation("A", "B")
         val result = sourceEquation.tryFindMinimalSolutionDefault()
-        assertTrue(result.solutionState is JezResult.SolutionState.NoSolution.Absolutely,
+        assertTrue(result.solutionState is JezResult.SolutionState.NotFound.NoSolution,
             FAILED_MSG_WRONG_SOLUTION_STATE)
     }
 
@@ -123,7 +123,7 @@ class JezEquationTests {
     fun testNoSolution2() {
         val sourceEquation = parseEquation("x", "Ax")
         val result = sourceEquation.tryFindMinimalSolutionDefault()
-        assertTrue(result.solutionState is JezResult.SolutionState.NoSolution.Absolutely,
+        assertTrue(result.solutionState is JezResult.SolutionState.NotFound.NoSolution,
             FAILED_MSG_WRONG_SOLUTION_STATE)
     }
 

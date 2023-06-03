@@ -96,7 +96,7 @@ fun main(args: Array<String>) {
             storeHistory = allowRevert || disallowCycles || dotFilename != null,
             storeEquations = disallowCycles,
             heurExtNegRest = heurExtNegRest,
-            maxIterationsCount = maxIterationsCount,
+            maxIterationsCount = maxIterationsCount.toLong(),
             dot = dotFilename != null,
             dotHTMLLabels = dotHTMLLabels,
             dotMaxStatementsCount = dotMaxStatementsCount,

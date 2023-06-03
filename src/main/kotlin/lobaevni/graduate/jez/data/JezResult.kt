@@ -18,17 +18,20 @@ data class JezResult(
          */
         object Found : SolutionState()
 
-        sealed class NoSolution : SolutionState() {
-
-            /**
-             * Describes state, when algorithm is out of iterations and solution wasn't found, but may exist.
-             */
-            object NotEnoughIterations : NoSolution()
+        /**
+         * Describes states, when equation wasn't solved.
+         */
+        sealed class NotFound : SolutionState() {
 
             /**
              * Describes state, when there is exactly no any solution may exist.
              */
-            object Absolutely : NoSolution()
+            object NoSolution : NotFound()
+
+            /**
+             * Describes state, when algorithm is out of iterations and solution wasn't found, but may exist.
+             */
+            object NotEnoughIterations : NotFound()
 
         }
 

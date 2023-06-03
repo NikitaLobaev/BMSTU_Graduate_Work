@@ -33,6 +33,8 @@ internal class JezState(
     } else null
 
     init {
+        assert(dotMaxStatementsCount >= 0)
+
         val variables = equation.getUsedVariables()
         for (variable in variables) {
             sigmaLeft[variable] = mutableListOf()
