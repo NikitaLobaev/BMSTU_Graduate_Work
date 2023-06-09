@@ -90,8 +90,7 @@ internal class JezState(
     /**
      * TODO
      */
-    fun generateConstantBlock(constant: JezConstant): JezGeneratedConstantBlock {
-        return JezGeneratedConstantBlock(constant, generatedBlocksPowersCount++)
-    }
+    fun generateConstantBlock(constant: JezConstant): JezGeneratedConstantBlock =
+        JezGeneratedConstantBlock(constant, generatedBlocksPowersCount++)
 
 }

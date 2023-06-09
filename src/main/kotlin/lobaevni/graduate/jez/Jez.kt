@@ -124,7 +124,8 @@ internal fun JezState.tryFindMinimalSolution(
  * TODO
  */
 internal fun JezState.blockCompCr(): JezState {
-    val suggestedBlockComps = mutableMapOf<JezVariable, MutableList<JezConstant>>() //duplicates allowed, because order is more important than space complexity
+    //duplicates allowed, because order is more important than space complexity
+    val suggestedBlockComps = mutableMapOf<JezVariable, MutableList<JezConstant>>()
     for (equationPart in listOf(equation.u, equation.v)) {
         equationPart.forEachIndexed { index, element ->
             if (element !is JezVariable) return@forEachIndexed
@@ -229,11 +230,22 @@ internal fun JezState.blockCompNCr(maxBlockLength: Long): JezState {
  */
 internal fun JezState.pairCompNCr(): JezState {
     val sideConstants = getSideConstants()
-    val pairs = cartesianProduct(sideConstants.first, sideConstants.second)
-    //TODO: maybe filter existing pairs from cartesian product
-    apply(JezReplaceConstantsAction(pairs.map { pair ->
-        Pair(pair.toList(), listOf(getOrPutGeneratedConstant(pair.toList())))
-    }))
+    val pairsMap = cartesianProduct(sideConstants.first, sideConstants.second).associateWith { false }.toMutableMap()
+    for (equationPart in listOf(equation.u, equation.v)) { //filtering existing pairs in equation
+        for (pair in equationPart.zipWithNext()) {
+            if (pair.first !is JezConstant || pair.second !is JezConstant || !pairsMap.containsKey(pair)) continue
+            pairsMap[Pair(pair.first as JezConstant, pair.second as JezConstant)] = true
+        }
+    }
+
+    apply(JezReplaceConstantsAction(
+        pairsMap
+            .filterValues { it }
+            .keys
+            .map { pair ->
+                Pair(pair.toList(), listOf(getOrPutGeneratedConstant(pair.toList())))
+            }
+    ))
     return this
 }
 

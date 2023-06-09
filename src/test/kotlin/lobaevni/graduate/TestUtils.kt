@@ -21,9 +21,9 @@ object TestUtils {
      */
     private fun parseEquationPart(u: String): JezEquationPart {
         return u.map {
-            if (it.isUpperCase()) { // constant
+            if (it.isUpperCase()) { //constant
                 JezSourceConstant(it)
-            } else { // variable
+            } else { //variable
                 JezVariable(it)
             }
         }.toMutableList()

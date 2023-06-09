@@ -29,9 +29,9 @@ internal fun String.parseEquation(letters: List<JezSourceConstant>, variables: L
         assert(eqPartStr.isNotEmpty())
 
         do {
-            val element: JezElement? = if (eqPartStr[0].isUpperCase()) { // letter
+            val element: JezElement? = if (eqPartStr[0].isUpperCase()) { //letter
                 letters.find { eqPartStr.startsWith(it.value as String) }
-            } else { // variable
+            } else { //variable
                 variables.find { eqPartStr.startsWith(it.name as String) }
             }
             assert(element != null) { """Couldn't parse element "$element"""" }
@@ -46,12 +46,10 @@ internal fun String.parseEquation(letters: List<JezSourceConstant>, variables: L
             eqPartStr = eqPartStr.substring(length)
         } while (eqPartStr.isNotEmpty())
     }
-
     return JezEquation(eqParts[0], eqParts[1])
 }
 
-private fun String.parseSequence(): List<String> {
-    return trim('{', '}')
+private fun String.parseSequence(): List<String> =
+    trim('{', '}')
         .split(",")
         .map { it.trim() }
-}

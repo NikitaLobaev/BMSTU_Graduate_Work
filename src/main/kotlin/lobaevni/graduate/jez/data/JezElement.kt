@@ -40,7 +40,7 @@ sealed class JezElement {
 
             val isBlock: Boolean = value.all { it == value.first() }
 
-            val number: Int = if (isBlock) {
+            val number: Int = if (isBlock) { //TODO: оптимизировать. мы не можем так много времени тратить (на рекурсию) лишь на строковое представление блока
                 val constant = value.firstOrNull()
                 if (constant is JezGeneratedConstant && constant.isBlock) {
                     constant.number * value.size
@@ -85,7 +85,7 @@ sealed class JezElement {
 
         data class GeneratedBlock(
             val constant: JezConstant,
-            val powerIndexes: List<Int>, //TODO: remove list if unused...
+            val powerIndexes: List<Int>, //TODO: remove list if unused
             val additionalPower: Int = 0,
         ) : Constant() {
 
