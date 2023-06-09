@@ -15,8 +15,9 @@ private const val OPTION_ALLOW_REVERT_DESCRIPTION =
     "Allow reverting of recompression actions until no solution found"
 private const val OPTION_DISALLOW_CYCLES_DESCRIPTION =
     "Try preventing of cycles by storing the equations themselves in the history"
-private const val OPTION_ALLOW_BLOCK_COMP_CR = "Allow compression of crossing blocks with parametrized blocks"
-private const val OPTION_HEURISTIC_EXTENDED_NEGATIVE_RESTRICTIONS =
+private const val OPTION_ALLOW_BLOCK_COMP_CR_DESCRIPTION =
+    "Allow compression of crossing blocks with parametrized blocks"
+private const val OPTION_HEURISTIC_EXTENDED_NEGATIVE_RESTRICTIONS_DESCRIPTION =
     "Use heuristic of extended negative sigma restrictions"
 private const val OPTION_MAX_ITERATIONS_COUNT_DESCRIPTION = "Max iterations count"
 private const val OPTION_DOT_FILENAME_DESCRIPTION = "Output DOT-representation filename (without extension)"
@@ -46,12 +47,12 @@ fun main(args: Array<String>) {
         type = ArgType.Boolean,
     ).default(false)
     val allowBlockCompCr by parser.option(
-        description = OPTION_ALLOW_BLOCK_COMP_CR,
+        description = OPTION_ALLOW_BLOCK_COMP_CR_DESCRIPTION,
         fullName = "allow-block-comp-cr",
         type = ArgType.Boolean,
     ).default(false)
     val heurExtNegRest by parser.option(
-        description = OPTION_HEURISTIC_EXTENDED_NEGATIVE_RESTRICTIONS,
+        description = OPTION_HEURISTIC_EXTENDED_NEGATIVE_RESTRICTIONS_DESCRIPTION,
         fullName = "heur-ext-neg-rest",
         type = ArgType.Boolean,
     ).default(false)

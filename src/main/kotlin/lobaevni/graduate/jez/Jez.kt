@@ -95,8 +95,11 @@ internal fun JezState.tryFindMinimalSolution(
     } else {
         if (maxIterationsCount != null && iteration > maxIterationsCount) {
             JezResult.SolutionState.NotFound.NotEnoughIterations
+        } else if (history == null) {
+            JezResult.SolutionState.NotFound.HistoryNotStored
+        } else if (!allowRevert && checkRevertIsPossible()) {
+            JezResult.SolutionState.NotFound.RevertNotAllowed
         } else {
-            //TODO: check for possible reverts, and if allowRevert is false, then its not Absolutely
             JezResult.SolutionState.NotFound.NoSolution
         }
     }
@@ -398,4 +401,18 @@ internal fun JezState.checkEquationLength(maxSolutionLength: Long): Boolean {
 
     val currentLength = equation.u.getLength() + equation.v.getLength()
     return currentLength <= maxSolutionLength
+}
+
+/**
+ * TODO
+ */
+internal fun JezState.checkRevertIsPossible(): Boolean {
+    var curNode = history?.currentGraphNode
+    while (curNode?.action != null &&
+        curNode.action !is JezReplaceVariablesAction &&
+        curNode.action !is JezDropVariablesAction
+    ) {
+        curNode = curNode.parentNode
+    }
+    return curNode != null
 }

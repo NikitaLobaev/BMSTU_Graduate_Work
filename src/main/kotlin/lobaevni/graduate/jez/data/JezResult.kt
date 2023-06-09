@@ -33,6 +33,17 @@ data class JezResult(
              */
             object NotEnoughIterations : NotFound()
 
+            /**
+             * Describes state, when it's impossible to check history of recompressions and algorithm doesn't know
+             * exactly why does the solution wasn't found.
+             */
+            object HistoryNotStored : NotFound()
+
+            /**
+             * Describes state, when revert was possible after dead-end final branch, but revert is not allowed.
+             */
+            object RevertNotAllowed : NotFound()
+
         }
 
     }
