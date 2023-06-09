@@ -48,7 +48,8 @@ internal fun JezState.tryFindMinimalSolution(
     val variables = equation.getUsedVariables()
 
     var iteration: Long = 0
-    val maxSolutionLength: Long = (E.pow(E.pow(equation.u.size + equation.v.size))).roundToLong() //TODO
+    val maxSolutionLength: Long = (E.pow(E.pow(equation.u.size + equation.v.size))).roundToLong()
+    val maxBlockLength: Long = 4L.toDouble().pow(equation.u.size + equation.v.size).roundToLong()
     mainLoop@ while (maxIterationsCount == null || iteration++ < maxIterationsCount) {
         try {
             tryShorten()
@@ -60,7 +61,7 @@ internal fun JezState.tryFindMinimalSolution(
         val currentEquation = equation
 
         val compressions = listOfNotNull(
-            { blockCompNCr() },
+            { blockCompNCr(maxBlockLength) },
             if (allowBlockCompCr) { { blockCompCr() } } else null,
             { pairCompNCr() },
             { pairCompCr(equation == currentEquation) }
@@ -187,7 +188,7 @@ internal fun JezState.blockCompCr(): JezState {
 /**
  * Compression for non-crossing blocks.
  */
-internal fun JezState.blockCompNCr(): JezState {
+internal fun JezState.blockCompNCr(maxBlockLength: Long): JezState {
     val blocks: MutableSet<List<JezConstant>> = mutableSetOf()
     for (equationPart in listOf(equation.u, equation.v)) {
         data class Acc(
@@ -202,6 +203,10 @@ internal fun JezState.blockCompNCr(): JezState {
                 Acc(currentAcc.element, lastAcc.count + 1)
             } else {
                 if (lastAcc.element is JezConstant && lastAcc.count > 1) {
+                    if (lastAcc.element.source.size.toLong() * lastAcc.count >= maxBlockLength) {
+                        throw JezEquationNotConvergesException()
+                    }
+
                     val block = List(lastAcc.count) { lastAcc.element }
                     blocks.add(block)
                 }
