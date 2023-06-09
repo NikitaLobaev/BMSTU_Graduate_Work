@@ -7,20 +7,18 @@ import lobaevni.graduate.jez.data.JezEquationPart
 import lobaevni.graduate.jez.data.JezState
 
 /**
- * Action of recompression for [JezEquation].
+ * Action of recompression.
  */
 internal sealed class JezAction {
 
     /**
-     * Tries to apply [JezAction] to [JezState] and adds corresponding record to
-     * [lobaevni.graduate.jez.history.JezHistory].
+     * Tries to apply this [JezAction] to current [state].
      * @return true, if action was successfully applied, false otherwise.
      */
     internal abstract fun applyAction(state: JezState): Boolean
 
     /**
-     * Tries to revert [JezAction] in [JezState] and adds corresponding record to
-     * [lobaevni.graduate.jez.history.JezHistory].
+     * Tries to revert this [JezAction] in current [state].
      * @return false, if action was successfully reverted, false otherwise.
      */
     internal abstract fun revertAction(state: JezState): Boolean

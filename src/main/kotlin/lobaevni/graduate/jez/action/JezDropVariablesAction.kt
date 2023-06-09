@@ -15,10 +15,12 @@ internal data class JezDropVariablesAction(
 
     override fun applyAction(state: JezState): Boolean {
         /**
-         * TODO
+         * @return true, if [variableIndexes] exactly represents all indexes of [variable] in this [JezEquationPart],
+         * false otherwise.
          */
-        fun JezEquationPart.validateIndexes(variable: JezVariable, variableIndexes: Set<Int>): Boolean =
-            withIndex().all {
+        fun JezEquationPart.validateIndexes(variable: JezVariable, variableIndexes: Set<Int>): Boolean = this
+            .withIndex()
+            .all {
                 if (it.value == variable) {
                     variableIndexes.contains(it.index)
                 } else {

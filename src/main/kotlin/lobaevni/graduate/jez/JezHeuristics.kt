@@ -49,9 +49,19 @@ object JezHeuristics {
     /**
      * Heuristic of assuming variable and constant that we could use for popping first via checking prefixes and
      * suffixes.
-     * @return TODO
+     * @return true, if heuristic worked and some [JezReplaceVariablesAction] was successfully applied, false otherwise.
      */
     internal fun JezState.tryAssumeAndApply(): Boolean {
+        /**
+         * @return indexes of all occurrences of specified [variable] in this [JezEquationPart].
+         */
+        fun JezEquationPart.getVariableIndexes(variable: JezVariable): Set<Int> = this
+            .withIndex()
+            .filter { it.value == variable }
+            .map { it.index }
+            .toSet()
+
+
         val pairs = listOf( //Pair((y, A), left=true)
             Pair(Pair(equation.u.firstOrNull(), equation.v.firstOrNull()), true),
             Pair(Pair(equation.u.lastOrNull(), equation.v.lastOrNull()), false),
@@ -60,31 +70,31 @@ object JezHeuristics {
                 if (pair.first.first !is JezVariable) {
                     Pair(Pair(pair.first.second, pair.first.first), pair.second)
                 } else pair
-            }.mapNotNull { pair ->
+            }
+            .mapNotNull { pair ->
                 Pair(Pair(
                     pair.first.first as? JezVariable ?: return@mapNotNull null,
                     pair.first.second as? JezConstant ?: return@mapNotNull null,
                 ), pair.second)
             }
-        return pairs.any { pair ->
-            val variable = pair.first.first
-            if (!(apply(JezReplaceVariablesAction(
-                    variable,
-                    leftPart = if (pair.second) listOf(pair.first.second) else listOf(),
-                    rightPart = if (pair.second) listOf() else listOf(pair.first.second),
-                    oldNegativeSigmaLeft = negativeSigmaLeft?.toJezNegativeSigma()?.filterKeys { it == variable },
-                    oldNegativeSigmaRight = negativeSigmaRight?.toJezNegativeSigma()?.filterKeys { it == variable },
-                )) || apply(JezDropVariablesAction(
-                    replaces = listOf(Pair(listOf(variable), listOf())),
-                    indexes = mapOf(variable to Pair(
-                        equation.u.withIndex().filter { it.value == variable }.map { it.index }.toSet(),
-                        equation.v.withIndex().filter { it.value == variable }.map { it.index }.toSet(),
-                    )),
-                )))) {
-                throw JezEquationNotConvergesException()
-            }
-            return@any true
+        val pair = pairs.firstOrNull() ?: return false
+        val variable = pair.first.first
+        if (!(apply(JezReplaceVariablesAction(
+                variable,
+                leftPart = if (pair.second) listOf(pair.first.second) else listOf(),
+                rightPart = if (pair.second) listOf() else listOf(pair.first.second),
+                oldNegativeSigmaLeft = negativeSigmaLeft?.toJezNegativeSigma()?.filterKeys { it == variable },
+                oldNegativeSigmaRight = negativeSigmaRight?.toJezNegativeSigma()?.filterKeys { it == variable },
+            )) || apply(JezDropVariablesAction(
+                replaces = listOf(Pair(listOf(variable), listOf())),
+                indexes = mapOf(variable to Pair(
+                    equation.u.getVariableIndexes(variable),
+                    equation.v.getVariableIndexes(variable),
+                )),
+            )))) {
+            throw JezEquationNotConvergesException()
         }
+        return true
     }
 
 }

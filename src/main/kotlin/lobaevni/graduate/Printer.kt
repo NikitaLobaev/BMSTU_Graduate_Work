@@ -7,7 +7,7 @@ import lobaevni.graduate.jez.data.JezVariable
 import java.io.File
 
 /**
- * Prints solution (substitution) of equation, if it was successfully solved, otherwise does nothing.
+ * Prints solution (substitution) of equation.
  */
 internal fun printSolution(
     result: JezResult,
@@ -19,10 +19,10 @@ internal fun printSolution(
         println("$variable = $value")
     }
 
-    for (mapEntry in result.sigma) {
+    result.sigma.forEach { mapEntry ->
         printVariable(mapEntry.key, mapEntry.value)
     }
-    for (variable in variables) {
+    variables.forEach { variable ->
         if (!result.sigma.containsKey(variable)) {
             printVariable(variable, listOf())
         }
@@ -30,7 +30,7 @@ internal fun printSolution(
 }
 
 /**
- * Writes DOT-representation of stages history of an algorithm to dot file and to graphic file.
+ * Writes DOT-representation of stages history of an algorithm to DOT file and to graphic (DOT-representation) file.
  */
 internal fun writeDOT(
     historyDotGraph: DotRootGraph,

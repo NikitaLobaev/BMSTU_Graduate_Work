@@ -93,6 +93,9 @@ internal data class JezReplaceVariablesAction(
         return true
     }
 
+    /**
+     * @return pair with left and right parts of [variable] value in this [JezReplaceVariablesAction]].
+     */
     private fun getReplacedParts(
         variable: JezVariable,
         replacedPart: JezEquationPart,
@@ -100,6 +103,7 @@ internal data class JezReplaceVariablesAction(
         val variableIndex = replacedPart.indexOf(variable).takeIf { it != -1 } ?: replacedPart.size
         val leftReplacedPart = replacedPart.subList(0, variableIndex)
         val rightReplacedPart = replacedPart.subList(minOf(replacedPart.size, variableIndex + 1), replacedPart.size)
+        assert(leftReplacedPart.size + rightReplacedPart.size + 1 == replacedPart.size)
         return Pair(leftReplacedPart.map { it as JezConstant }, rightReplacedPart.map { it as JezConstant })
     }
 

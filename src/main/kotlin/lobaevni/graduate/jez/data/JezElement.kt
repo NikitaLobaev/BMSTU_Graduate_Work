@@ -126,7 +126,7 @@ sealed class JezElement {
 }
 
 /**
- * Reveals source constants values and returns list of these [JezSourceConstant].
+ * Reveals and returns source constants values.
  */
 internal fun Collection<JezConstant>.toJezSourceConstants(): List<JezSourceConstant> = this
     .map { constant ->
@@ -135,7 +135,7 @@ internal fun Collection<JezConstant>.toJezSourceConstants(): List<JezSourceConst
     .flatten()
 
 /**
- * TODO
+ * Transforms [JezMutableNegativeSigma] to [JezNegativeSigma].
  */
 internal fun JezMutableNegativeSigma.toJezNegativeSigma(): JezNegativeSigma = this
     .toMap()

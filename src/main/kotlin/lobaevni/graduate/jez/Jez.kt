@@ -13,7 +13,7 @@ import kotlin.math.pow
 import kotlin.math.roundToLong
 
 /**
- * Tries to find minimal solution of this [JezEquation].
+ * Tries to find minimal solution of this [JezEquation]. The entry point to the main algorithm.
  */
 fun JezEquation.tryFindMinimalSolution(
     allowRevert: Boolean,
@@ -38,7 +38,7 @@ fun JezEquation.tryFindMinimalSolution(
 ).tryFindMinimalSolution(maxIterationsCount)
 
 /**
- * Tries to find minimal solution of [this.equation].
+ * Tries to find minimal solution of [this.equation]. The main algorithm.
  */
 internal fun JezState.tryFindMinimalSolution(
     maxIterationsCount: Long?,
@@ -121,7 +121,46 @@ internal fun JezState.tryFindMinimalSolution(
 }
 
 /**
- * TODO
+ * Compression for non-crossing blocks.
+ * @param maxBlockLength maximum possible length of any block in current equation.
+ */
+internal fun JezState.blockCompNCr(maxBlockLength: Long): JezState {
+    val blocks: MutableSet<List<JezConstant>> = mutableSetOf()
+    listOf(equation.u, equation.v).forEach { equationPart ->
+        data class Acc(
+            val element: JezElement?,
+            val count: Int,
+        )
+
+        (equationPart + null)
+            .map { element ->
+                Acc(element, 1)
+            }
+            .reduce { lastAcc, currentAcc ->
+                if (lastAcc.element == currentAcc.element) {
+                    Acc(currentAcc.element, lastAcc.count + 1)
+                } else {
+                    if (lastAcc.element is JezConstant && lastAcc.count > 1) {
+                        if (lastAcc.element.source.size.toLong() * lastAcc.count >= maxBlockLength) {
+                            throw JezEquationNotConvergesException()
+                        }
+
+                        val block = List(lastAcc.count) { lastAcc.element }
+                        blocks.add(block)
+                    }
+                    currentAcc
+                }
+            }
+    }
+
+    apply(JezReplaceConstantsAction(blocks.map { block ->
+        Pair(block, listOf(getOrPutGeneratedConstant(block)))
+    }))
+    return this
+}
+
+/**
+ * Compression for crossing blocks.
  */
 internal fun JezState.blockCompCr(): JezState {
     //duplicates allowed, because order is more important than space complexity
@@ -190,42 +229,6 @@ internal fun JezState.blockCompCr(): JezState {
 }
 
 /**
- * Compression for non-crossing blocks.
- */
-internal fun JezState.blockCompNCr(maxBlockLength: Long): JezState {
-    val blocks: MutableSet<List<JezConstant>> = mutableSetOf()
-    listOf(equation.u, equation.v).forEach { equationPart ->
-        data class Acc(
-            val element: JezElement?,
-            val count: Int,
-        )
-
-        (equationPart + null).map { element ->
-            Acc(element, 1)
-        }.reduce { lastAcc, currentAcc ->
-            if (lastAcc.element == currentAcc.element) {
-                Acc(currentAcc.element, lastAcc.count + 1)
-            } else {
-                if (lastAcc.element is JezConstant && lastAcc.count > 1) {
-                    if (lastAcc.element.source.size.toLong() * lastAcc.count >= maxBlockLength) {
-                        throw JezEquationNotConvergesException()
-                    }
-
-                    val block = List(lastAcc.count) { lastAcc.element }
-                    blocks.add(block)
-                }
-                currentAcc
-            }
-        }
-    }
-
-    apply(JezReplaceConstantsAction(blocks.map { block ->
-        Pair(block, listOf(getOrPutGeneratedConstant(block)))
-    }))
-    return this
-}
-
-/**
  * Compression for non-crossing pairs.
  */
 internal fun JezState.pairCompNCr(): JezState {
@@ -274,9 +277,9 @@ internal fun JezState.pairCompCr(necComp: Boolean): JezState {
 }
 
 /**
- * Shortening of the [JezEquation]. Cuts similar starts and ends of the left and right side of the
- * [JezEquation].
- * @return TODO
+ * Shortening of the [JezEquation]. Cuts similar prefixes and suffixes of the both [JezEquation] parts (guaranteed
+ * without loss to the solution).
+ * @return true, if [JezCropAction] was successfully applied to the equation, false otherwise.
  */
 internal fun JezState.tryShorten(): Boolean {
     //TODO: maybe collapse adjacent parametrized blocks
@@ -299,7 +302,7 @@ internal fun JezState.tryShorten(): Boolean {
 }
 
 /**
- * Checking trivial and side contradictions in the [JezEquation] at left and at right sides of both parts of it.
+ * Checking side and some trivial contradictions in current [JezEquation] in prefixes and in suffixes of both parts.
  * @return true, if contradiction was found, false otherwise.
  */
 internal fun JezState.checkTrivialContradictions(): Boolean {
@@ -324,7 +327,8 @@ internal fun JezState.checkTrivialContradictions(): Boolean {
 /**
  * Reverts actions (via addressing to a history) until it is able to move another way (until there can be no solution
  * yet).
- * @return true, if there was found node, through which we can try to find a solution, false otherwise.
+ * @return true, if there was successfully found node (and if we currently moved to it), through which we can try to
+ * find a solution, false otherwise.
  */
 internal fun JezState.revertUntilNoSolution(skips: Int = 0): Boolean {
     assert(skips >= 0)
@@ -343,7 +347,7 @@ internal fun JezState.revertUntilNoSolution(skips: Int = 0): Boolean {
 }
 
 /**
- * @return whether an empty solution is suitable for this [JezEquation].
+ * @return whether an empty solution is suitable for current [JezEquation].
  */
 internal fun JezState.checkEmptySolution(): Boolean {
     if (!allowBlockCompCr)
@@ -401,12 +405,9 @@ internal fun JezState.checkEmptySolution(): Boolean {
 }
 
 /**
- * TODO
+ * Validates current [JezEquation] length.
  */
 internal fun JezState.checkEquationLength(maxSolutionLength: Long): Boolean {
-    /**
-     * TODO
-     */
     fun JezEquationPart.getLength(): Long = filterIsInstance<JezConstant>().sumOf { it.source.size.toLong() }
 
     val currentLength = equation.u.getLength() + equation.v.getLength()
@@ -414,7 +415,8 @@ internal fun JezState.checkEquationLength(maxSolutionLength: Long): Boolean {
 }
 
 /**
- * TODO
+ * @return true, if revert is currently possible (there are exists parent node in history, which we can revert and try
+ * to find solution in another branch), false otherwise.
  */
 internal fun JezState.checkRevertIsPossible(): Boolean {
     var curNode = history?.currentGraphNode

@@ -62,7 +62,8 @@ internal class JezState(
     }
 
     /**
-     * @return TODO
+     * Retrieves existing [JezGeneratedConstant] for specified [repPart] or creates new.
+     * @return [JezGeneratedConstant] for specified [repPart].
      */
     fun getOrPutGeneratedConstant(repPart: List<JezConstant>): JezGeneratedConstant {
         return replaces.getOrElse(repPart.toJezSourceConstants()) {
@@ -80,15 +81,12 @@ internal class JezState(
      */
     fun removeGeneratedConstant(constant: JezGeneratedConstant): Boolean {
         if (constant.source !in replaces) return false
-
-        if (constant.isBlock) {
-            generatedBlocksCount--
-        }
+        if (constant.isBlock) generatedBlocksCount--
         return replaces.remove(constant.source) != null
     }
 
     /**
-     * TODO
+     * @return new [JezGeneratedConstantBlock] for specified [constant].
      */
     fun generateConstantBlock(constant: JezConstant): JezGeneratedConstantBlock =
         JezGeneratedConstantBlock(constant, generatedBlocksPowersCount++)
