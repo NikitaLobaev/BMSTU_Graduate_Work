@@ -17,7 +17,7 @@ internal class JezHistory(
     storeEquations: Boolean,
     dot: Boolean,
     private val dotHTMLLabels: Boolean,
-    private val dotMaxStatementsCount: Int,
+    private val dotMaxStatementsCount: Int?,
 ) {
 
     private val rootGraphNode: JezHistoryGraphNode = JezHistoryGraphNode()
@@ -83,7 +83,7 @@ internal class JezHistory(
         }
 
         dotRootGraph?.apply {
-            if (stmts.size >= dotMaxStatementsCount) return@apply
+            if (dotMaxStatementsCount == null || stmts.size >= dotMaxStatementsCount) return@apply
 
             val newEquationStrBr = "\"$newEquation\""
             val oldEquationStrBr = "\"$oldEquation\""
@@ -110,7 +110,7 @@ internal class JezHistory(
         currentGraphNode = currentGraphNode.parentNode ?: return
 
         dotRootGraph?.apply {
-            if (stmts.size >= dotMaxStatementsCount) return@apply
+            if (dotMaxStatementsCount == null || stmts.size >= dotMaxStatementsCount) return@apply
 
             val oldEquationStrBr = "\"$oldEquation\""
             val newEquationStrBr = "\"$newEquation\""

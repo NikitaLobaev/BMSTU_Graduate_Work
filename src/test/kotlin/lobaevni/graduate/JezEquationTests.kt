@@ -10,8 +10,6 @@ import kotlin.test.*
 private const val FAILED_MSG_WRONG_SOLUTION_STATE = "Wrong solution state"
 private const val FAILED_MSG_WRONG_SIGMA = "Wrong answer"
 
-private const val MAX_ITERATIONS_COUNT: Long = 15
-
 class JezEquationTests {
 
     @Test
@@ -133,10 +131,10 @@ class JezEquationTests {
         storeHistory = true,
         storeEquations = true,
         heurExtNegRest = false,
-        maxIterationsCount = MAX_ITERATIONS_COUNT,
+        maxIterationsCount = null,
         dot = false,
         dotHTMLLabels = false,
-        dotMaxStatementsCount = 0,
+        dotMaxStatementsCount = null,
     )
 
 }

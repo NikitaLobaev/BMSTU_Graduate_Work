@@ -60,7 +60,7 @@ fun main(args: Array<String>) {
         description = OPTION_MAX_ITERATIONS_COUNT_DESCRIPTION,
         fullName = "max-iters-count",
         type = ArgType.Int,
-    ).default(Int.MAX_VALUE) //TODO: добавить ограничение на минимальное значение (что не меньше нуля)
+    ) //TODO: добавить ограничение на минимальное значение (что не меньше нуля)
     val dotFilename by parser.option(
         description = OPTION_DOT_FILENAME_DESCRIPTION,
         fullName = "dot-filename",
@@ -75,7 +75,7 @@ fun main(args: Array<String>) {
         description = OPTION_DOT_MAX_STATEMENTS_COUNT_DESCRIPTION,
         fullName = "dot-max-stmts-count",
         type = ArgType.Int,
-    ).default(Int.MAX_VALUE)
+    )
     parser.parse(args)
 
     val letters: List<JezSourceConstant>
@@ -97,7 +97,7 @@ fun main(args: Array<String>) {
             storeHistory = allowRevert || disallowCycles || dotFilename != null,
             storeEquations = disallowCycles,
             heurExtNegRest = heurExtNegRest,
-            maxIterationsCount = maxIterationsCount.toLong(),
+            maxIterationsCount = maxIterationsCount?.toLong(),
             dot = dotFilename != null,
             dotHTMLLabels = dotHTMLLabels,
             dotMaxStatementsCount = dotMaxStatementsCount,

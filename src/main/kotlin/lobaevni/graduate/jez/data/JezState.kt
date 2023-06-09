@@ -14,7 +14,7 @@ internal class JezState(
     val heurExtNegRest: Boolean,
     dot: Boolean,
     dotHTMLLabels: Boolean,
-    dotMaxStatementsCount: Int,
+    dotMaxStatementsCount: Int?,
 ) {
 
     val sigmaLeft: JezMutableSigma = mutableMapOf()
@@ -33,7 +33,7 @@ internal class JezState(
     } else null
 
     init {
-        assert(dotMaxStatementsCount >= 0)
+        assert(dotMaxStatementsCount == null || dotMaxStatementsCount >= 0)
 
         val variables = equation.getUsedVariables()
         variables.forEach { variable ->

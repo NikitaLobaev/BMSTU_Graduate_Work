@@ -24,7 +24,7 @@ fun JezEquation.tryFindMinimalSolution(
     maxIterationsCount: Long?,
     dot: Boolean,
     dotHTMLLabels: Boolean,
-    dotMaxStatementsCount: Int,
+    dotMaxStatementsCount: Int?,
 ): JezResult = JezState(
     equation = this,
     allowRevert = allowRevert,
@@ -34,7 +34,7 @@ fun JezEquation.tryFindMinimalSolution(
     heurExtNegRest = heurExtNegRest,
     dot = dot,
     dotHTMLLabels = dotHTMLLabels,
-    dotMaxStatementsCount = dotMaxStatementsCount
+    dotMaxStatementsCount = dotMaxStatementsCount,
 ).tryFindMinimalSolution(maxIterationsCount)
 
 /**
@@ -90,9 +90,9 @@ internal fun JezState.tryFindMinimalSolution(
         (sigmaLeft[variable]!! + sigmaRight[variable]!!).toJezSourceConstants()
     }
 
-    val solutionState = if (checkEmptySolution()) {
+    val solutionState = if (checkEmptySolution()) { //solution was found
         JezResult.SolutionState.Found
-    } else {
+    } else { //solution wasn't found
         if (maxIterationsCount != null && iteration > maxIterationsCount) {
             JezResult.SolutionState.NotFound.NotEnoughIterations
         } else if (history == null) {
