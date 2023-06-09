@@ -7,6 +7,7 @@ import lobaevni.graduate.jez.action.JezAction
 import lobaevni.graduate.jez.data.JezEquation
 
 private const val DOT_GRAPH_NAME = "recompression"
+private const val DOT_GRAPH_ORDERING = "out"
 private const val DOT_ROOT_NODE_STYLE = "bold"
 private const val DOT_NODE_DEFAULT_COLOR = "black"
 private const val DOT_NODE_REVERTED_COLOR = "red"
@@ -29,6 +30,7 @@ internal class JezHistory(
 
     val dotRootGraph: DotRootGraph? = if (dot) {
         digraph(name = DOT_GRAPH_NAME, strict = true) {
+            ordering = DOT_GRAPH_ORDERING
             node {
                 color = DOT_NODE_DEFAULT_COLOR
                 shape = DotNodeShape.BOX
