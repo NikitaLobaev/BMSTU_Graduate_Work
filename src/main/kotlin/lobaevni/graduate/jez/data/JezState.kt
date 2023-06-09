@@ -36,7 +36,7 @@ internal class JezState(
         assert(dotMaxStatementsCount >= 0)
 
         val variables = equation.getUsedVariables()
-        for (variable in variables) {
+        variables.forEach { variable ->
             sigmaLeft[variable] = mutableListOf()
             sigmaRight[variable] = mutableListOf()
             negativeSigmaLeft?.put(variable, mutableSetOf())

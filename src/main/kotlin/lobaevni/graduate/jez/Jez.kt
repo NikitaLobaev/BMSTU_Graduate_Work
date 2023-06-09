@@ -126,7 +126,7 @@ internal fun JezState.tryFindMinimalSolution(
 internal fun JezState.blockCompCr(): JezState {
     //duplicates allowed, because order is more important than space complexity
     val suggestedBlockComps = mutableMapOf<JezVariable, MutableList<JezConstant>>()
-    for (equationPart in listOf(equation.u, equation.v)) {
+    listOf(equation.u, equation.v).forEach { equationPart ->
         equationPart.forEachIndexed { index, element ->
             if (element !is JezVariable) return@forEachIndexed
 
@@ -142,7 +142,7 @@ internal fun JezState.blockCompCr(): JezState {
     }
 
     val connectedBlocks = mutableMapOf<JezConstant, MutableSet<JezConstant>>()
-    for (equationPart in listOf(equation.u, equation.v)) {
+    listOf(equation.u, equation.v).forEach { equationPart ->
         equationPart.forEachIndexed { index, element ->
             if ((element as? JezGeneratedConstant)?.isBlock != true) return@forEachIndexed
 
@@ -157,8 +157,8 @@ internal fun JezState.blockCompCr(): JezState {
                 }
         }
     }
-    for (suggestedBlockComp in suggestedBlockComps) {
-        for (constant in suggestedBlockComp.value.toList()) { //need a copy, because we modify it same time
+    suggestedBlockComps.forEach { suggestedBlockComp ->
+        suggestedBlockComp.value.toList().forEach { constant -> //need a copy, because we modify it same time
             suggestedBlockComp.value.addAll(connectedBlocks.getOrDefault(constant, null) ?: listOf())
         }
     }
@@ -194,7 +194,7 @@ internal fun JezState.blockCompCr(): JezState {
  */
 internal fun JezState.blockCompNCr(maxBlockLength: Long): JezState {
     val blocks: MutableSet<List<JezConstant>> = mutableSetOf()
-    for (equationPart in listOf(equation.u, equation.v)) {
+    listOf(equation.u, equation.v).forEach { equationPart ->
         data class Acc(
             val element: JezElement?,
             val count: Int,
@@ -231,15 +231,15 @@ internal fun JezState.blockCompNCr(maxBlockLength: Long): JezState {
 internal fun JezState.pairCompNCr(): JezState {
     val sideConstants = getSideConstants()
     val pairsMap = cartesianProduct(sideConstants.first, sideConstants.second).associateWith { false }.toMutableMap()
-    for (equationPart in listOf(equation.u, equation.v)) { //filtering existing pairs in equation
-        for (pair in equationPart.zipWithNext()) {
-            if (pair.first !is JezConstant || pair.second !is JezConstant || !pairsMap.containsKey(pair)) continue
+    listOf(equation.u, equation.v).forEach { equationPart -> //filtering existing pairs in equation
+        equationPart.zipWithNext().forEach pair@ { pair ->
+            if (pair.first !is JezConstant || pair.second !is JezConstant || !pairsMap.containsKey(pair)) return@pair
             pairsMap[Pair(pair.first as JezConstant, pair.second as JezConstant)] = true
         }
     }
 
     apply(JezReplaceConstantsAction(
-        pairsMap
+        replaces = pairsMap
             .filterValues { it }
             .keys
             .map { pair ->
@@ -257,9 +257,9 @@ internal fun JezState.pairCompNCr(): JezState {
 internal fun JezState.pairCompCr(necComp: Boolean): JezState {
     if (tryAssumeAndApply() || !necComp) return this
 
-    for (left in listOf(true, false)) {
-        for (variable in equation.getUsedVariables()) {
-            for (constant in (equation.getUsedSourceConstants() + equation.getUsedGeneratedConstants())) {
+    listOf(true, false).forEach { left ->
+        equation.getUsedVariables().forEach { variable ->
+            (equation.getUsedSourceConstants() + equation.getUsedGeneratedConstants()).forEach { constant ->
                 if (apply(JezReplaceVariablesAction(
                         variable,
                         leftPart = if (left) listOf(constant) else listOf(),
@@ -306,13 +306,12 @@ internal fun JezState.checkTrivialContradictions(): Boolean {
     if ((equation.u.isEmpty() && equation.v.find { it is JezConstant } != null) ||
         (equation.v.isEmpty() && equation.u.find { it is JezConstant } != null)) return true
 
-    fun JezElement.retrieveConstant(): JezConstant? {
-        return when (this) {
+    fun JezElement.retrieveConstant(): JezConstant? =
+        when (this) {
             is JezGeneratedConstantBlock -> constant
             is JezConstant -> this
             else -> null
         }
-    }
 
     return (equation.u.firstOrNull()?.retrieveConstant() is JezConstant &&
             equation.v.firstOrNull()?.retrieveConstant() is JezConstant &&
@@ -347,9 +346,8 @@ internal fun JezState.revertUntilNoSolution(skips: Int = 0): Boolean {
  * @return whether an empty solution is suitable for this [JezEquation].
  */
 internal fun JezState.checkEmptySolution(): Boolean {
-    if (!allowBlockCompCr) {
+    if (!allowBlockCompCr)
         return equation.u.filterIsInstance<JezConstant>() == equation.v.filterIsInstance<JezConstant>()
-    }
 
     data class JezEquationEntry(
         val source: List<JezSourceConstant> = listOf(),
@@ -359,10 +357,11 @@ internal fun JezState.checkEmptySolution(): Boolean {
     /**
      * TODO
      */
-    fun List<JezConstant>.groupBySource(): List<JezEquationEntry> {
-        return map { constant ->
+    fun List<JezConstant>.groupBySource(): List<JezEquationEntry> = this
+        .map { constant ->
             mutableListOf(JezEquationEntry(constant.source, mutableListOf(constant)))
-        }.reduce { last, current ->
+        }
+        .reduce { last, current ->
             if (last.last().source == current.first().source) {
                 last.last().entries.addAll(current.first().entries)
             } else {
@@ -370,7 +369,6 @@ internal fun JezState.checkEmptySolution(): Boolean {
             }
             return@reduce last
         }
-    }
 
     //val d: D2Array<Int> = mk.ndarray(mk[mk[2, 3, -1], mk[1, -2, 1], mk[1, 0, 2]])
 

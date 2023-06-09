@@ -57,16 +57,15 @@ sealed class JezElement {
                 assert(source.isNotEmpty())
             }
 
-            override fun toString(): String {
-                return if (isBlock) {
+            override fun toString(): String =
+                if (isBlock) {
                     "BLOCK(${value.firstOrNull()}, ${value.size})"
                 } else {
                     "GENCONST($number)"
                 }
-            }
 
-            override fun toHTMLString(): String {
-                return if (isBlock) {
+            override fun toHTMLString(): String =
+                if (isBlock) {
                     var constant = value.first()
                     while ((constant as? JezGeneratedConstant)?.isBlock == true) {
                         constant = constant.value.first()
@@ -79,7 +78,6 @@ sealed class JezElement {
                 } else {
                     "&xi;<sub>$number</sub>"
                 }
-            }
 
         }
 
@@ -123,26 +121,24 @@ sealed class JezElement {
 
     }
 
-    open fun toHTMLString(): String {
-        return toString()
-    }
+    open fun toHTMLString(): String = toString()
 
 }
 
 /**
  * Reveals source constants values and returns list of these [JezSourceConstant].
  */
-internal fun Collection<JezConstant>.toJezSourceConstants(): List<JezSourceConstant> {
-    return map { constant ->
+internal fun Collection<JezConstant>.toJezSourceConstants(): List<JezSourceConstant> = this
+    .map { constant ->
         constant.source
-    }.flatten()
-}
+    }
+    .flatten()
 
 /**
  * TODO
  */
-internal fun JezMutableNegativeSigma.toJezNegativeSigma(): JezNegativeSigma {
-    return toMap().mapValues { entry ->
+internal fun JezMutableNegativeSigma.toJezNegativeSigma(): JezNegativeSigma = this
+    .toMap()
+    .mapValues { entry ->
         entry.value.toSet()
     }
-}

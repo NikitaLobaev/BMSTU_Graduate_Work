@@ -47,13 +47,14 @@ data class JezEquation(
 
 typealias JezEquationPart = List<JezElement>
 
-internal fun JezEquationPart.convertToString(): String {
-    return this.map {
+internal fun JezEquationPart.convertToString(): String = this
+    .map {
         "$it "
-    }.joinToString("") {
+    }
+    .joinToString("") {
         it
-    }.trim()
-}
+    }
+    .trim()
 
 internal fun JezEquationPart.convertToHTMLString(
     epsilonIfEmpty: Boolean = true,
@@ -79,5 +80,7 @@ internal fun JezEquationPart.convertToHTMLString(
                     Acc(lastAcc.total + elementStr, currentAcc.element, 1)
                 }
             }
-        }.total.takeIf { it.isNotEmpty() } ?: if (epsilonIfEmpty) "&epsilon;" else ""
+        }
+        .total
+        .takeIf { it.isNotEmpty() } ?: if (epsilonIfEmpty) "&epsilon;" else ""
 }

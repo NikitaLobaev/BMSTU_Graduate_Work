@@ -25,9 +25,7 @@ internal sealed class JezAction {
      */
     internal abstract fun revertAction(state: JezState): Boolean
 
-    open fun toHTMLString(): String {
-        return toString()
-    }
+    open fun toHTMLString(): String = toString()
 
     /**
      * Replaces all occurrences of [repPart] to [newPart] in current [JezEquation].

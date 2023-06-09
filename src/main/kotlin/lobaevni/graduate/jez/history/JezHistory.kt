@@ -21,6 +21,7 @@ internal class JezHistory(
 ) {
 
     private val rootGraphNode: JezHistoryGraphNode = JezHistoryGraphNode()
+
     var currentGraphNode: JezHistoryGraphNode = rootGraphNode
     private set
 
@@ -123,8 +124,6 @@ internal class JezHistory(
     }
 
     @DotExperimentalHTMLLabel
-    private fun String.formatHTMLLabel(): String {
-        return "\" label=<&nbsp;$this&nbsp;> hacklabel=\""
-    }
+    private fun String.formatHTMLLabel(): String = "\" label=<&nbsp;$this&nbsp;> hacklabel=\""
 
 }

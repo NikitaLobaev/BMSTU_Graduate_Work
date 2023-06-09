@@ -52,19 +52,20 @@ object JezHeuristics {
      * @return TODO
      */
     internal fun JezState.tryAssumeAndApply(): Boolean {
-        val pairs = listOf( //((y, A), left=true)
+        val pairs = listOf( //Pair((y, A), left=true)
             Pair(Pair(equation.u.firstOrNull(), equation.v.firstOrNull()), true),
             Pair(Pair(equation.u.lastOrNull(), equation.v.lastOrNull()), false),
-        ).map { pair ->
-            if (pair.first.first !is JezVariable) {
-                Pair(Pair(pair.first.second, pair.first.first), pair.second)
-            } else pair
-        }.mapNotNull { pair ->
-            Pair(Pair(
-                pair.first.first as? JezVariable ?: return@mapNotNull null,
-                pair.first.second as? JezConstant ?: return@mapNotNull null,
-            ), pair.second)
-        }
+        )
+            .map { pair ->
+                if (pair.first.first !is JezVariable) {
+                    Pair(Pair(pair.first.second, pair.first.first), pair.second)
+                } else pair
+            }.mapNotNull { pair ->
+                Pair(Pair(
+                    pair.first.first as? JezVariable ?: return@mapNotNull null,
+                    pair.first.second as? JezConstant ?: return@mapNotNull null,
+                ), pair.second)
+            }
         return pairs.any { pair ->
             val variable = pair.first.first
             if (!(apply(JezReplaceVariablesAction(
