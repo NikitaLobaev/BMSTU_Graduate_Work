@@ -21,6 +21,7 @@ fun JezEquation.tryFindMinimalSolution(
     storeHistory: Boolean,
     storeEquations: Boolean,
     heurExtNegRest: Boolean,
+    fullTraversal: Boolean,
     maxIterationsCount: Long?,
     dot: Boolean,
     dotHTMLLabels: Boolean,
@@ -32,6 +33,7 @@ fun JezEquation.tryFindMinimalSolution(
     storeHistory = storeHistory || allowRevert,
     storeEquations = storeEquations,
     heurExtNegRest = heurExtNegRest,
+    fullTraversal = fullTraversal,
     dot = dot,
     dotHTMLLabels = dotHTMLLabels,
     dotMaxStatementsCount = dotMaxStatementsCount,
@@ -45,18 +47,23 @@ internal fun JezState.tryFindMinimalSolution(
 ): JezResult {
     assert(maxIterationsCount == null || maxIterationsCount >= 0)
 
-    val variables = equation.getUsedVariables()
-
     var iteration: Long = 0
     val maxSolutionLength: Long = (E.pow(E.pow(equation.u.size + equation.v.size))).roundToLong()
     val maxBlockLength: Long = 4L.toDouble().pow(equation.u.size + equation.v.size).roundToLong()
-    mainLoop@ while (maxIterationsCount == null || iteration++ < maxIterationsCount) {
+    var bestSigma: JezSigma? = null
+    mainLoop@ while (true) {
+        if (checkTrivialContradictions()) break@mainLoop
+        if (checkEmptySolution()) {
+            bestSigma = processSolution(bestSigma)
+            break@mainLoop
+        }
+        if (maxIterationsCount != null && iteration++ >= maxIterationsCount) break@mainLoop
+
         try {
             tryShorten()
         } catch (e: JezEquationNotConvergesException) {
             break@mainLoop
         }
-        if (checkTrivialContradictions() || checkEmptySolution()) break@mainLoop
 
         val currentEquation = equation
 
@@ -70,27 +77,30 @@ internal fun JezState.tryFindMinimalSolution(
             compressionLoop@ for (compression in compressions) {
                 compression()
 
-                tryShorten()
-                if (checkEmptySolution()) break@mainLoop
+                if (checkEmptySolution()) {
+                    val usedVariables = equation.getUsedVariables()
+                    bestSigma = processSolution(bestSigma)
+
+                    if (!fullTraversal) break@mainLoop
+                    if (revertUntilNoSolution(skips = if (usedVariables.isNotEmpty()) 1 else 0)) {
+                        continue@mainLoop
+                    } else break@mainLoop
+                }
                 if (checkTrivialContradictions() || !checkEquationLength(maxSolutionLength)) {
                     throw JezEquationNotConvergesException()
                 }
+                tryShorten()
             }
         } catch (e: JezEquationNotConvergesException) {
-            if (!allowRevert || !revertUntilNoSolution()) break@mainLoop
-            continue@mainLoop
+            if (revertUntilNoSolution()) {
+                continue@mainLoop
+            } else break@mainLoop
         }
 
-        if (equation == currentEquation) {
-            if (!allowRevert || !revertUntilNoSolution(skips = 1)) break@mainLoop
-        }
+        if (equation == currentEquation && !revertUntilNoSolution()) break@mainLoop
     }
 
-    val sigma: JezSigma = variables.associateWith { variable ->
-        (sigmaLeft[variable]!! + sigmaRight[variable]!!).toJezSourceConstants()
-    }
-
-    val solutionState = if (checkEmptySolution()) { //solution was found
+    val solutionState = if (bestSigma != null) { //solution was found
         JezResult.SolutionState.Found
     } else { //solution wasn't found
         if (maxIterationsCount != null && iteration > maxIterationsCount) {
@@ -103,18 +113,8 @@ internal fun JezState.tryFindMinimalSolution(
             JezResult.SolutionState.NotFound.NoSolution
         }
     }
-
-    if (solutionState is JezResult.SolutionState.Found) {
-        val curUsedVariables = equation.getUsedVariables()
-        assert(curUsedVariables.isEmpty() || apply(JezDropVariablesAction(
-            replaces = curUsedVariables.map { variable ->
-                Pair(listOf(variable), listOf())
-            },
-        )))
-    }
-
     return JezResult(
-        sigma = sigma,
+        sigma = bestSigma ?: sigma,
         solutionState = solutionState,
         historyDotGraph = history?.dotRootGraph,
     )
@@ -277,6 +277,30 @@ internal fun JezState.pairCompCr(necComp: Boolean): JezState {
 }
 
 /**
+ * Processes currently found solution.
+ * @return best sigma (with minimal length) of [lastSigma] and current.
+ */
+internal fun JezState.processSolution(lastSigma: JezSigma?): JezSigma {
+    val curUsedVariables = equation.getUsedVariables()
+    if (curUsedVariables.isNotEmpty()) {
+        assert(apply(JezDropVariablesAction(
+            variables = curUsedVariables.toList(),
+            indexes = curUsedVariables.associateWith { variable ->
+                Pair(
+                    equation.u.getVariableIndexes(variable),
+                    equation.v.getVariableIndexes(variable),
+                )
+            },
+        )))
+    }
+
+    val curSigma = sigma
+    return if (lastSigma == null || curSigma.getLength() < lastSigma.getLength()) {
+        curSigma
+    } else lastSigma
+}
+
+/**
  * Shortening of the [JezEquation]. Cuts similar prefixes and suffixes of the both [JezEquation] parts (guaranteed
  * without loss to the solution).
  * @return true, if [JezCropAction] was successfully applied to the equation, false otherwise.
@@ -330,8 +354,10 @@ internal fun JezState.checkTrivialContradictions(): Boolean {
  * @return true, if there was successfully found node (and if we currently moved to it), through which we can try to
  * find a solution, false otherwise.
  */
-internal fun JezState.revertUntilNoSolution(skips: Int = 0): Boolean {
+internal fun JezState.revertUntilNoSolution(skips: Int = 0): Boolean { //TODO: такое ощущение, что skips = 0 абсолютно всегда достаточно
     assert(skips >= 0)
+    if (!allowRevert) return false
+
     var skipsRemaining = skips
     while (skipsRemaining >= 0) {
         val action = history?.currentGraphNode?.action ?: return false

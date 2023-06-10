@@ -1,6 +1,7 @@
 package lobaevni.graduate.jez.data
 
 import lobaevni.graduate.jez.action.JezAction
+import lobaevni.graduate.jez.checkEmptySolution
 import lobaevni.graduate.jez.history.JezHistory
 
 class JezEquationNotConvergesException : Exception()
@@ -12,6 +13,7 @@ internal class JezState(
     storeHistory: Boolean,
     storeEquations: Boolean,
     val heurExtNegRest: Boolean,
+    val fullTraversal: Boolean,
     dot: Boolean,
     dotHTMLLabels: Boolean,
     dotMaxStatementsCount: Int?,
@@ -19,6 +21,12 @@ internal class JezState(
 
     val sigmaLeft: JezMutableSigma = mutableMapOf()
     val sigmaRight: JezMutableSigma = mutableMapOf()
+
+    val sigma: JezSigma
+        get() = (sigmaLeft.keys + sigmaRight.keys)
+            .associateWith { variable ->
+                (sigmaLeft[variable]!! + sigmaRight[variable]!!).toJezSourceConstants()
+            }
 
     val negativeSigmaLeft: JezMutableNegativeSigma? = if (heurExtNegRest) mutableMapOf() else null
     val negativeSigmaRight: JezMutableNegativeSigma? = if (heurExtNegRest) mutableMapOf() else null
@@ -42,7 +50,7 @@ internal class JezState(
             negativeSigmaLeft?.put(variable, mutableSetOf())
             negativeSigmaRight?.put(variable, mutableSetOf())
         }
-        history?.init(equation)
+        history?.init(equation, converges = checkEmptySolution())
     }
 
     /**

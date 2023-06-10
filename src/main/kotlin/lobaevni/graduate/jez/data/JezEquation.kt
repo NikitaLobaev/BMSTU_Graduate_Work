@@ -47,6 +47,15 @@ data class JezEquation(
 
 typealias JezEquationPart = List<JezElement>
 
+/**
+ * @return indexes of all occurrences of specified [variable] in this [JezEquationPart].
+ */
+fun JezEquationPart.getVariableIndexes(variable: JezVariable): Set<Int> = this
+    .withIndex()
+    .filter { it.value == variable }
+    .map { it.index }
+    .toSet()
+
 internal fun JezEquationPart.convertToString(): String = this
     .map {
         "$it "

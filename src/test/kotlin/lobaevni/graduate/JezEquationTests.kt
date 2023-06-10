@@ -131,6 +131,7 @@ class JezEquationTests {
         storeHistory = true,
         storeEquations = true,
         heurExtNegRest = false,
+        fullTraversal = false,
         maxIterationsCount = null,
         dot = false,
         dotHTMLLabels = false,

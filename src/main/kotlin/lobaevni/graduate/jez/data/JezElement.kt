@@ -142,3 +142,12 @@ internal fun JezMutableNegativeSigma.toJezNegativeSigma(): JezNegativeSigma = th
     .mapValues { entry ->
         entry.value.toSet()
     }
+
+/**
+ * @return length of this [JezSigma] (sum of lengths of each variable).
+ */
+internal fun JezSigma.getLength() = this
+    .values
+    .sumOf { constants ->
+        constants.size
+    }

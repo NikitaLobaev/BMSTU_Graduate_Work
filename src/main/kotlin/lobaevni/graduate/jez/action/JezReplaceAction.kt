@@ -1,5 +1,6 @@
 package lobaevni.graduate.jez.action
 
+import lobaevni.graduate.jez.checkEmptySolution
 import lobaevni.graduate.jez.data.JezEquationPart
 import lobaevni.graduate.jez.data.JezState
 import lobaevni.graduate.jez.data.convertToHTMLString
@@ -35,6 +36,7 @@ internal abstract class JezReplaceAction : JezAction() {
             oldEquation = oldEquation,
             action = this,
             newEquation = state.equation,
+            converges = state.checkEmptySolution(),
         )
         return true
     }

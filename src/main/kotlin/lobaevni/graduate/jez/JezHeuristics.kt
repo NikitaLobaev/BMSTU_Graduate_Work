@@ -52,16 +52,6 @@ object JezHeuristics {
      * @return true, if heuristic worked and some [JezReplaceVariablesAction] was successfully applied, false otherwise.
      */
     internal fun JezState.tryAssumeAndApply(): Boolean {
-        /**
-         * @return indexes of all occurrences of specified [variable] in this [JezEquationPart].
-         */
-        fun JezEquationPart.getVariableIndexes(variable: JezVariable): Set<Int> = this
-            .withIndex()
-            .filter { it.value == variable }
-            .map { it.index }
-            .toSet()
-
-
         val pairs = listOf( //Pair((y, A), left=true)
             Pair(Pair(equation.u.firstOrNull(), equation.v.firstOrNull()), true),
             Pair(Pair(equation.u.lastOrNull(), equation.v.lastOrNull()), false),
@@ -85,7 +75,7 @@ object JezHeuristics {
                 rightPart = if (pair.second) listOf() else listOf(pair.first.second),
                 oldNegativeSigmaLeft = negativeSigmaLeft?.toJezNegativeSigma()?.filterKeys { it == variable },
                 oldNegativeSigmaRight = negativeSigmaRight?.toJezNegativeSigma()?.filterKeys { it == variable },
-            )) || apply(JezDropVariablesAction(
+            )) || apply(JezDropVariablesAction( //TODO: переделать эвристику, есть грубая ошибка. например, для уравнения x^2 y^4 = A^3...
                 replaces = listOf(Pair(listOf(variable), listOf())),
                 indexes = mapOf(variable to Pair(
                     equation.u.getVariableIndexes(variable),

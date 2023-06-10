@@ -19,6 +19,7 @@ private const val OPTION_ALLOW_BLOCK_COMP_CR_DESCRIPTION =
     "Allow compression of crossing blocks with parametrized blocks"
 private const val OPTION_HEURISTIC_EXTENDED_NEGATIVE_RESTRICTIONS_DESCRIPTION =
     "Use heuristic of extended negative sigma restrictions"
+private const val OPTION_FULL_TRAVERSAL_DESCRIPTION = "Should perform full traversal of scan graph"
 private const val OPTION_MAX_ITERATIONS_COUNT_DESCRIPTION = "Max iterations count"
 private const val OPTION_DOT_FILENAME_DESCRIPTION = "Output DOT-representation filename (without extension)"
 private const val OPTION_DOT_SHORTEN_LABELS_DESCRIPTION = "Shorten labels in output DOT-representation"
@@ -56,11 +57,16 @@ fun main(args: Array<String>) {
         fullName = "heur-ext-neg-rest",
         type = ArgType.Boolean,
     ).default(false)
+    val fullTraversal by parser.option(
+        description = OPTION_FULL_TRAVERSAL_DESCRIPTION,
+        fullName = "full-traversal",
+        type = ArgType.Boolean,
+    ).default(false)
     val maxIterationsCount by parser.option(
         description = OPTION_MAX_ITERATIONS_COUNT_DESCRIPTION,
         fullName = "max-iters-count",
         type = ArgType.Int,
-    ) //TODO: добавить ограничение на минимальное значение (что не меньше нуля)
+    ) //TODO: добавить ограничение на минимальное значение (что не меньше единицы (не можем не класть стартовый узел))
     val dotFilename by parser.option(
         description = OPTION_DOT_FILENAME_DESCRIPTION,
         fullName = "dot-filename",
@@ -97,6 +103,7 @@ fun main(args: Array<String>) {
             storeHistory = allowRevert || disallowCycles || dotFilename != null,
             storeEquations = disallowCycles,
             heurExtNegRest = heurExtNegRest,
+            fullTraversal = fullTraversal,
             maxIterationsCount = maxIterationsCount?.toLong(),
             dot = dotFilename != null,
             dotHTMLLabels = dotHTMLLabels,
