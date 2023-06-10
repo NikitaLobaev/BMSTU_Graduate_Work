@@ -3,6 +3,8 @@ package lobaevni.graduate.jez
 import lobaevni.graduate.Utils.cartesianProduct
 import lobaevni.graduate.jez.JezHeuristics.getSideConstants
 import lobaevni.graduate.jez.JezHeuristics.tryAssumeAndApply
+import lobaevni.graduate.jez.action.*
+import lobaevni.graduate.jez.action.JezAction
 import lobaevni.graduate.jez.action.JezCropAction
 import lobaevni.graduate.jez.action.JezDropVariablesAction
 import lobaevni.graduate.jez.action.JezReplaceConstantsAction
@@ -49,7 +51,7 @@ internal fun JezState.tryFindMinimalSolution(
 
     var iteration: Long = 0
     val maxSolutionLength: Long = (E.pow(E.pow(equation.u.size + equation.v.size))).roundToLong()
-    val maxBlockLength: Long = 4L.toDouble().pow(equation.u.size + equation.v.size).roundToLong()
+    val maxBlockLength: Long = 4L.toDouble().pow(equation.u.size + equation.v.size).roundToLong() //TODO: validate input equation too
     var bestSigma: JezSigma? = null
     mainLoop@ while (true) {
         if (checkTrivialContradictions()) break@mainLoop
@@ -86,10 +88,9 @@ internal fun JezState.tryFindMinimalSolution(
                         continue@mainLoop
                     } else break@mainLoop
                 }
-                if (checkTrivialContradictions() || !checkEquationLength(maxSolutionLength)) {
-                    throw JezEquationNotConvergesException()
-                }
+                if (!checkEquationLength(maxSolutionLength)) throw JezEquationNotConvergesException()
                 tryShorten()
+                if (checkTrivialContradictions()) throw JezEquationNotConvergesException()
             }
         } catch (e: JezEquationNotConvergesException) {
             if (revertUntilNoSolution()) {
@@ -101,13 +102,16 @@ internal fun JezState.tryFindMinimalSolution(
     }
 
     val solutionState = if (bestSigma != null) { //solution was found
-        JezResult.SolutionState.Found
+        JezResult.SolutionState.Found.Minimal //TODO: не забыть проверять на минимальное!!!
     } else { //solution wasn't found
         if (maxIterationsCount != null && iteration > maxIterationsCount) {
             JezResult.SolutionState.NotFound.NotEnoughIterations
         } else if (history == null) {
             JezResult.SolutionState.NotFound.HistoryNotStored
         } else if (!allowRevert && checkRevertIsPossible()) {
+            //TODO: даже если мы разрешаем откаты и он возможен (мог быть ущербный), он может быть единственный
+            // и быть случаем, когда уже рассмотрели x->Ax и x->e и других вариантов гарантированно нет и тогда
+            // можем утверждать что решения точно не существует... как обрабатывать этот кейс?
             JezResult.SolutionState.NotFound.RevertNotAllowed
         } else {
             JezResult.SolutionState.NotFound.NoSolution
@@ -354,7 +358,7 @@ internal fun JezState.checkTrivialContradictions(): Boolean {
  * @return true, if there was successfully found node (and if we currently moved to it), through which we can try to
  * find a solution, false otherwise.
  */
-internal fun JezState.revertUntilNoSolution(skips: Int = 0): Boolean { //TODO: такое ощущение, что skips = 0 абсолютно всегда достаточно
+internal fun JezState.revertUntilNoSolution(skips: Int = 0): Boolean {
     assert(skips >= 0)
     if (!allowRevert) return false
 
@@ -363,11 +367,7 @@ internal fun JezState.revertUntilNoSolution(skips: Int = 0): Boolean { //TODO: �
         val action = history?.currentGraphNode?.action ?: return false
         if (!revert(action)) return false
 
-        when (action) {
-            is JezReplaceVariablesAction,
-            is JezDropVariablesAction -> skipsRemaining--
-            else -> {}
-        }
+        if (action.isFlawed()) skipsRemaining--
     }
     return true
 }
@@ -433,7 +433,7 @@ internal fun JezState.checkEmptySolution(): Boolean {
 /**
  * Validates current [JezEquation] length.
  */
-internal fun JezState.checkEquationLength(maxSolutionLength: Long): Boolean {
+internal fun JezState.checkEquationLength(maxSolutionLength: Long): Boolean { //TODO: мы crop'ами теряем информацию же...
     fun JezEquationPart.getLength(): Long = filterIsInstance<JezConstant>().sumOf { it.source.size.toLong() }
 
     val currentLength = equation.u.getLength() + equation.v.getLength()
@@ -446,11 +446,24 @@ internal fun JezState.checkEquationLength(maxSolutionLength: Long): Boolean {
  */
 internal fun JezState.checkRevertIsPossible(): Boolean {
     var curNode = history?.currentGraphNode
-    while (curNode?.action != null &&
-        curNode.action !is JezReplaceVariablesAction &&
-        curNode.action !is JezDropVariablesAction
-    ) {
+    while (curNode?.action != null && !curNode.action!!.isFlawed()) {
         curNode = curNode.parentNode
     }
     return curNode != null
 }
+
+/**
+ * @return true, if this [JezAction] may be flawed, false if exactly not.
+ */
+internal fun JezAction.isFlawed(): Boolean =
+    when (this) {
+        is JezReplaceVariablesAction,
+        is JezDropVariablesAction -> true
+        is JezReplaceConstantsAction ->
+            replaces.any { pair ->
+                pair.second.any { generatedConstant ->
+                    generatedConstant.isBlock
+                }
+            }
+        else -> false
+    }

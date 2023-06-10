@@ -1,8 +1,8 @@
 package lobaevni.graduate
 
-import kotlin.test.Test
 import lobaevni.graduate.Utils.prefixFunction
-import kotlin.test.assertEquals
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 
 private const val FAILED_MSG_WRONG_PREFIX_FUNC = "The prefix function computed wrong values"
 
@@ -20,7 +20,7 @@ class PrefixFunctionTests {
     fun test2() {
         val collection = "A".chunked(1)
         val actualPValues = collection.prefixFunction()
-        val expectedPValues = listOf<Int>(0)
+        val expectedPValues = listOf(0)
         assertEquals(expectedPValues, actualPValues, FAILED_MSG_WRONG_PREFIX_FUNC)
     }
 

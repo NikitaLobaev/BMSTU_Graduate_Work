@@ -127,8 +127,8 @@ internal class JezHistory(
     }
 
     /**
-     * @return true, if max allowed statements count in DOT graph cannot be reached **after adding exactly one**
-     * statement, false otherwise.
+     * @return true, if max allowed statements count in DOT graph cannot be reached **after adding exactly one
+     * statement**, false otherwise.
      */
     private fun checkDotMaxStatementsCount(): Boolean =
         dotMaxStatementsCount == null || (dotRootGraph != null && dotRootGraph.stmts.size < dotMaxStatementsCount)

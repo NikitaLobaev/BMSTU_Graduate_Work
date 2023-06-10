@@ -14,9 +14,21 @@ data class JezResult(
     sealed class SolutionState {
 
         /**
-         * Describes state, when equation was successfully solved.
+         * Describes states, when equation was successfully solved.
          */
-        object Found : SolutionState()
+        sealed class Found : SolutionState() {
+
+            /**
+             * Describes state, when exactly the minimal solution was found.
+             */
+            object Minimal : Found()
+
+            /**
+             * Describes state, when any of existing arbitrary solutions was found, optionally minimal.
+             */
+            object Arbitrary : Found()
+
+        }
 
         /**
          * Describes states, when equation wasn't solved.

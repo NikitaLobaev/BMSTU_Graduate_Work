@@ -1,6 +1,7 @@
 package lobaevni.graduate.jez.action
 
 import lobaevni.graduate.Utils.prefixFunction
+import lobaevni.graduate.Utils.replace
 import lobaevni.graduate.jez.data.JezElement
 import lobaevni.graduate.jez.data.JezEquation
 import lobaevni.graduate.jez.data.JezEquationPart
@@ -43,45 +44,6 @@ internal sealed class JezAction {
         )
     }
 
-    /**
-     * @return [JezEquationPart] with specified [newPart] replacement of all [repPart] occurrences.
-     */
-    private fun JezEquationPart.replace(
-        repPart: Collection<JezElement>,
-        newPart: Collection<JezElement>,
-        prefixFunctionValues: Collection<Int>? = null,
-    ): JezEquationPart {
-        if (isEmpty() || repPart.isEmpty() || repPart == newPart) return this
 
-        data class Acc(
-            val element: JezElement? = null,
-            val buffer: MutableList<JezElement> = mutableListOf(),
-            val result: MutableList<JezElement> = mutableListOf(),
-        )
-
-        val result = (listOf(Acc(null)) + map { element ->
-            Acc(element)
-        }).reduce { lastAcc, curAcc ->
-            lastAcc.buffer.add(curAcc.element!!)
-
-            val repPartElement = repPart.elementAt(lastAcc.buffer.size - 1)
-            while (lastAcc.buffer.isNotEmpty() && lastAcc.buffer.last() != repPartElement) {
-                val dropCount = lastAcc.buffer.size -
-                        (prefixFunctionValues?.elementAt(lastAcc.buffer.size - 1) ?: 0)
-                for (i in 0 until dropCount) {
-                    lastAcc.result.add(lastAcc.buffer.removeFirst())
-                }
-            }
-
-            if (lastAcc.buffer.size == repPart.size) {
-                lastAcc.buffer.clear()
-                lastAcc.result.addAll(newPart)
-            }
-            lastAcc
-        }.also { acc ->
-            acc.result.addAll(acc.buffer)
-        }.result
-        return result
-    }
 
 }

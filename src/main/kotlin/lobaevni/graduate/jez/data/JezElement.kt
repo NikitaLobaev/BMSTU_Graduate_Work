@@ -42,7 +42,7 @@ sealed class JezElement {
 
             val number: Int = if (isBlock) { //TODO: оптимизировать. мы не можем так много времени тратить (на рекурсию) лишь на строковое представление блока
                 val constant = value.firstOrNull()
-                if (constant is JezGeneratedConstant && constant.isBlock) {
+                if ((constant as? JezGeneratedConstant)?.isBlock == true) {
                     constant.number * value.size
                 } else {
                     value.size

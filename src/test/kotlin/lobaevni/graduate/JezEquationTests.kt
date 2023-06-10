@@ -5,10 +5,13 @@ import lobaevni.graduate.TestUtils.toStringMap
 import lobaevni.graduate.jez.data.JezEquation
 import lobaevni.graduate.jez.data.JezResult
 import lobaevni.graduate.jez.tryFindMinimalSolution
-import kotlin.test.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
 
 private const val FAILED_MSG_WRONG_SOLUTION_STATE = "Wrong solution state"
 private const val FAILED_MSG_WRONG_SIGMA = "Wrong answer"
+private const val MAX_ITERATIONS_COUNT: Long = 50
 
 class JezEquationTests {
 
@@ -20,7 +23,7 @@ class JezEquationTests {
             "y" to "",
         )
         val result = sourceEquation.tryFindMinimalSolutionDefault()
-        assertTrue(result.solutionState is JezResult.SolutionState.Found, FAILED_MSG_WRONG_SOLUTION_STATE)
+        assertTrue(result.solutionState is JezResult.SolutionState.Found.Minimal, FAILED_MSG_WRONG_SOLUTION_STATE)
         val actualSigma = result.sigma.toStringMap()
         assertEquals(expectedSigma, actualSigma, FAILED_MSG_WRONG_SIGMA)
     }
@@ -30,7 +33,7 @@ class JezEquationTests {
         val sourceEquation = parseEquation("A", "A")
         val expectedSigma = emptyMap<String, String>()
         val result = sourceEquation.tryFindMinimalSolutionDefault()
-        assertTrue(result.solutionState is JezResult.SolutionState.Found, FAILED_MSG_WRONG_SOLUTION_STATE)
+        assertTrue(result.solutionState is JezResult.SolutionState.Found.Minimal, FAILED_MSG_WRONG_SOLUTION_STATE)
         val actualSigma = result.sigma.toStringMap()
         assertEquals(expectedSigma, actualSigma, FAILED_MSG_WRONG_SIGMA)
     }
@@ -42,7 +45,7 @@ class JezEquationTests {
             "x" to "A",
         )
         val result = sourceEquation.tryFindMinimalSolutionDefault()
-        assertTrue(result.solutionState is JezResult.SolutionState.Found, FAILED_MSG_WRONG_SOLUTION_STATE)
+        assertTrue(result.solutionState is JezResult.SolutionState.Found.Minimal, FAILED_MSG_WRONG_SOLUTION_STATE)
         val actualSigma = result.sigma.toStringMap()
         assertEquals(expectedSigma, actualSigma, FAILED_MSG_WRONG_SIGMA)
     }
@@ -54,7 +57,7 @@ class JezEquationTests {
             "x" to "B",
         )
         val result = sourceEquation.tryFindMinimalSolutionDefault()
-        assertTrue(result.solutionState is JezResult.SolutionState.Found, FAILED_MSG_WRONG_SOLUTION_STATE)
+        assertTrue(result.solutionState is JezResult.SolutionState.Found.Minimal, FAILED_MSG_WRONG_SOLUTION_STATE)
         val actualSigma = result.sigma.toStringMap()
         assertEquals(expectedSigma, actualSigma, FAILED_MSG_WRONG_SIGMA)
     }
@@ -67,7 +70,7 @@ class JezEquationTests {
             "y" to "",
         )
         val result = sourceEquation.tryFindMinimalSolutionDefault()
-        assertTrue(result.solutionState is JezResult.SolutionState.Found, FAILED_MSG_WRONG_SOLUTION_STATE)
+        assertTrue(result.solutionState is JezResult.SolutionState.Found.Minimal, FAILED_MSG_WRONG_SOLUTION_STATE)
         val actualSigma = result.sigma.toStringMap()
         assertEquals(expectedSigma, actualSigma, FAILED_MSG_WRONG_SIGMA)
     }
@@ -79,7 +82,7 @@ class JezEquationTests {
             "x" to "AAAA",
         )
         val result = sourceEquation.tryFindMinimalSolutionDefault()
-        assertTrue(result.solutionState is JezResult.SolutionState.Found, FAILED_MSG_WRONG_SOLUTION_STATE)
+        assertTrue(result.solutionState is JezResult.SolutionState.Found.Minimal, FAILED_MSG_WRONG_SOLUTION_STATE)
         val actualSigma = result.sigma.toStringMap()
         assertEquals(expectedSigma, actualSigma, FAILED_MSG_WRONG_SIGMA)
     }
@@ -92,7 +95,7 @@ class JezEquationTests {
             "y" to "AAAAA",
         )
         val result = sourceEquation.tryFindMinimalSolutionDefault()
-        assertTrue(result.solutionState is JezResult.SolutionState.Found, FAILED_MSG_WRONG_SOLUTION_STATE)
+        assertTrue(result.solutionState is JezResult.SolutionState.Found.Minimal, FAILED_MSG_WRONG_SOLUTION_STATE)
         val actualSigma = result.sigma.toStringMap()
         assertEquals(expectedSigma, actualSigma, FAILED_MSG_WRONG_SIGMA)
     }
@@ -104,7 +107,7 @@ class JezEquationTests {
             "x" to "AB",
         )
         val result = sourceEquation.tryFindMinimalSolutionDefault()
-        assertTrue(result.solutionState is JezResult.SolutionState.Found, FAILED_MSG_WRONG_SOLUTION_STATE)
+        assertTrue(result.solutionState is JezResult.SolutionState.Found.Minimal, FAILED_MSG_WRONG_SOLUTION_STATE)
         val actualSigma = result.sigma.toStringMap()
         assertEquals(expectedSigma, actualSigma, FAILED_MSG_WRONG_SIGMA)
     }
@@ -131,8 +134,8 @@ class JezEquationTests {
         storeHistory = true,
         storeEquations = true,
         heurExtNegRest = false,
-        fullTraversal = false,
-        maxIterationsCount = null,
+        fullTraversal = true,
+        maxIterationsCount = MAX_ITERATIONS_COUNT,
         dot = false,
         dotHTMLLabels = false,
         dotMaxStatementsCount = null,
