@@ -1,10 +1,6 @@
 package lobaevni.graduate.jez.action
 
 import lobaevni.graduate.jez.data.*
-import lobaevni.graduate.jez.data.JezConstant
-import lobaevni.graduate.jez.data.JezNegativeSigma
-import lobaevni.graduate.jez.data.JezState
-import lobaevni.graduate.jez.data.JezVariable
 
 internal data class JezReplaceVariablesAction(
     override val replaces: Collection<Pair<List<JezVariable>, List<JezElement>>>,

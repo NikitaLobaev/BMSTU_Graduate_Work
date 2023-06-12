@@ -83,29 +83,18 @@ sealed class JezElement {
 
         data class GeneratedBlock(
             val constant: JezConstant,
-            val powerIndexes: List<Int>, //TODO: remove list if unused
-            val additionalPower: Int = 0,
+            val powerIndex: Int,
         ) : Constant() {
-
-            constructor(
-                constant: JezConstant,
-                powerIndexes: Int,
-                additionalPower: Int = 0,
-            ) : this(constant, listOf(powerIndexes), additionalPower)
 
             override val source = constant.source
 
-            override fun toString(): String {
-                val powerIndexesStr = powerIndexes.joinToString(" + ") { "i_$it" } +
-                        if (additionalPower > 0) " + $additionalPower" else ""
-                return "BLOCK($constant, $powerIndexesStr)"
-            }
+            override fun equals(other: Any?): Boolean = constant == (other as? JezGeneratedConstantBlock)?.constant
 
-            override fun toHTMLString(): String {
-                val powerIndexesStr = powerIndexes.joinToString(" + ") { "i<sub>$it</sub>" } +
-                        if (additionalPower > 0) " + $additionalPower" else ""
-                return "${constant.toHTMLString()}<sup>$powerIndexesStr&nbsp;</sup>"
-            }
+            override fun hashCode(): Int = constant.hashCode()
+
+            override fun toString(): String = "BLOCK($constant, i_$powerIndex)"
+
+            override fun toHTMLString(): String = "${constant.toHTMLString()}<sup>i<sub>$powerIndex</sub>&nbsp;</sup>"
 
         }
 

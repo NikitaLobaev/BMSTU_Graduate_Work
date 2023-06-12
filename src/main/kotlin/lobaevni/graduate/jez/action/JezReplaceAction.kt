@@ -1,10 +1,7 @@
 package lobaevni.graduate.jez.action
 
 import lobaevni.graduate.jez.checkEmptySolution
-import lobaevni.graduate.jez.data.JezEquationPart
-import lobaevni.graduate.jez.data.JezState
-import lobaevni.graduate.jez.data.convertToHTMLString
-import lobaevni.graduate.jez.data.convertToString
+import lobaevni.graduate.jez.data.*
 
 internal abstract class JezReplaceAction : JezAction() {
 

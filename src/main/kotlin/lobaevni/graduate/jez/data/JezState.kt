@@ -99,4 +99,12 @@ internal class JezState(
     fun generateConstantBlock(constant: JezConstant): JezGeneratedConstantBlock =
         JezGeneratedConstantBlock(constant, generatedBlocksPowersCount++)
 
+    /**
+     * Removes generated constant block.
+     */
+    fun removeGeneratedConstantBlock(constant: JezGeneratedConstantBlock) {//TODO: константы никогда не удаляются, в тч простые JezGeneratedConstant
+        assert(generatedBlocksPowersCount > 0)
+        generatedBlocksPowersCount--
+    }
+
 }

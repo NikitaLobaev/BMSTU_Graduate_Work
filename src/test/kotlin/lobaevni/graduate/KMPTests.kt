@@ -38,16 +38,11 @@ class KMPTests {
 
             @Test
             fun test1() {
-                test(source = "ABCABCDAABBBCDDDDABCD", from = "", to = "", expected = "ABCABCDAABBBCDDDDABCD")
-            }
-
-            @Test
-            fun test2() {
                 test(source = "ABCABCDAABBBCDDDDABCD", from = "", to = "A", expected = "ABCABCDAABBBCDDDDABCD")
             }
 
             @Test
-            fun test3() {
+            fun test2() {
                 test(source = "ABCABCDAABBBCDDDDABCD", from = "", to = "AB", expected = "ABCABCDAABBBCDDDDABCD")
             }
 

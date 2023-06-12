@@ -5,6 +5,13 @@ import lobaevni.graduate.jez.JezHeuristics.getSideConstants
 import lobaevni.graduate.jez.JezHeuristics.tryAssumeAndApply
 import lobaevni.graduate.jez.action.*
 import lobaevni.graduate.jez.data.*
+import org.jetbrains.kotlinx.multik.api.linalg.solve
+import org.jetbrains.kotlinx.multik.api.mk
+import org.jetbrains.kotlinx.multik.api.zeros
+import org.jetbrains.kotlinx.multik.ndarray.data.D1Array
+import org.jetbrains.kotlinx.multik.ndarray.data.D2Array
+import org.jetbrains.kotlinx.multik.ndarray.data.get
+import org.jetbrains.kotlinx.multik.ndarray.data.set
 import java.math.BigInteger
 import kotlin.math.E
 import kotlin.math.pow
@@ -99,16 +106,13 @@ internal fun JezState.tryFindMinimalSolution(
     }
 
     val solutionState = if (bestSigma != null) { //solution was found
-        JezResult.SolutionState.Found.Minimal //TODO: не забыть проверять на минимальное!!!
+        JezResult.SolutionState.Found.Minimal //TODO: проверяем только если full traversal
     } else { //solution wasn't found
         if (maxIterationsCount != null && iteration > maxIterationsCount) {
             JezResult.SolutionState.NotFound.NotEnoughIterations
         } else if (history == null) {
             JezResult.SolutionState.NotFound.HistoryNotStored
-        } else if (!allowRevert && checkRevertIsPossible()) {
-            //TODO: даже если мы разрешаем откаты и он возможен (мог быть ущербный), он может быть единственный
-            // и быть случаем, когда уже рассмотрели x->Ax и x->e и других вариантов гарантированно нет и тогда
-            // можем утверждать что решения точно не существует... как обрабатывать этот кейс?
+        } else if (!allowRevert) {
             JezResult.SolutionState.NotFound.RevertNotAllowed
         } else {
             JezResult.SolutionState.NotFound.NoSolution
@@ -126,7 +130,7 @@ internal fun JezState.tryFindMinimalSolution(
  * Compression for non-crossing blocks.
  * @param maxBlockLength maximum possible length of any block in current equation.
  */
-internal fun JezState.blockCompNCr(maxBlockLength: Long): JezState {
+internal fun JezState.blockCompNCr(maxBlockLength: Long) {
     val blocks: MutableSet<List<JezConstant>> = mutableSetOf()
     listOf(equation.u, equation.v).forEach { equationPart ->
         data class Acc(
@@ -158,13 +162,12 @@ internal fun JezState.blockCompNCr(maxBlockLength: Long): JezState {
     apply(JezReplaceConstantsAction(blocks.map { block ->
         Pair(block, listOf(getOrPutGeneratedConstant(block)))
     }))
-    return this
 }
 
 /**
  * Compression for crossing blocks.
  */
-internal fun JezState.blockCompCr(): JezState {
+internal fun JezState.blockCompCr() {
     //duplicates allowed, because order is more important than space complexity
     val suggestedBlockComps = mutableMapOf<JezVariable, MutableList<JezConstant>>()
     listOf(equation.u, equation.v).forEach { equationPart ->
@@ -227,13 +230,12 @@ internal fun JezState.blockCompCr(): JezState {
             return@any true
         }
     }
-    return this
 }
 
 /**
  * Compression for non-crossing pairs.
  */
-internal fun JezState.pairCompNCr(): JezState {
+internal fun JezState.pairCompNCr() {
     val sideConstants = getSideConstants()
     val pairsMap = cartesianProduct(sideConstants.first, sideConstants.second).associateWith { false }.toMutableMap()
     listOf(equation.u, equation.v).forEach { equationPart -> //filtering existing pairs in equation
@@ -251,7 +253,6 @@ internal fun JezState.pairCompNCr(): JezState {
                 Pair(pair.toList(), listOf(getOrPutGeneratedConstant(pair.toList())))
             }
     ))
-    return this
 }
 
 /**
@@ -259,8 +260,8 @@ internal fun JezState.pairCompNCr(): JezState {
  * @param necComp heuristic whether should we necessarily perform compression for a random possibly crossing pair if
  * there really is no way to compress the equation at the algorithm iteration.
  */
-internal fun JezState.pairCompCr(necComp: Boolean): JezState {
-    if (tryAssumeAndApply() || !necComp) return this
+internal fun JezState.pairCompCr(necComp: Boolean) {
+    if (tryAssumeAndApply() || !necComp) return
 
     listOf(true, false).forEach { left ->
         equation.getUsedVariables().forEach { variable ->
@@ -271,11 +272,10 @@ internal fun JezState.pairCompCr(necComp: Boolean): JezState {
                         rightPart = if (left) listOf() else listOf(constant),
                         oldNegativeSigmaLeft = negativeSigmaLeft?.toJezNegativeSigma()?.filterKeys { it == variable },
                         oldNegativeSigmaRight = negativeSigmaRight?.toJezNegativeSigma()?.filterKeys { it == variable },
-                ))) return this
+                ))) return
             }
         }
     }
-    return this
 }
 
 /**
@@ -308,7 +308,6 @@ internal fun JezState.processSolution(lastSigma: JezSigma?): JezSigma {
  * @return true, if [JezCropAction] was successfully applied to the equation, false otherwise.
  */
 internal fun JezState.tryShorten(): Boolean {
-    //TODO: maybe collapse adjacent parametrized blocks
     val leftIndex = equation.u.zip(equation.v).indexOfFirst { (uElement, vElement) ->
         uElement != vElement
     }.takeIf { it != -1 } ?: minOf(equation.u.size, equation.v.size)
@@ -383,22 +382,28 @@ internal fun JezState.checkEmptySolution(): Boolean {
     )
 
     /**
-     * TODO
+     * Groups each constant together with similar neighbours (like flatten).
      */
     fun List<JezConstant>.groupBySource(): List<JezEquationEntry> = this
         .map { constant ->
-            mutableListOf(JezEquationEntry(constant.source, mutableListOf(constant)))
+            val source = when (constant) {
+                is JezGeneratedConstant -> constant.value.first().source
+                else -> constant.source
+            }
+            mutableListOf(JezEquationEntry(source, mutableListOf(constant)))
         }
-        .reduce { last, current ->
+        .reduceOrNull { last, current ->
             if (last.last().source == current.first().source) {
                 last.last().entries.addAll(current.first().entries)
             } else {
                 last.addAll(current)
             }
-            return@reduce last
-        }
+            last
+        } ?: listOf()
 
-    //val d: D2Array<Int> = mk.ndarray(mk[mk[2, 3, -1], mk[1, -2, 1], mk[1, 0, 2]])
+    val matrixA: D2Array<Long> = mk.zeros(100, 100)
+    val vectorB: D1Array<Long> = mk.zeros(100)
+    var curRowIndex = 0
 
     val u = equation.u.filterIsInstance<JezConstant>().groupBySource()
     val v = equation.v.filterIsInstance<JezConstant>().groupBySource()
@@ -406,48 +411,81 @@ internal fun JezState.checkEmptySolution(): Boolean {
     val vIterator = v.iterator()
     uLoop@ while (uIterator.hasNext()) {
         val uEntry = uIterator.next()
+        var updated = false
         vLoop@ while (vIterator.hasNext()) {
             val vEntry = vIterator.next()
             if (vEntry.source != uEntry.source) {
-                //TODO
+                vEntry.entries.forEach { constant ->
+                    when (constant) {
+                        is JezGeneratedConstantBlock -> {
+                            matrixA[curRowIndex, constant.powerIndex] = 1 //TODO: отображение индексов блоков... (Set)
+                            curRowIndex++
+                        }
+                        else -> return false
+                    }
+                }
                 continue@vLoop
             }
 
-            //TODO
-            continue@uLoop
+            listOf(Pair(uEntry.entries, 1L), Pair(vEntry.entries, -1L)).forEach { pair ->
+                pair.first.forEach pairForEach@ { constant ->
+                    when (constant) {
+                        is JezGeneratedConstantBlock -> {
+                            matrixA[curRowIndex, constant.powerIndex] += pair.second
+                            return@pairForEach
+                        }
+                        is JezGeneratedConstant -> {
+                            if (constant.isBlock) {
+                                vectorB[curRowIndex] += pair.second * constant.value.size
+                                return@pairForEach
+                            }
+                        }
+                    }
+                    vectorB[curRowIndex] += pair.second
+                }
+            }
+            curRowIndex++
+            updated = true
             break@vLoop
         }
-        return false
+        if (!updated) return false
     }
+    vLoop@ while (vIterator.hasNext()) {
+        val vEntry = vIterator.next()
+        vEntry.entries.forEach { constant ->
+            when (constant) {
+                is JezGeneratedConstantBlock -> {
+                    matrixA[curRowIndex, constant.powerIndex] = 1
+                    curRowIndex++
+                }
+                else -> return false
+            }
+        }
+    }
+    //на +- последнем слайде сказать что можно было бы улучшить (как подитог) и сказать про квазиевкл кольца и тп
 
-    /*val a: D2Array<Long> = mk.ndarray(mk[mk[2, 3, -1], mk[1, -2, 1], mk[1, 0, 2]])
-    val b: D1Array<Long> = mk.ndarray(mk[9, 3, 2])
-    val rrr = mk.linalg.solve(a, b)
-    print(rrr)*/
-
-    return u == v
+    //val vectorX = mk.linalg.solve(matrixA, vectorB)
+    //println("vectorX = $vectorX")
+    return true
 }
 
 /**
  * Validates current [JezEquation] length.
  */
 internal fun JezState.checkEquationLength(maxSolutionLength: Long): Boolean { //TODO: мы crop'ами теряем информацию же...
-    fun JezEquationPart.getLength(): Long = filterIsInstance<JezConstant>().sumOf { it.source.size.toLong() }
+    /*fun JezEquationPart.getLength(): Long = filterIsInstance<JezConstant>().sumOf { it.source.size.toLong() }
 
     val currentLength = equation.u.getLength() + equation.v.getLength()
-    return currentLength <= maxSolutionLength
-}
+    return currentLength <= maxSolutionLength*/
+    fun JezMutableSigma.getLength(): Long = this
+        .values
+        .sumOf { constants ->
+            constants.sumOf { constant ->
+                constant.source.size.toLong()
+            }
+        }
 
-/**
- * @return true, if revert is currently possible (there are exists parent node in history, which we can revert and try
- * to find solution in another branch), false otherwise.
- */
-internal fun JezState.checkRevertIsPossible(): Boolean {
-    var curNode = history?.currentGraphNode
-    while (curNode?.action != null && !curNode.action!!.isFlawed()) {
-        curNode = curNode.parentNode
-    }
-    return curNode != null
+    return sigmaLeft.getLength() + sigmaRight.getLength() <= maxSolutionLength
 }
 
 /**
@@ -462,6 +500,9 @@ internal fun JezAction.isFlawed(): Boolean =
                 pair.second.any { generatedConstant ->
                     generatedConstant.isBlock
                 }
+                /*pair.first.any { generatedConstant ->
+                    (generatedConstant as? JezGeneratedConstant)?.isBlock == true
+                } || pair.second.any { generatedConstant -> generatedConstant.isBlock }*/ //TODO
             }
         else -> false
     }

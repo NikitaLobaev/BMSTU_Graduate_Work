@@ -2,10 +2,7 @@ package lobaevni.graduate.jez.action
 
 import lobaevni.graduate.Utils.prefixFunction
 import lobaevni.graduate.Utils.replace
-import lobaevni.graduate.jez.data.JezElement
-import lobaevni.graduate.jez.data.JezEquation
-import lobaevni.graduate.jez.data.JezEquationPart
-import lobaevni.graduate.jez.data.JezState
+import lobaevni.graduate.jez.data.*
 
 /**
  * Action of recompression.

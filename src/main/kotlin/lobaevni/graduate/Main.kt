@@ -38,6 +38,7 @@ private const val ERROR_MESSAGE = "Unfortunately, exception was thrown while sol
 
 fun main(args: Array<String>) {
     val parser = ArgParser(PROGRAM_NAME)
+    //TODO: debug flag
     val allowRevert by parser.option(
         description = OPTION_ALLOW_REVERT_DESCRIPTION,
         fullName = "allow-revert",
