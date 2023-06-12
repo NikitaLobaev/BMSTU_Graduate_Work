@@ -44,13 +44,13 @@ internal data class JezReplaceVariablesAction(
             state.sigmaRight[variable]!!.addAll(rightReplacedPart)
 
             state.negativeSigmaLeft?.get(variable)?.apply {
-                leftReplacedPart.firstOrNull()?.let { constant ->
+                leftReplacedPart.firstOrNull()?.source?.firstOrNull()?.let { constant ->
                     clear()
                     add(constant)
                 }
             }
             state.negativeSigmaRight?.get(variable)?.apply {
-                rightReplacedPart.lastOrNull()?.let { constant ->
+                rightReplacedPart.lastOrNull()?.source?.lastOrNull()?.let { constant ->
                     clear()
                     add(constant)
                 }
@@ -74,6 +74,9 @@ internal data class JezReplaceVariablesAction(
                     oldNegativeSigmaLeft?.get(variable)?.let { oldNegativeSigma ->
                         addAll(oldNegativeSigma)
                     }
+                    leftReplacedPart.firstOrNull()?.source?.firstOrNull()?.let { constant ->
+                        add(constant)
+                    }
                 }
             }
             state.negativeSigmaRight?.get(variable)?.apply {
@@ -81,6 +84,9 @@ internal data class JezReplaceVariablesAction(
                     clear()
                     oldNegativeSigmaRight?.get(variable)?.let { oldNegativeSigma ->
                         addAll(oldNegativeSigma)
+                    }
+                    rightReplacedPart.lastOrNull()?.source?.lastOrNull()?.let { constant ->
+                        add(constant)
                     }
                 }
             }

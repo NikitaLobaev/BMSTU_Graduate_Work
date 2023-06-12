@@ -4,8 +4,8 @@ import java.math.BigInteger
 
 typealias JezSigma = Map<JezVariable, List<JezSourceConstant>>
 internal typealias JezMutableSigma = MutableMap<JezVariable, MutableList<JezConstant>>
-internal typealias JezNegativeSigma = Map<JezVariable, Set<JezConstant>>
-internal typealias JezMutableNegativeSigma = MutableMap<JezVariable, MutableSet<JezConstant>>
+internal typealias JezNegativeSigma = Map<JezVariable, Set<JezSourceConstant>>
+internal typealias JezMutableNegativeSigma = MutableMap<JezVariable, MutableSet<JezSourceConstant>>
 internal typealias JezReplaces = MutableMap<List<JezSourceConstant>, JezGeneratedConstant>
 internal typealias JezConstant = JezElement.Constant
 internal typealias JezSourceConstant = JezElement.Constant.Source
@@ -89,10 +89,6 @@ sealed class JezElement {
         ) : Constant() {
 
             override val source = constant.source
-
-            override fun equals(other: Any?): Boolean = constant == (other as? JezGeneratedConstantBlock)?.constant
-
-            override fun hashCode(): Int = constant.hashCode()
 
             override fun toString(): String = "BLOCK($constant, i_$powerIndex)"
 

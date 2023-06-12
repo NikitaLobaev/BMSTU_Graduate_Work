@@ -30,6 +30,9 @@ internal data class JezReplaceConstantsAction(
         replaces.forEach { (_, to) ->
             val constant = to.first()
             assert(state.removeGeneratedConstant(constant))
+            /*if (state.removeGeneratedConstant(constant)) {
+                println("WTH")
+            }*/
         }
         return true
     }

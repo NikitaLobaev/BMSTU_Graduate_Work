@@ -75,7 +75,7 @@ object JezHeuristics {
                 rightPart = if (pair.second) listOf() else listOf(pair.first.second),
                 oldNegativeSigmaLeft = negativeSigmaLeft?.toJezNegativeSigma()?.filterKeys { it == variable },
                 oldNegativeSigmaRight = negativeSigmaRight?.toJezNegativeSigma()?.filterKeys { it == variable },
-            )) || apply(JezDropVariablesAction( //TODO: переделать эвристику, есть грубая ошибка. например, для уравнения x^2 y^4 = A^3...
+            )) || apply(JezDropVariablesAction(
                 replaces = listOf(Pair(listOf(variable), listOf())),
                 indexes = mapOf(variable to Pair(
                     equation.u.getVariableIndexes(variable),

@@ -13,12 +13,12 @@ import org.jetbrains.kotlinx.multik.ndarray.data.D1Array
 import org.jetbrains.kotlinx.multik.ndarray.data.D2Array
 import org.jetbrains.kotlinx.multik.ndarray.data.get
 import org.jetbrains.kotlinx.multik.ndarray.data.set
+import org.jetbrains.kotlinx.multik.ndarray.operations.append
+import org.jetbrains.kotlinx.multik.ndarray.operations.forEach
+import org.jetbrains.kotlinx.multik.ndarray.operations.times
 import java.math.BigDecimal
 import java.math.BigInteger
-import kotlin.math.E
-import kotlin.math.pow
-import kotlin.math.roundToInt
-import kotlin.math.roundToLong
+import kotlin.math.*
 
 /**
  * Tries to find minimal solution of this [JezEquation]. The entry point to the main algorithm.
@@ -125,6 +125,8 @@ internal fun JezState.tryFindMinimalSolution(
             JezResult.SolutionState.NotFound.HistoryNotStored
         } else if (!allowRevert) {
             JezResult.SolutionState.NotFound.RevertNotAllowed
+        } else if (heurExtNegRest) {
+            JezResult.SolutionState.NotFound.HeurExtNegRestDamage
         } else {
             JezResult.SolutionState.NotFound.NoSolution
         }
@@ -385,8 +387,10 @@ internal fun JezState.revertUntilNoSolution(skips: Int = 0): Boolean {
  * @return whether an empty solution is suitable for current [JezEquation].
  */
 internal fun JezState.checkEmptySolution(): Boolean {
-    if (!allowBlockCompCr)
-        return equation.u.filterIsInstance<JezConstant>() == equation.v.filterIsInstance<JezConstant>()
+    fun checkEmptySolutionTrivial(): Boolean =
+        equation.u.filterIsInstance<JezConstant>() == equation.v.filterIsInstance<JezConstant>()
+
+    if (!allowBlockCompCr) return checkEmptySolutionTrivial()
 
     data class JezEquationEntry(
         val source: List<JezSourceConstant> = listOf(),
@@ -413,9 +417,15 @@ internal fun JezState.checkEmptySolution(): Boolean {
             last
         } ?: listOf()
 
-    val matrixA: D2Array<Long> = mk.zeros(100, 100)
-    val vectorB: D1Array<Long> = mk.zeros(100)
-    var curRowIndex = 0
+    val variablesIndexes: MutableMap<Int, Int> = mutableMapOf() //power index -> matrix index
+    equation.getUsedGeneratedConstantBlocks().forEach { block ->
+        variablesIndexes.getOrPut(block.powerIndex) { variablesIndexes.size }
+    }
+
+    if (variablesIndexes.isEmpty()) return checkEmptySolutionTrivial()
+
+    var matrixA: D2Array<Long> = mk.zeros(0, variablesIndexes.size)
+    var vectorB: D1Array<Long> = mk.zeros(0)
 
     val u = equation.u.filterIsInstance<JezConstant>().groupBySource()
     val v = equation.v.filterIsInstance<JezConstant>().groupBySource()
@@ -430,8 +440,10 @@ internal fun JezState.checkEmptySolution(): Boolean {
                 vEntry.entries.forEach { constant ->
                     when (constant) {
                         is JezGeneratedConstantBlock -> {
-                            matrixA[curRowIndex, constant.powerIndex] = 1 //TODO: отображение индексов блоков... (Set)
-                            curRowIndex++
+                            val matrixARow: D2Array<Long> = mk.zeros(1, variablesIndexes.size)
+                            matrixARow[0, variablesIndexes[constant.powerIndex]!!] = 1
+                            vectorB = vectorB.append(0)
+                            matrixA = matrixA.append(matrixARow).reshape(vectorB.size, variablesIndexes.size)
                         }
                         else -> return false
                     }
@@ -439,24 +451,26 @@ internal fun JezState.checkEmptySolution(): Boolean {
                 continue@vLoop
             }
 
+            val matrixARow: D1Array<Long> = mk.zeros(variablesIndexes.size)
+            vectorB = vectorB.append(0)
             listOf(Pair(uEntry.entries, 1L), Pair(vEntry.entries, -1L)).forEach { pair ->
                 pair.first.forEach pairForEach@ { constant ->
                     when (constant) {
                         is JezGeneratedConstantBlock -> {
-                            matrixA[curRowIndex, constant.powerIndex] += pair.second
+                            matrixARow[variablesIndexes[constant.powerIndex]!!] += pair.second
                             return@pairForEach
                         }
                         is JezGeneratedConstant -> {
                             if (constant.isBlock) {
-                                vectorB[curRowIndex] += pair.second * constant.value.size
+                                vectorB[vectorB.size - 1] += pair.second * constant.value.size
                                 return@pairForEach
                             }
                         }
                     }
-                    vectorB[curRowIndex] += pair.second
+                    vectorB[vectorB.size - 1] += pair.second
                 }
             }
-            curRowIndex++
+            matrixA = matrixA.append(matrixARow).reshape(vectorB.size, variablesIndexes.size)
             updated = true
             break@vLoop
         }
@@ -467,18 +481,71 @@ internal fun JezState.checkEmptySolution(): Boolean {
         vEntry.entries.forEach { constant ->
             when (constant) {
                 is JezGeneratedConstantBlock -> {
-                    matrixA[curRowIndex, constant.powerIndex] = 1
-                    curRowIndex++
+                    val matrixARow: D2Array<Long> = mk.zeros(1, variablesIndexes.size)
+                    matrixARow[0, variablesIndexes[constant.powerIndex]!!] = 1
+                    vectorB = vectorB.append(0)
+                    matrixA = matrixA.append(matrixARow).reshape(vectorB.size, variablesIndexes.size)
                 }
                 else -> return false
             }
         }
     }
-    //на +- последнем слайде сказать что можно было бы улучшить (как подитог) и сказать про квазиевкл кольца и тп
 
+    logger.debug("trying to solve SLDE with matrix A={} and vector B={}",
+        matrixA.toString().replace("\n", " "), vectorB)
+
+    //TODO: we can try add a priori information and only after Gauss-Jordan "half-elimination" perform a complete search
     //val vectorX = mk.linalg.solve(matrixA, vectorB)
-    //println("vectorX = $vectorX")
-    return true
+
+    var maxValue: Long = 0
+    for (rowIndex in 0 until vectorB.size) {
+        var minValue = Long.MAX_VALUE
+        if (vectorB[rowIndex] < 0) {
+            vectorB[rowIndex] *= -1L
+            for (columnIndex in 0 until matrixA[rowIndex].size) {
+                matrixA[rowIndex, columnIndex] *= -1L
+                minValue = min(minValue, abs(matrixA[rowIndex, columnIndex]))
+            }
+        }
+        maxValue = max(maxValue, vectorB[rowIndex] / minValue) //round down
+    }
+
+    /**
+     * Check satisfiability of constructed SLDE with specified substitution.
+     */
+    fun checkSatisfiability(substitution: Array<Long>): Boolean {
+        for (rowIndex in 0 until vectorB.size) {
+            var sum: Long = 0
+            for (columnIndex in 0 until matrixA[rowIndex].size) {
+                sum += matrixA[rowIndex, columnIndex] * substitution.elementAt(columnIndex)
+            }
+            if (sum != vectorB[rowIndex]) return false
+        }
+        return true
+    }
+
+    /**
+     * Generates and processes all possible combinations of variables values in current constructed SLDE.
+     */
+    fun checkAllCombinations(maxValue: Long): Boolean {
+        val currentCombination = Array<Long>(variablesIndexes.size) { 0 }
+        while (true) {
+            if (checkSatisfiability(currentCombination)) return true
+
+            val index = currentCombination.indexOfFirst { it == maxValue }
+            if (index < 0) break
+
+            currentCombination[index]++
+            for (i in index + 1 until currentCombination.size) {
+                currentCombination[i] = 0
+            }
+        }
+        return false
+    }
+
+    val result = checkAllCombinations(maxValue)
+    logger.debug("SLDE was solved - {}", result)
+    return result
 }
 
 /**

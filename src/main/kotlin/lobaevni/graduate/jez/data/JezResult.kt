@@ -58,6 +58,11 @@ data class JezResult(
              */
             object RevertNotAllowed : NotFound()
 
+            /**
+             * Describes state, when heuristic of extended negative restriction might have been a reason of failure.
+             */
+            object HeurExtNegRestDamage : NotFound()
+
         }
 
     }

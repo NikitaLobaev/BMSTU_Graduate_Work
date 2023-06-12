@@ -102,7 +102,7 @@ internal class JezState(
     /**
      * Removes generated constant block.
      */
-    fun removeGeneratedConstantBlock(constant: JezGeneratedConstantBlock) {//TODO: константы никогда не удаляются, в тч простые JezGeneratedConstant
+    fun removeGeneratedConstantBlock(constant: JezGeneratedConstantBlock) {//TODO: we should decrement counter properly
         assert(generatedBlocksPowersCount > 0)
         generatedBlocksPowersCount--
     }
