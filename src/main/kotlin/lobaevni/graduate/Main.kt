@@ -72,7 +72,7 @@ fun main(args: Array<String>) {
         description = OPTION_MAX_ITERATIONS_COUNT_DESCRIPTION,
         fullName = "max-iters-count",
         type = ArgType.Int,
-    ) //TODO: добавить ограничение на минимальное значение (что не меньше единицы (не можем не класть стартовый узел))
+    )
     val dotFilename by parser.option(
         description = OPTION_DOT_FILENAME_DESCRIPTION,
         fullName = "dot-filename",
@@ -89,6 +89,9 @@ fun main(args: Array<String>) {
         type = ArgType.Int,
     )
     parser.parse(args)
+
+    assert(maxIterationsCount == null || maxIterationsCount!! > 1)
+    assert(dotMaxStatementsCount == null || dotMaxStatementsCount!! > 0)
 
     val letters: List<JezSourceConstant>
     val variables: List<JezVariable>

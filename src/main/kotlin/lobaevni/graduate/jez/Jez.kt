@@ -13,9 +13,11 @@ import org.jetbrains.kotlinx.multik.ndarray.data.D1Array
 import org.jetbrains.kotlinx.multik.ndarray.data.D2Array
 import org.jetbrains.kotlinx.multik.ndarray.data.get
 import org.jetbrains.kotlinx.multik.ndarray.data.set
+import java.math.BigDecimal
 import java.math.BigInteger
 import kotlin.math.E
 import kotlin.math.pow
+import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 
 /**
@@ -54,8 +56,10 @@ internal fun JezState.tryFindMinimalSolution(
     assert(maxIterationsCount == null || maxIterationsCount > BigInteger.ZERO)
 
     var iteration = BigInteger.ZERO
-    val maxSolutionLength: Long = (E.pow(E.pow(equation.u.size + equation.v.size))).roundToLong() //TODO: ok?
-    val maxBlockLength: Long = 4L.toDouble().pow(equation.u.size + equation.v.size).roundToLong() //TODO: validate input equation too
+    val maxSolutionLength: BigInteger = BigInteger.ONE +
+        BigDecimal(E.pow(E)).pow(equation.u.size + equation.v.size).toBigInteger() //inclusive
+    val maxBlockLength: BigInteger =
+        BigDecimal(4).pow(equation.u.size + equation.v.size).toBigInteger() //non-inclusive
     var bestSigma: JezSigma? = null
     mainLoop@ while (true) {
         logger.debug("main loop iteration #{}", iteration)
@@ -133,7 +137,7 @@ internal fun JezState.tryFindMinimalSolution(
  * Compression for non-crossing blocks.
  * @param maxBlockLength maximum possible length of any block in current equation.
  */
-internal fun JezState.blockCompNCr(maxBlockLength: Long) {
+internal fun JezState.blockCompNCr(maxBlockLength: BigInteger) {
     val blocks: MutableSet<List<JezConstant>> = mutableSetOf()
     listOf(equation.u, equation.v).forEach { equationPart ->
         data class Acc(
@@ -150,7 +154,8 @@ internal fun JezState.blockCompNCr(maxBlockLength: Long) {
                     Acc(currentAcc.element, lastAcc.count + 1)
                 } else {
                     if (lastAcc.element is JezConstant && lastAcc.count > 1) {
-                        if (lastAcc.element.source.size.toLong() * lastAcc.count >= maxBlockLength) {
+                        val curBlockLength = BigInteger.valueOf(lastAcc.element.source.size.toLong() * lastAcc.count)
+                        if (curBlockLength > maxBlockLength) {
                             throw JezEquationNotConvergesException()
                         }
 
@@ -476,16 +481,12 @@ internal fun JezState.checkEmptySolution(): Boolean {
 /**
  * Validates current [JezEquation] length.
  */
-internal fun JezState.checkEquationLength(maxSolutionLength: Long): Boolean { //TODO: мы crop'ами теряем информацию же...
-    /*fun JezEquationPart.getLength(): Long = filterIsInstance<JezConstant>().sumOf { it.source.size.toLong() }
-
-    val currentLength = equation.u.getLength() + equation.v.getLength()
-    return currentLength <= maxSolutionLength*/
-    fun JezMutableSigma.getLength(): Long = this
+internal fun JezState.checkEquationLength(maxSolutionLength: BigInteger): Boolean {
+    fun JezMutableSigma.getLength(): BigInteger = this
         .values
         .sumOf { constants ->
             constants.sumOf { constant ->
-                constant.source.size.toLong()
+                BigInteger.valueOf(constant.source.size.toLong())
             }
         }
 
