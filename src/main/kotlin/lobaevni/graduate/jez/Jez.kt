@@ -502,9 +502,6 @@ internal fun JezAction.isFlawed(): Boolean =
                 pair.second.any { generatedConstant ->
                     generatedConstant.isBlock
                 }
-                /*pair.first.any { generatedConstant ->
-                    (generatedConstant as? JezGeneratedConstant)?.isBlock == true
-                } || pair.second.any { generatedConstant -> generatedConstant.isBlock }*/ //TODO
             }
         else -> false
     }
