@@ -17,7 +17,7 @@ class JezAlgorithmTests {
     @Nested
     inner class FullTraversal {
 
-        private val maxIterationsCount = BigInteger.valueOf(50)
+        private val maxIterationsCount = BigInteger.valueOf(250)
 
         @Test
         fun test1() {

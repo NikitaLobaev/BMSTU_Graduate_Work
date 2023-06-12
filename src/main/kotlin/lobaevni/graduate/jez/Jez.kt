@@ -113,7 +113,11 @@ internal fun JezState.tryFindMinimalSolution(
     }
 
     val solutionState = if (bestSigma != null) { //solution was found
-        JezResult.SolutionState.Found.Minimal //TODO: проверяем только если full traversal
+        if (fullTraversal && iteration <= maxIterationsCount) {
+            JezResult.SolutionState.Found.Minimal
+        } else {
+            JezResult.SolutionState.Found.Arbitrary
+        }
     } else { //solution wasn't found
         if (maxIterationsCount != null && iteration > maxIterationsCount) {
             JezResult.SolutionState.NotFound.NotEnoughIterations
