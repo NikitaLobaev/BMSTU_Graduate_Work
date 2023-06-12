@@ -7,18 +7,22 @@ import lobaevni.graduate.jez.data.JezVariable
 object TestUtils {
 
     /**
-     * Parses [JezEquation] in kind of "[u] = [v]".
+     * Parses [JezEquation] in kind of "u=v".
      */
-    fun parseEquation(u: String, v: String): JezEquation =
-        JezEquation(
-            u = parseEquationPart(u),
-            v = parseEquationPart(v),
+    fun parseEquation(equation: String): JezEquation {
+        val equationParts = equation.split("=")
+        assert(equationParts.size == 2)
+        return JezEquation(
+            u = parseEquationPart(equationParts[0]),
+            v = parseEquationPart(equationParts[1]),
         )
+    }
 
     /**
      * Parses part (left or right) of the [JezEquation].
      */
     private fun parseEquationPart(u: String): JezEquationPart = u
+        .trim()
         .map {
             if (it.isUpperCase()) { //constant
                 JezSourceConstant(it)

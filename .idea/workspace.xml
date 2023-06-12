@@ -5,8 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="85e7987e-bcf2-4b0a-8323-009184876a50" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/test/kotlin/lobaevni/graduate/JezAlgorithmTests.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/kotlin/lobaevni/graduate/KMPTests.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/kotlin/lobaevni/graduate/KMPTests.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/kotlin/lobaevni/graduate/JezEquationTests.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/kotlin/lobaevni/graduate/TestUtils.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/kotlin/lobaevni/graduate/TestUtils.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -91,8 +93,8 @@
       <recent name="lobaevni.graduate.jez.history" />
     </key>
   </component>
-  <component name="RunManager" selected="Gradle.KMPTests">
-    <configuration name="JezEquationTests" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+  <component name="RunManager" selected="Gradle.JezAlgorithmTests">
+    <configuration name="JezAlgorithmTests" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
@@ -105,15 +107,15 @@
           <list>
             <option value=":test" />
             <option value="--tests" />
-            <option value="&quot;lobaevni.graduate.JezEquationTests&quot;" />
+            <option value="&quot;lobaevni.graduate.JezAlgorithmTests&quot;" />
           </list>
         </option>
-        <option name="vmOptions" value="-ea" />
+        <option name="vmOptions" value="" />
       </ExternalSystemSettings>
       <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
       <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
       <DebugAllEnabled>false</DebugAllEnabled>
-      <ForceTestExec>false</ForceTestExec>
+      <ForceTestExec>true</ForceTestExec>
       <method v="2" />
     </configuration>
     <configuration name="KMPTests" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
@@ -175,16 +177,16 @@
       </method>
     </configuration>
     <list>
+      <item itemvalue="Gradle.JezAlgorithmTests" />
       <item itemvalue="Gradle.KMPTests" />
       <item itemvalue="Gradle.PrefixFunctionTests" />
-      <item itemvalue="Gradle.JezEquationTests" />
       <item itemvalue="Kotlin.MainKt" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Gradle.JezAlgorithmTests" />
         <item itemvalue="Gradle.KMPTests" />
         <item itemvalue="Kotlin.MainKt" />
-        <item itemvalue="Gradle.JezEquationTests" />
         <item itemvalue="Gradle.PrefixFunctionTests" />
       </list>
     </recent_temporary>
