@@ -309,9 +309,8 @@ internal fun JezState.processSolution(lastSigma: JezSigma?): JezSigma {
         return lastSigma!!
     }
 
-    val curSigma = sigma
-    return if (lastSigma == null || curSigma.getLength() < lastSigma.getLength()) {
-        curSigma
+    return if (lastSigma == null || sigmaLeft.getLength() + sigmaRight.getLength() < lastSigma.getLength()) {
+        sigma
     } else lastSigma
 }
 
@@ -486,15 +485,9 @@ internal fun JezState.checkEmptySolution(): Boolean {
  * Validates current [JezEquation] length.
  */
 internal fun JezState.checkEquationLength(maxSolutionLength: BigInteger): Boolean {
-    fun JezMutableSigma.getLength(): BigInteger = this
-        .values
-        .sumOf { constants ->
-            constants.sumOf { constant ->
-                BigInteger.valueOf(constant.source.size.toLong())
-            }
-        }
-
-    return sigmaLeft.getLength() + sigmaRight.getLength() <= maxSolutionLength
+    val curLength = sigmaLeft.getLength() + sigmaRight.getLength()
+    logger.debug("current sigma length is {} (max length is {})", curLength, maxSolutionLength)
+    return curLength <= maxSolutionLength
 }
 
 /**

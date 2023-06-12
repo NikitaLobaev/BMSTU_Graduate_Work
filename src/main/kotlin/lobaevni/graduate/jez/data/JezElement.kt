@@ -1,5 +1,7 @@
 package lobaevni.graduate.jez.data
 
+import java.math.BigInteger
+
 typealias JezSigma = Map<JezVariable, List<JezSourceConstant>>
 internal typealias JezMutableSigma = MutableMap<JezVariable, MutableList<JezConstant>>
 internal typealias JezNegativeSigma = Map<JezVariable, Set<JezConstant>>
@@ -133,10 +135,24 @@ internal fun JezMutableNegativeSigma.toJezNegativeSigma(): JezNegativeSigma = th
     }
 
 /**
- * @return length of this [JezSigma] (sum of lengths of each variable).
+ * @return length of this sigma (sum of lengths of each variable).
  */
-internal fun JezSigma.getLength() = this
+@JvmName("jezSigmaGetLength")
+fun JezSigma.getLength(): BigInteger = this
     .values
-    .sumOf { constants ->
-        constants.size
+    .flatten()
+    .getLength()
+
+/**
+ * @see getLength
+ */
+@JvmName("jezMutableSigmaGetLength")
+fun JezMutableSigma.getLength(): BigInteger = this
+    .values
+    .flatten()
+    .getLength()
+
+private fun Collection<JezConstant>.getLength(): BigInteger = this
+    .sumOf { constant ->
+        BigInteger.valueOf(constant.source.size.toLong())
     }

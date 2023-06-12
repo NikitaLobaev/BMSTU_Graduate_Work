@@ -7,7 +7,7 @@
     <list default="true" id="85e7987e-bcf2-4b0a-8323-009184876a50" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/Jez.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/Jez.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/kotlin/lobaevni/graduate/JezAlgorithmTests.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/kotlin/lobaevni/graduate/JezAlgorithmTests.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/data/JezElement.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/data/JezElement.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -168,7 +168,7 @@
     <configuration name="MainKt" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="lobaevni.graduate.MainKt" />
       <module name="BMSTU_Graduate_Work.main" />
-      <option name="PROGRAM_PARAMETERS" value="--dot-filename output/representation --dot-html-labels --max-iters-count 350 --disallow-cycles --dot-max-stmts-count 200 --allow-revert --full-traversal" />
+      <option name="PROGRAM_PARAMETERS" value="--dot-filename output/representation --dot-html-labels --max-iters-count 100 --disallow-cycles --dot-max-stmts-count 200 --allow-revert --full-traversal" />
       <shortenClasspath name="NONE" />
       <option name="VM_PARAMETERS" value="-ea -Dorg.slf4j.simpleLogger.defaultLogLevel=DEBUG" />
       <method v="2">
