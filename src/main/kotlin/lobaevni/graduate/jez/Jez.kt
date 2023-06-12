@@ -5,6 +5,7 @@ import lobaevni.graduate.jez.JezHeuristics.getSideConstants
 import lobaevni.graduate.jez.JezHeuristics.tryAssumeAndApply
 import lobaevni.graduate.jez.action.*
 import lobaevni.graduate.jez.data.*
+import lobaevni.graduate.logger
 import org.jetbrains.kotlinx.multik.api.linalg.solve
 import org.jetbrains.kotlinx.multik.api.mk
 import org.jetbrains.kotlinx.multik.api.zeros
@@ -57,6 +58,8 @@ internal fun JezState.tryFindMinimalSolution(
     val maxBlockLength: Long = 4L.toDouble().pow(equation.u.size + equation.v.size).roundToLong() //TODO: validate input equation too
     var bestSigma: JezSigma? = null
     mainLoop@ while (true) {
+        logger.debug("main loop iteration #{}", iteration)
+
         if (checkTrivialContradictions()) break@mainLoop
         if (checkEmptySolution()) {
             bestSigma = processSolution(bestSigma)
@@ -284,8 +287,7 @@ internal fun JezState.pairCompCr(necComp: Boolean) {
  */
 internal fun JezState.processSolution(lastSigma: JezSigma?): JezSigma {
     val curUsedVariables = equation.getUsedVariables()
-    if (curUsedVariables.isNotEmpty()) {
-        assert(apply(JezDropVariablesAction(
+    if (curUsedVariables.isNotEmpty() && !apply(JezDropVariablesAction(
             variables = curUsedVariables.toList(),
             indexes = curUsedVariables.associateWith { variable ->
                 Pair(
@@ -293,7 +295,9 @@ internal fun JezState.processSolution(lastSigma: JezSigma?): JezSigma {
                     equation.v.getVariableIndexes(variable),
                 )
             },
-        )))
+        ))) {
+        assert(lastSigma != null)
+        return lastSigma!!
     }
 
     val curSigma = sigma

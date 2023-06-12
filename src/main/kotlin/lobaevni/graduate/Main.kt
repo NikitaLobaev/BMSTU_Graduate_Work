@@ -8,9 +8,12 @@ import lobaevni.graduate.jez.data.JezEquation
 import lobaevni.graduate.jez.data.JezResult
 import lobaevni.graduate.jez.data.JezSourceConstant
 import lobaevni.graduate.jez.data.JezVariable
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.math.BigInteger
 
 private const val PROGRAM_NAME = "jez"
+private const val LOGGER_NAME = "JezLogger"
 
 private const val OPTION_ALLOW_REVERT_DESCRIPTION =
     "Allow reverting of recompression actions until no solution found"
@@ -36,9 +39,10 @@ private const val SOLUTION_STATE_MESSAGE = "Solution state: "
 private const val NOT_SOLVED_MESSAGE = "Unfortunately, solution wasn't found."
 private const val ERROR_MESSAGE = "Unfortunately, exception was thrown while solving the equation."
 
+val logger: Logger = LoggerFactory.getLogger(LOGGER_NAME)
+
 fun main(args: Array<String>) {
     val parser = ArgParser(PROGRAM_NAME)
-    //TODO: debug flag
     val allowRevert by parser.option(
         description = OPTION_ALLOW_REVERT_DESCRIPTION,
         fullName = "allow-revert",

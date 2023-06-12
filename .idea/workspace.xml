@@ -6,14 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="85e7987e-bcf2-4b0a-8323-009184876a50" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/Main.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/Main.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/Jez.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/Jez.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/JezAction.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/JezAction.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/JezReplaceAction.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/JezReplaceAction.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/JezReplaceVariablesAction.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/JezReplaceVariablesAction.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/data/JezElement.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/data/JezElement.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/data/JezState.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/data/JezState.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/kotlin/lobaevni/graduate/KMPTests.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/kotlin/lobaevni/graduate/KMPTests.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -98,7 +93,7 @@
       <recent name="lobaevni.graduate.jez.history" />
     </key>
   </component>
-  <component name="RunManager" selected="Gradle.JezAlgorithmTests">
+  <component name="RunManager" selected="Kotlin.MainKt">
     <configuration name="JezAlgorithmTests" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -176,7 +171,7 @@
       <module name="BMSTU_Graduate_Work.main" />
       <option name="PROGRAM_PARAMETERS" value="--dot-filename output/representation --dot-html-labels --max-iters-count 150 --disallow-cycles --dot-max-stmts-count 200 --allow-revert --full-traversal" />
       <shortenClasspath name="NONE" />
-      <option name="VM_PARAMETERS" value="-ea" />
+      <option name="VM_PARAMETERS" value="-ea -Dorg.slf4j.simpleLogger.defaultLogLevel=DEBUG" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -189,8 +184,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Gradle.JezAlgorithmTests" />
         <item itemvalue="Kotlin.MainKt" />
+        <item itemvalue="Gradle.JezAlgorithmTests" />
         <item itemvalue="Gradle.KMPTests" />
         <item itemvalue="Gradle.PrefixFunctionTests" />
       </list>
@@ -238,9 +233,9 @@
           <option name="timeStamp" value="35" />
         </breakpoint>
         <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/Jez.kt</url>
-          <line>403</line>
-          <option name="timeStamp" value="58" />
+          <url>file://$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/JezDropVariablesAction.kt</url>
+          <line>42</line>
+          <option name="timeStamp" value="62" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
