@@ -8,10 +8,11 @@ import lobaevni.graduate.jez.tryFindMinimalSolution
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.math.BigInteger
 
 private const val FAILED_MSG_WRONG_SOLUTION_STATE = "Wrong solution state"
 private const val FAILED_MSG_WRONG_SIGMA = "Wrong answer"
-private const val MAX_ITERATIONS_COUNT: Long = 50
+private val MAX_ITERATIONS_COUNT = BigInteger.valueOf(50)
 
 class JezEquationTests {
 

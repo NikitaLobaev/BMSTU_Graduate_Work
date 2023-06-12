@@ -1,6 +1,7 @@
 package lobaevni.graduate.jez.data
 
 import io.github.rchowell.dotlin.DotRootGraph
+import java.math.BigInteger
 
 /**
  * Describes result of Jez algorithm.
@@ -8,6 +9,7 @@ import io.github.rchowell.dotlin.DotRootGraph
 data class JezResult(
     val sigma: JezSigma,
     val solutionState: SolutionState,
+    val iterationsCount: BigInteger,
     val historyDotGraph: DotRootGraph?,
 ) {
 

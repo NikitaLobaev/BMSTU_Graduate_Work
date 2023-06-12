@@ -4,12 +4,8 @@ import lobaevni.graduate.Utils.cartesianProduct
 import lobaevni.graduate.jez.JezHeuristics.getSideConstants
 import lobaevni.graduate.jez.JezHeuristics.tryAssumeAndApply
 import lobaevni.graduate.jez.action.*
-import lobaevni.graduate.jez.action.JezAction
-import lobaevni.graduate.jez.action.JezCropAction
-import lobaevni.graduate.jez.action.JezDropVariablesAction
-import lobaevni.graduate.jez.action.JezReplaceConstantsAction
-import lobaevni.graduate.jez.action.JezReplaceVariablesAction
 import lobaevni.graduate.jez.data.*
+import java.math.BigInteger
 import kotlin.math.E
 import kotlin.math.pow
 import kotlin.math.roundToLong
@@ -24,7 +20,7 @@ fun JezEquation.tryFindMinimalSolution(
     storeEquations: Boolean,
     heurExtNegRest: Boolean,
     fullTraversal: Boolean,
-    maxIterationsCount: Long?,
+    maxIterationsCount: BigInteger?,
     dot: Boolean,
     dotHTMLLabels: Boolean,
     dotMaxStatementsCount: Int?,
@@ -45,12 +41,12 @@ fun JezEquation.tryFindMinimalSolution(
  * Tries to find minimal solution of [this.equation]. The main algorithm.
  */
 internal fun JezState.tryFindMinimalSolution(
-    maxIterationsCount: Long?,
+    maxIterationsCount: BigInteger?,
 ): JezResult {
-    assert(maxIterationsCount == null || maxIterationsCount >= 0)
+    assert(maxIterationsCount == null || maxIterationsCount > BigInteger.ZERO)
 
-    var iteration: Long = 0
-    val maxSolutionLength: Long = (E.pow(E.pow(equation.u.size + equation.v.size))).roundToLong()
+    var iteration = BigInteger.ZERO
+    val maxSolutionLength: Long = (E.pow(E.pow(equation.u.size + equation.v.size))).roundToLong() //TODO: ok?
     val maxBlockLength: Long = 4L.toDouble().pow(equation.u.size + equation.v.size).roundToLong() //TODO: validate input equation too
     var bestSigma: JezSigma? = null
     mainLoop@ while (true) {
@@ -59,7 +55,8 @@ internal fun JezState.tryFindMinimalSolution(
             bestSigma = processSolution(bestSigma)
             break@mainLoop
         }
-        if (maxIterationsCount != null && iteration++ >= maxIterationsCount) break@mainLoop
+
+        if (iteration++ == maxIterationsCount) break@mainLoop
 
         try {
             tryShorten()
@@ -120,6 +117,7 @@ internal fun JezState.tryFindMinimalSolution(
     return JezResult(
         sigma = bestSigma ?: sigma,
         solutionState = solutionState,
+        iterationsCount = iteration,
         historyDotGraph = history?.dotRootGraph,
     )
 }

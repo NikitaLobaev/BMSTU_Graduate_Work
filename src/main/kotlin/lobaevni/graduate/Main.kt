@@ -8,6 +8,7 @@ import lobaevni.graduate.jez.data.JezEquation
 import lobaevni.graduate.jez.data.JezResult
 import lobaevni.graduate.jez.data.JezSourceConstant
 import lobaevni.graduate.jez.data.JezVariable
+import java.math.BigInteger
 
 private const val PROGRAM_NAME = "jez"
 
@@ -104,7 +105,7 @@ fun main(args: Array<String>) {
             storeEquations = disallowCycles,
             heurExtNegRest = heurExtNegRest,
             fullTraversal = fullTraversal,
-            maxIterationsCount = maxIterationsCount?.toLong(),
+            maxIterationsCount = maxIterationsCount?.let { BigInteger.valueOf(it.toLong()) },
             dot = dotFilename != null,
             dotHTMLLabels = dotHTMLLabels,
             dotMaxStatementsCount = dotMaxStatementsCount,
@@ -122,11 +123,13 @@ fun main(args: Array<String>) {
         } else {
             println(NOT_SOLVED_MESSAGE)
         }
+        println()
+        println("Iterations count: ${result.iterationsCount}")
 
         dotFilename?.let { df ->
-            result.historyDotGraph?.let {
+            result.historyDotGraph?.let { historyDotGraph ->
                 writeDOT(
-                    historyDotGraph = result.historyDotGraph,
+                    historyDotGraph = historyDotGraph,
                     filename = df,
                 )
             }
