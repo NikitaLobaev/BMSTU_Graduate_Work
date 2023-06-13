@@ -6,18 +6,16 @@ import lobaevni.graduate.jez.JezHeuristics.tryAssumeAndApply
 import lobaevni.graduate.jez.action.*
 import lobaevni.graduate.jez.data.*
 import lobaevni.graduate.logger
-import org.jetbrains.kotlinx.multik.api.linalg.solve
 import org.jetbrains.kotlinx.multik.api.mk
 import org.jetbrains.kotlinx.multik.api.zeros
 import org.jetbrains.kotlinx.multik.ndarray.data.D1Array
 import org.jetbrains.kotlinx.multik.ndarray.data.D2Array
 import org.jetbrains.kotlinx.multik.ndarray.data.get
 import org.jetbrains.kotlinx.multik.ndarray.data.set
-import org.jetbrains.kotlinx.multik.ndarray.operations.append
-import org.jetbrains.kotlinx.multik.ndarray.operations.forEach
-import org.jetbrains.kotlinx.multik.ndarray.operations.times
+import org.jetbrains.kotlinx.multik.ndarray.operations.*
 import java.math.BigDecimal
 import java.math.BigInteger
+import kotlin.collections.first
 import kotlin.math.*
 
 /**
@@ -455,12 +453,12 @@ internal fun JezState.checkEmptySolution(): Boolean {
                         }
                         is JezGeneratedConstant -> {
                             if (constant.isBlock) {
-                                vectorB[vectorB.size - 1] += pair.second * constant.value.size
+                                vectorB[vectorB.size - 1] += -pair.second * constant.value.size
                                 return@pairForEach
                             }
                         }
                     }
-                    vectorB[vectorB.size - 1] += pair.second
+                    vectorB[vectorB.size - 1] += -pair.second
                 }
             }
             matrixA = matrixA.append(matrixARow).reshape(vectorB.size, variablesIndexes.size)
@@ -492,26 +490,32 @@ internal fun JezState.checkEmptySolution(): Boolean {
 
     var maxValue: Long = 0
     for (rowIndex in 0 until vectorB.size) {
-        var minValue = Long.MAX_VALUE
         if (vectorB[rowIndex] < 0) {
             vectorB[rowIndex] *= -1L
-            for (columnIndex in 0 until matrixA[rowIndex].size) {
-                matrixA[rowIndex, columnIndex] *= -1L
-                minValue = min(minValue, abs(matrixA[rowIndex, columnIndex]))
-            }
+            matrixA[rowIndex] = matrixA[rowIndex].times(-1)
         }
-        maxValue = max(maxValue, vectorB[rowIndex] / minValue) //round down
+
+        val minDiv = matrixA[rowIndex]
+            .minBy { value ->
+                abs(value)
+            }
+            ?.takeIf { minValue -> //find minimal value, but it may be at least one
+                minValue > 0
+            } ?: 1
+        maxValue = max(maxValue, vectorB[rowIndex] / minDiv) //round down
     }
 
     /**
      * Check satisfiability of constructed SLDE with specified substitution.
      */
     fun checkSatisfiability(substitution: Array<Long>): Boolean {
+        println("checking substitution ${substitution.toList()}")
         for (rowIndex in 0 until vectorB.size) {
-            var sum: Long = 0
-            for (columnIndex in 0 until matrixA[rowIndex].size) {
-                sum += matrixA[rowIndex, columnIndex] * substitution.elementAt(columnIndex)
-            }
+            val sum = matrixA[rowIndex]
+                .mapIndexed { index, value ->
+                    value * substitution.elementAt(index)
+                }
+                .sum()
             if (sum != vectorB[rowIndex]) return false
         }
         return true
@@ -525,7 +529,7 @@ internal fun JezState.checkEmptySolution(): Boolean {
         while (true) {
             if (checkSatisfiability(currentCombination)) return true
 
-            val index = currentCombination.indexOfFirst { it == maxValue }
+            val index = currentCombination.indexOfLast { it != maxValue }
             if (index < 0) break
 
             currentCombination[index]++
@@ -536,7 +540,7 @@ internal fun JezState.checkEmptySolution(): Boolean {
         return false
     }
 
-    val result = checkAllCombinations(maxValue)
+    val result = checkAllCombinations(maxValue + 1)
     logger.debug("SLDE was solved - {}", result)
     return result
 }
