@@ -1,7 +1,7 @@
 package lobaevni.graduate.jez.data
 
 import lobaevni.graduate.jez.action.JezAction
-import lobaevni.graduate.jez.checkEmptySolution
+import lobaevni.graduate.jez.checkTrivialEmptySolution
 import lobaevni.graduate.jez.history.JezHistory
 
 class JezEquationNotConvergesException : Exception()
@@ -25,11 +25,14 @@ internal class JezState(
     val sigma: JezSigma
         get() = (sigmaLeft.keys + sigmaRight.keys)
             .associateWith { variable ->
-                (sigmaLeft[variable]!! + sigmaRight[variable]!!).toJezSourceConstants()
+                (sigmaLeft[variable]!! + sigmaRight[variable]!!).toJezSourceConstants(lastParameters)
             }
 
     val negativeSigmaLeft: JezMutableNegativeSigma? = if (heurExtNegRest) mutableMapOf() else null
     val negativeSigmaRight: JezMutableNegativeSigma? = if (heurExtNegRest) mutableMapOf() else null
+
+    //power index -> block length
+    val lastParameters: MutableMap<Int, Long>? = if (allowBlockCompCr) mutableMapOf() else null
 
     private val replaces: JezReplaces = mutableMapOf()
     private var generatedBlocksCount: Int = 0
@@ -49,7 +52,7 @@ internal class JezState(
             negativeSigmaLeft?.put(variable, mutableSetOf())
             negativeSigmaRight?.put(variable, mutableSetOf())
         }
-        history?.init(equation, converges = checkEmptySolution())
+        history?.init(equation, converges = checkTrivialEmptySolution())
     }
 
     /**

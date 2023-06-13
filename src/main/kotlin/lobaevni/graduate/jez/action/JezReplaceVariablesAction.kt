@@ -95,6 +95,8 @@ internal data class JezReplaceVariablesAction(
         return true
     }
 
+    override fun toString(): String = super.toString()
+
     /**
      * @return pair with left and right parts of [variable] value in this [JezReplaceVariablesAction]].
      */

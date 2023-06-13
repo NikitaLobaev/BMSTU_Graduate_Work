@@ -291,21 +291,10 @@ internal fun JezState.pairCompCr(necComp: Boolean) {
  * Processes currently found solution.
  * @return best sigma (with minimal length) of [lastSigma] and current.
  */
-internal fun JezState.processSolution(lastSigma: JezSigma?): JezSigma {
-    val curUsedVariables = equation.getUsedVariables()
-    apply(JezDropVariablesAction(
-        variables = curUsedVariables.toList(),
-        indexes = curUsedVariables.associateWith { variable ->
-            Pair(
-                equation.u.getVariableIndexes(variable),
-                equation.v.getVariableIndexes(variable),
-            )
-        },
-    ))
-    return if (lastSigma == null || sigmaLeft.getLength() + sigmaRight.getLength() < lastSigma.getLength()) {
+internal fun JezState.processSolution(lastSigma: JezSigma?): JezSigma = //TODO
+    if (lastSigma == null || sigmaLeft.getLength() + sigmaRight.getLength() < lastSigma.getLength()) {
         sigma
     } else lastSigma
-}
 
 /**
  * Shortening of the [JezEquation]. Cuts similar prefixes and suffixes of the both [JezEquation] parts (guaranteed
@@ -377,12 +366,37 @@ internal fun JezState.revertUntilNoSolution(skips: Int = 0): Boolean {
 /**
  * @return whether an empty solution is suitable for current [JezEquation].
  */
-internal fun JezState.checkEmptySolution(): Boolean {
-    fun checkEmptySolutionTrivial(): Boolean =
-        equation.u.filterIsInstance<JezConstant>() == equation.v.filterIsInstance<JezConstant>()
+internal fun JezState.checkEmptySolution(): Boolean =
+    if (allowBlockCompCr) {
+        checkParametrizedEmptySolution()
+    } else checkTrivialEmptySolution()
 
-    if (!allowBlockCompCr) return checkEmptySolutionTrivial()
+/**
+ * @see [checkEmptySolution].
+ */
+internal fun JezState.checkTrivialEmptySolution(): Boolean {
+    val result = equation.u.filterIsInstance<JezConstant>() == equation.v.filterIsInstance<JezConstant>()
+    if (result) {
+        val curUsedVariables = equation.getUsedVariables()
+        apply(JezDropParametersAndVariablesAction(
+            elements = curUsedVariables,
+            indexes = curUsedVariables.associateWith { variable ->
+                Pair(
+                    equation.u.getElementIndexes(variable),
+                    equation.v.getElementIndexes(variable),
+                )
+            },
+        ))
+    }
+    return result
+}
 
+/**
+ * Checks empty solution for satisfiability and, if it success, applies actions of removing variables and indexes of
+ * parametrized blocks.
+ * @return whether an empty solution is suitable for current [JezEquation].
+ */
+internal fun JezState.checkParametrizedEmptySolution(): Boolean {
     data class JezEquationEntry(
         val source: List<JezSourceConstant> = listOf(),
         val entries: MutableList<JezConstant> = mutableListOf(),
@@ -408,12 +422,12 @@ internal fun JezState.checkEmptySolution(): Boolean {
             last
         } ?: listOf()
 
-    val variablesIndexes: MutableMap<Int, Int> = mutableMapOf() //power index -> matrix index
+    val variablesIndexes: MutableMap<Int, Pair<Int, JezGeneratedConstantBlock>> = mutableMapOf() //power index -> matrix index
     equation.getUsedGeneratedConstantBlocks().forEach { block ->
-        variablesIndexes.getOrPut(block.powerIndex) { variablesIndexes.size }
+        variablesIndexes.getOrPut(block.powerIndex) { Pair(variablesIndexes.size, block) }
     }
 
-    if (variablesIndexes.isEmpty()) return checkEmptySolutionTrivial()
+    if (variablesIndexes.isEmpty()) return checkTrivialEmptySolution()
 
     var matrixA: D2Array<Long> = mk.zeros(0, variablesIndexes.size)
     var vectorB: D1Array<Long> = mk.zeros(0)
@@ -432,7 +446,7 @@ internal fun JezState.checkEmptySolution(): Boolean {
                     when (constant) {
                         is JezGeneratedConstantBlock -> {
                             val matrixARow: D2Array<Long> = mk.zeros(1, variablesIndexes.size)
-                            matrixARow[0, variablesIndexes[constant.powerIndex]!!] = 1
+                            matrixARow[0, variablesIndexes[constant.powerIndex]!!.first] = 1
                             vectorB = vectorB.append(0)
                             matrixA = matrixA.append(matrixARow).reshape(vectorB.size, variablesIndexes.size)
                         }
@@ -448,7 +462,7 @@ internal fun JezState.checkEmptySolution(): Boolean {
                 pair.first.forEach pairForEach@ { constant ->
                     when (constant) {
                         is JezGeneratedConstantBlock -> {
-                            matrixARow[variablesIndexes[constant.powerIndex]!!] += pair.second
+                            matrixARow[variablesIndexes[constant.powerIndex]!!.first] += pair.second
                             return@pairForEach
                         }
                         is JezGeneratedConstant -> {
@@ -473,7 +487,7 @@ internal fun JezState.checkEmptySolution(): Boolean {
             when (constant) {
                 is JezGeneratedConstantBlock -> {
                     val matrixARow: D2Array<Long> = mk.zeros(1, variablesIndexes.size)
-                    matrixARow[0, variablesIndexes[constant.powerIndex]!!] = 1
+                    matrixARow[0, variablesIndexes[constant.powerIndex]!!.first] = 1
                     vectorB = vectorB.append(0)
                     matrixA = matrixA.append(matrixARow).reshape(vectorB.size, variablesIndexes.size)
                 }
@@ -509,7 +523,7 @@ internal fun JezState.checkEmptySolution(): Boolean {
      * Check satisfiability of constructed SLDE with specified substitution.
      */
     fun checkSatisfiability(substitution: Array<Long>): Boolean {
-        println("checking substitution ${substitution.toList()}")
+        logger.debug("checking SLDE substitution {}", substitution.toList())
         for (rowIndex in 0 until vectorB.size) {
             val sum = matrixA[rowIndex]
                 .mapIndexed { index, value ->
@@ -524,10 +538,10 @@ internal fun JezState.checkEmptySolution(): Boolean {
     /**
      * Generates and processes all possible combinations of variables values in current constructed SLDE.
      */
-    fun checkAllCombinations(maxValue: Long): Boolean {
+    fun checkAllCombinations(maxValue: Long): Array<Long>? {
         val currentCombination = Array<Long>(variablesIndexes.size) { 0 }
         while (true) {
-            if (checkSatisfiability(currentCombination)) return true
+            if (checkSatisfiability(currentCombination)) return currentCombination
 
             val index = currentCombination.indexOfLast { it != maxValue }
             if (index < 0) break
@@ -537,12 +551,46 @@ internal fun JezState.checkEmptySolution(): Boolean {
                 currentCombination[i] = 0
             }
         }
-        return false
+        return null
     }
 
-    val result = checkAllCombinations(maxValue + 1)
-    logger.debug("SLDE was solved - {}", result)
-    return result
+    val result: Array<Long>? = checkAllCombinations(maxValue + 1)
+    logger.debug("SLDE solution is {}", result)
+
+    if (result == null) return false
+
+    val curUsedVariables = equation.getUsedVariables()
+    val variablesReplaces: List<Pair<List<JezElement>, List<JezElement>>> = curUsedVariables.map { variable ->
+        Pair(listOf(variable), listOf())
+    }
+    val blocksReplaces: List<Pair<List<JezElement>, List<JezElement>>> = variablesIndexes.map { entry ->
+        if (result[entry.value.first] > 0) {
+            //TODO: we should clear memory after revert properly
+            val generatedConstant =
+                getOrPutGeneratedConstant(List(result[entry.value.first].toInt()) { entry.value.second.constant })
+            Pair(listOf(entry.value.second), listOf(generatedConstant))
+        } else {
+            Pair(listOf(entry.value.second), listOf())
+        }
+    }
+    apply(JezDropParametersAndVariablesAction(
+        replaces = variablesReplaces + blocksReplaces,
+        indexes = curUsedVariables.associateWith { variable ->
+            Pair(
+                equation.u.getElementIndexes(variable),
+                equation.v.getElementIndexes(variable),
+            )
+        },
+    ))
+
+    lastParameters?.apply {
+        clear()
+        putAll(variablesIndexes.map { entry ->
+            Pair(entry.key, result[entry.value.first])
+        })
+    }
+
+    return true
 }
 
 /**
@@ -560,7 +608,7 @@ internal fun JezState.checkEquationLength(maxSolutionLength: BigInteger): Boolea
 internal fun JezAction.isFlawed(): Boolean =
     when (this) {
         is JezReplaceVariablesAction,
-        is JezDropVariablesAction -> true
+        is JezDropParametersAndVariablesAction -> true
         is JezReplaceConstantsAction ->
             replaces.any { pair ->
                 pair.second.any { generatedConstant ->

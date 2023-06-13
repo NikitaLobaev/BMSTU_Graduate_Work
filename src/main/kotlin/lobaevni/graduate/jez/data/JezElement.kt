@@ -114,10 +114,15 @@ sealed class JezElement {
 
 /**
  * Reveals and returns source constants values.
+ * @param parameters values of known parameters of [JezGeneratedConstantBlock] to replace with.
  */
-internal fun Collection<JezConstant>.toJezSourceConstants(): List<JezSourceConstant> = this
+internal fun Collection<JezConstant>.toJezSourceConstants(
+    parameters: Map<Int, Long>? = null,
+): List<JezSourceConstant> = this
     .map { constant ->
-        constant.source
+        if (constant is JezGeneratedConstantBlock) {
+            List(parameters?.get(constant.powerIndex)?.toInt() ?: 0) { constant.source }.flatten()
+        } else constant.source
     }
     .flatten()
 

@@ -69,7 +69,7 @@ internal class JezHistory(
         action: JezAction,
         newEquation: JezEquation,
         ignored: Boolean = false,
-        converges: Boolean = false,
+        converges: Boolean = false, //TODO: почему передаём сюда значение? можем же просто внутри тела функции вычислять, когда это надо...
     ) {
         assert(!ignored || !currentGraphNode.childNodes.contains(action))
 

@@ -1,6 +1,6 @@
 package lobaevni.graduate.jez
 
-import lobaevni.graduate.jez.action.JezDropVariablesAction
+import lobaevni.graduate.jez.action.JezDropParametersAndVariablesAction
 import lobaevni.graduate.jez.action.JezReplaceVariablesAction
 import lobaevni.graduate.jez.data.*
 import lobaevni.graduate.jez.data.JezConstant
@@ -75,13 +75,14 @@ object JezHeuristics {
                 rightPart = if (pair.second) listOf() else listOf(pair.first.second),
                 oldNegativeSigmaLeft = negativeSigmaLeft?.toJezNegativeSigma()?.filterKeys { it == variable },
                 oldNegativeSigmaRight = negativeSigmaRight?.toJezNegativeSigma()?.filterKeys { it == variable },
-            )) || apply(JezDropVariablesAction(
+            )) || apply(JezDropParametersAndVariablesAction(
                 replaces = listOf(Pair(listOf(variable), listOf())),
                 indexes = mapOf(variable to Pair(
-                    equation.u.getVariableIndexes(variable),
-                    equation.v.getVariableIndexes(variable),
+                    equation.u.getElementIndexes(variable),
+                    equation.v.getElementIndexes(variable),
                 )),
-            )))) {
+            )
+            ))) {
             throw JezEquationNotConvergesException()
         }
         return true

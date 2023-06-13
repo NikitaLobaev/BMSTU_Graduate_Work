@@ -74,11 +74,11 @@ internal data class JezCropAction(
         return true
     }
 
-    override fun toString(): String {
-        return StringBuilder("crop").apply {
+    override fun toString(): String = StringBuilder("crop")
+        .apply {
             if (leftPart.isNotEmpty()) append(" ${leftPart.size} left")
             if (rightPart.isNotEmpty()) append(" ${rightPart.size} right")
-        }.toString()
-    }
+        }
+        .toString()
 
 }
