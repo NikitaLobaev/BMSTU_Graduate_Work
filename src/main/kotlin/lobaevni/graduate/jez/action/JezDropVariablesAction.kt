@@ -36,8 +36,7 @@ internal data class JezDropVariablesAction(
                 }
             }
 
-        if (replaces.any { it.first.any { variable -> state.nonEmptyVariables.contains(variable) } } ||
-            indexes.any { !state.equation.u.validateIndexes(it.key, it.value.first) } ||
+        if (indexes.any { !state.equation.u.validateIndexes(it.key, it.value.first) } ||
             indexes.any { !state.equation.v.validateIndexes(it.key, it.value.second) }) return false
 
         return super.applyAction(state)

@@ -232,16 +232,13 @@ internal fun JezState.blockCompCr() {
             val rightBlock = if (negativeSigmaRight?.get(variable)?.contains(constant) != true) {
                 listOf(generateConstantBlock(constant))
             } else listOf()
-            if (!apply(JezReplaceVariablesAction(
-                    variable,
-                    leftPart = leftBlock,
-                    rightPart = rightBlock,
-                    oldNegativeSigmaLeft = negativeSigmaLeft?.toJezNegativeSigma()?.filterKeys { it == variable },
-                    oldNegativeSigmaRight = negativeSigmaRight?.toJezNegativeSigma()?.filterKeys { it == variable },
-                ))) return@any false
-
-            nonEmptyVariables.add(variable)
-            return@any true
+            return@any apply(JezReplaceVariablesAction(
+                variable,
+                leftPart = leftBlock,
+                rightPart = rightBlock,
+                oldNegativeSigmaLeft = negativeSigmaLeft?.toJezNegativeSigma()?.filterKeys { it == variable },
+                oldNegativeSigmaRight = negativeSigmaRight?.toJezNegativeSigma()?.filterKeys { it == variable },
+            ))
         }
     }
 }
@@ -298,19 +295,15 @@ internal fun JezState.pairCompCr(necComp: Boolean) {
  */
 internal fun JezState.processSolution(lastSigma: JezSigma?): JezSigma {
     val curUsedVariables = equation.getUsedVariables()
-    if (curUsedVariables.isNotEmpty() && !apply(JezDropVariablesAction(
-            variables = curUsedVariables.toList(),
-            indexes = curUsedVariables.associateWith { variable ->
-                Pair(
-                    equation.u.getVariableIndexes(variable),
-                    equation.v.getVariableIndexes(variable),
-                )
-            },
-        ))) {
-        assert(lastSigma != null)
-        return lastSigma!!
-    }
-
+    apply(JezDropVariablesAction(
+        variables = curUsedVariables.toList(),
+        indexes = curUsedVariables.associateWith { variable ->
+            Pair(
+                equation.u.getVariableIndexes(variable),
+                equation.v.getVariableIndexes(variable),
+            )
+        },
+    ))
     return if (lastSigma == null || sigmaLeft.getLength() + sigmaRight.getLength() < lastSigma.getLength()) {
         sigma
     } else lastSigma

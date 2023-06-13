@@ -30,7 +30,6 @@ internal class JezState(
 
     val negativeSigmaLeft: JezMutableNegativeSigma? = if (heurExtNegRest) mutableMapOf() else null
     val negativeSigmaRight: JezMutableNegativeSigma? = if (heurExtNegRest) mutableMapOf() else null
-    val nonEmptyVariables: MutableSet<JezVariable> = mutableSetOf()
 
     private val replaces: JezReplaces = mutableMapOf()
     private var generatedBlocksCount: Int = 0
