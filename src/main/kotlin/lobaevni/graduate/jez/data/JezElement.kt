@@ -138,22 +138,22 @@ internal fun JezMutableNegativeSigma.toJezNegativeSigma(): JezNegativeSigma = th
 /**
  * @return length of this sigma (sum of lengths of each variable).
  */
-@JvmName("jezSigmaGetLength")
-fun JezSigma.getLength(): BigInteger = this
+@JvmName("jezSigmaGetSourceLength")
+fun JezSigma.getSourceLength(): BigInteger = this
     .values
     .flatten()
-    .getLength()
+    .getSourceLength()
 
 /**
- * @see getLength
+ * @see getSourceLength
  */
-@JvmName("jezMutableSigmaGetLength")
-fun JezMutableSigma.getLength(): BigInteger = this
+@JvmName("jezMutableSigmaGetSourceLength")
+fun JezMutableSigma.getSourceLength(): BigInteger = this
     .values
     .flatten()
-    .getLength()
+    .getSourceLength()
 
-private fun Collection<JezConstant>.getLength(): BigInteger = this
+private fun Collection<JezConstant>.getSourceLength(): BigInteger = this
     .sumOf { constant ->
         BigInteger.valueOf(constant.source.size.toLong())
     }

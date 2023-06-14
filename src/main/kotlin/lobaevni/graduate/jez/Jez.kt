@@ -292,7 +292,7 @@ internal fun JezState.pairCompCr(necComp: Boolean) {
  * @return best sigma (with minimal length) of [lastSigma] and current.
  */
 internal fun JezState.processSolution(lastSigma: JezSigma?): JezSigma = //TODO
-    if (lastSigma == null || sigmaLeft.getLength() + sigmaRight.getLength() < lastSigma.getLength()) {
+    if (lastSigma == null || sigmaLeft.getSourceLength() + sigmaRight.getSourceLength() < lastSigma.getSourceLength()) {
         sigma
     } else lastSigma
 
@@ -601,7 +601,7 @@ internal fun JezState.checkParametrizedEmptySolution(): Boolean {
  * Validates current [JezEquation] length.
  */
 internal fun JezState.checkEquationLength(maxSolutionLength: BigInteger): Boolean {
-    val curLength = sigmaLeft.getLength() + sigmaRight.getLength()
+    val curLength = sigmaLeft.getSourceLength() + sigmaRight.getSourceLength()
     logger.debug("current sigma length is {} (max length is {})", curLength, maxSolutionLength)
     return curLength <= maxSolutionLength
 }

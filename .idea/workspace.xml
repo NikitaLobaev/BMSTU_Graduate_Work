@@ -4,17 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="85e7987e-bcf2-4b0a-8323-009184876a50" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/Jez.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/Jez.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/JezHeuristics.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/JezHeuristics.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/JezCropAction.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/JezCropAction.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/JezDropParametersAndVariablesAction.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/JezDropParametersAndVariablesAction.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/JezReplaceAction.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/JezReplaceAction.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/JezReplaceConstantsAction.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/JezReplaceConstantsAction.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/JezReplaceVariablesAction.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/JezReplaceVariablesAction.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/history/JezHistory.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/history/JezHistory.kt" afterDir="false" />
-    </list>
+    <list default="true" id="85e7987e-bcf2-4b0a-8323-009184876a50" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -98,7 +88,7 @@
       <recent name="lobaevni.graduate.jez.history" />
     </key>
   </component>
-  <component name="RunManager" selected="Kotlin.MainKt">
+  <component name="RunManager" selected="Kotlin.Jez">
     <configuration name="JezAlgorithmTests" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -171,10 +161,10 @@
       <ForceTestExec>false</ForceTestExec>
       <method v="2" />
     </configuration>
-    <configuration name="MainKt" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
+    <configuration name="Jez" type="JetRunConfigurationType" temporary="true">
       <option name="MAIN_CLASS_NAME" value="lobaevni.graduate.MainKt" />
       <module name="BMSTU_Graduate_Work.main" />
-      <option name="PROGRAM_PARAMETERS" value="--dot-filename output/representation --dot-html-labels --max-iters-count 150 --disallow-cycles --dot-max-stmts-count 200 --allow-revert --full-traversal --allow-block-comp-cr --heur-ext-neg-rest" />
+      <option name="PROGRAM_PARAMETERS" value="--dot-filename output/representation --dot-html-labels --max-iters-count 100 --disallow-cycles --dot-max-stmts-count 150 --allow-revert --full-traversal" />
       <shortenClasspath name="NONE" />
       <option name="VM_PARAMETERS" value="-ea -Dorg.slf4j.simpleLogger.defaultLogLevel=DEBUG" />
       <method v="2">
@@ -185,11 +175,11 @@
       <item itemvalue="Gradle.JezAlgorithmTests" />
       <item itemvalue="Gradle.KMPTests" />
       <item itemvalue="Gradle.PrefixFunctionTests" />
-      <item itemvalue="Kotlin.MainKt" />
+      <item itemvalue="Kotlin.Jez" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Kotlin.MainKt" />
+        <item itemvalue="Kotlin.Jez" />
         <item itemvalue="Gradle.JezAlgorithmTests" />
         <item itemvalue="Gradle.KMPTests" />
         <item itemvalue="Gradle.PrefixFunctionTests" />

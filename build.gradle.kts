@@ -33,5 +33,5 @@ kotlin {
 }
 
 application {
-    mainClass.set("MainKt")
+    mainClass.set("lobaevni.graduate.MainKt")
 }
