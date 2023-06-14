@@ -40,6 +40,8 @@ internal class JezHistory(
         }
     } else null
 
+    private var stmtsLimitExceeded: Boolean = false
+
     /**
      * Puts first record with source [equation] to a history.
      */
@@ -126,12 +128,14 @@ internal class JezHistory(
     }
 
     /**
-     * @return true, if max allowed statements count in DOT graph cannot be reached **after adding exactly one
-     * statement**, false otherwise.
+     * @return true, if max allowed statements count in DOT graph still has not ever been reached, and we can add exactly
+     * [beingAdded] statements right now, false otherwise.
      */
-    private fun checkDotMaxStatementsCount(beingAdded: Int = 1): Boolean =
-        dotMaxStatementsCount == null ||
-                (dotRootGraph != null && dotRootGraph.stmts.size + beingAdded < dotMaxStatementsCount)
+    private fun checkDotMaxStatementsCount(beingAdded: Int = 1): Boolean {
+        if (stmtsLimitExceeded || dotMaxStatementsCount == null || dotRootGraph == null) return false
+        stmtsLimitExceeded = dotRootGraph.stmts.size + beingAdded > dotMaxStatementsCount
+        return !stmtsLimitExceeded
+    }
 
     @DotExperimentalHTMLLabel
     private fun String.formatHTMLLabel(): String = "\" label=<&nbsp;$this&nbsp;> hacklabel=\""
