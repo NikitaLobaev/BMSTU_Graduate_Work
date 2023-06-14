@@ -1,18 +1,18 @@
 package lobaevni.graduate.jez.action
 
-import lobaevni.graduate.jez.checkEmptySolution
+import lobaevni.graduate.jez.checkTrivialEmptySolution
 import lobaevni.graduate.jez.data.*
 
 internal abstract class JezReplaceAction : JezAction() {
 
-    abstract val replaces: Collection<Pair<JezEquationPart, JezEquationPart>>
+    abstract val replaces: Map<out JezEquationPart, JezEquationPart>
 
     override fun applyAction(state: JezState): Boolean {
         if (replaces.isEmpty()) return false
 
         val oldEquation = state.equation
         var newEquation = oldEquation
-        for ((from, to) in replaces) {
+        replaces.forEach { (from, to) ->
             newEquation = newEquation.replace(from, to)
         }
 
@@ -33,7 +33,7 @@ internal abstract class JezReplaceAction : JezAction() {
             oldEquation = oldEquation,
             action = this,
             newEquation = state.equation,
-            converges = state.checkEmptySolution(),
+            converges = state.checkTrivialEmptySolution(),
         )
         return true
     }
@@ -43,7 +43,7 @@ internal abstract class JezReplaceAction : JezAction() {
 
         val oldEquation = state.equation
         var newEquation = oldEquation
-        for ((from, to) in replaces) {
+        replaces.forEach { (from, to) ->
             newEquation = newEquation.replace(to, from)
         }
 
@@ -64,11 +64,13 @@ internal abstract class JezReplaceAction : JezAction() {
     override fun hashCode(): Int = replaces.hashCode()
 
     override fun toString(): String = replaces
+        .entries
         .joinToString(", ") { (from, to) ->
             "${from.convertToString()} -> ${to.convertToString()}"
         }
 
     override fun toHTMLString(): String = replaces
+        .entries
         .joinToString(", ") { (from, to) ->
             "${from.convertToHTMLString()} &rarr; ${to.convertToHTMLString()}"
         }

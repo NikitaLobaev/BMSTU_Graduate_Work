@@ -3,7 +3,7 @@ package lobaevni.graduate.jez.action
 import lobaevni.graduate.jez.data.*
 
 internal data class JezDropParametersAndVariablesAction(
-    override val replaces: Collection<Pair<List<JezElement>, List<JezElement>>>,
+    override val replaces: Map<List<JezElement>, List<JezElement>>,
     private val indexes: Map<JezElement, Pair<Set<Int>, Set<Int>>>,
 ) : JezReplaceAction() {
 
@@ -11,14 +11,14 @@ internal data class JezDropParametersAndVariablesAction(
         elements: Set<JezElement>, //TODO: если сломается, заменить на List
         indexes: Map<JezElement, Pair<Set<Int>, Set<Int>>>,
     ) : this(
-        replaces = elements.map { variable ->
+        replaces = elements.associate { variable ->
             Pair(listOf(variable), listOf())
         },
         indexes,
     )
 
-    init {
-        //assert(replaces.all { it.second.isEmpty() }) //TODO
+    init { //TODO
+        //assert(replaces.all { it.second.isEmpty() })
     }
 
     override fun applyAction(state: JezState): Boolean {
@@ -43,31 +43,49 @@ internal data class JezDropParametersAndVariablesAction(
     }
 
     override fun revertAction(state: JezState): Boolean {
-        fun JezEquationPart.insertElements(elements: Map<JezElement, Set<Int>>): JezEquationPart {
-            val equationPartArray = Array<JezElement?>(size + elements.values.sumOf { indexes -> indexes.size }) {
-                null
-            }
+        fun JezEquationPart.insertElements(
+            elements: Map<JezElement, Set<Int>>,
+        ): JezEquationPart {
+            val equationPartArray = Array<JezElement?>(
+                size = size + elements.values.sumOf { indexes -> indexes.size },
+            ) { null }
+            val skipIndexes: MutableSet<Int> = mutableSetOf()
             elements.forEach { entry ->
                 entry.value.forEach { index ->
                     equationPartArray[index] = entry.key
+                    if (replaces[listOf(entry.key)]!!.isNotEmpty()) {
+                        skipIndexes.add(index)
+                    }
                 }
             }
 
             val iterator = iterator()
             val result = equationPartArray
-                .mapNotNull { element ->
-                    if (element != null) return@mapNotNull element
-                    assert(iterator.hasNext())
-                    return@mapNotNull iterator.next()
+                .dropLast(skipIndexes.size)
+                .mapIndexedNotNull { index, element ->
+                    if (element != null) {
+                        if (skipIndexes.contains(index)) {
+                            iterator.next()
+                        }
+                        return@mapIndexedNotNull element
+                    }
+                    if (!iterator.hasNext()) {
+                        println("huh")
+                    }
+                    return@mapIndexedNotNull iterator.next()
                 }
             assert(!iterator.hasNext())
-            return result.toList()
+            return result
         }
 
         val oldEquation = state.equation
         val newEquation = JezEquation(
-            u = oldEquation.u.insertElements(indexes.mapValues { entry -> entry.value.first }),
-            v = oldEquation.v.insertElements(indexes.mapValues { entry -> entry.value.second }),
+            u = oldEquation.u.insertElements(
+                elements = indexes.mapValues { entry -> entry.value.first },
+            ),
+            v = oldEquation.v.insertElements(
+                elements = indexes.mapValues { entry -> entry.value.second },
+            ),
         )
 
         if (oldEquation == newEquation) return false
@@ -86,15 +104,17 @@ internal data class JezDropParametersAndVariablesAction(
     override fun toHTMLString(): String {
         val generatedConstantBlocksStr = replaces
             .filter { replace ->
-                replace.first.first() is JezGeneratedConstantBlock && replace.second.isNotEmpty()
+                replace.key.first() is JezGeneratedConstantBlock && replace.value.isNotEmpty()
             }
+            .entries
             .joinToString(", ") { (from, to) ->
                 "i<sub>${(from.first() as JezGeneratedConstantBlock).powerIndex}</sub> &rarr; ${(to.first() as JezGeneratedConstant).number}"
             }
         val variablesStr = replaces
             .filter { replace ->
-                replace.first.first() is JezVariable
+                replace.key.first() is JezVariable
             }
+            .entries
             .joinToString(", ") { (from, _) ->
                 from.convertToHTMLString()
             } + " &rarr; &epsilon;"

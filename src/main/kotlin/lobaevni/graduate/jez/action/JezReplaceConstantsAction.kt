@@ -5,7 +5,7 @@ import lobaevni.graduate.jez.data.JezGeneratedConstant
 import lobaevni.graduate.jez.data.JezState
 
 internal data class JezReplaceConstantsAction(
-    override val replaces: Collection<Pair<List<JezConstant>, List<JezGeneratedConstant>>>,
+    override val replaces: Map<List<JezConstant>, List<JezGeneratedConstant>>,
 ) : JezReplaceAction() {
 
     init {

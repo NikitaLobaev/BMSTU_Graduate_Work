@@ -1,6 +1,6 @@
 package lobaevni.graduate.jez.action
 
-import lobaevni.graduate.jez.checkEmptySolution
+import lobaevni.graduate.jez.checkTrivialEmptySolution
 import lobaevni.graduate.jez.data.JezElement
 import lobaevni.graduate.jez.data.JezEquation
 import lobaevni.graduate.jez.data.JezState
@@ -55,7 +55,7 @@ internal data class JezCropAction(
             oldEquation = oldEquation,
             action = this,
             newEquation = state.equation,
-            converges = state.checkEmptySolution(),
+            converges = state.checkTrivialEmptySolution(),
         )
         return true
     }

@@ -5,17 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="85e7987e-bcf2-4b0a-8323-009184876a50" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/JezDropParametersAndVariablesAction.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/Jez.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/Jez.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/JezHeuristics.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/JezHeuristics.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/JezCropAction.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/JezCropAction.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/JezDropVariablesAction.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/JezDropParametersAndVariablesAction.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/JezDropParametersAndVariablesAction.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/JezReplaceAction.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/JezReplaceAction.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/JezReplaceConstantsAction.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/JezReplaceConstantsAction.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/JezReplaceVariablesAction.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/action/JezReplaceVariablesAction.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/data/JezElement.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/data/JezElement.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/data/JezEquation.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/data/JezEquation.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/data/JezState.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/data/JezState.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/history/JezHistory.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/lobaevni/graduate/jez/history/JezHistory.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />

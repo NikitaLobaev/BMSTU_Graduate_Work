@@ -3,7 +3,7 @@ package lobaevni.graduate.jez.action
 import lobaevni.graduate.jez.data.*
 
 internal data class JezReplaceVariablesAction(
-    override val replaces: Collection<Pair<List<JezVariable>, List<JezElement>>>,
+    override val replaces: Map<List<JezVariable>, List<JezElement>>,
     val oldNegativeSigmaLeft: JezNegativeSigma? = null,
     val oldNegativeSigmaRight: JezNegativeSigma? = null,
 ) : JezReplaceAction() {
@@ -15,7 +15,7 @@ internal data class JezReplaceVariablesAction(
         oldNegativeSigmaLeft: JezNegativeSigma? = null,
         oldNegativeSigmaRight: JezNegativeSigma? = null,
     ) : this(
-        replaces = listOf(Pair(listOf(variable), leftPart + listOf(variable) + rightPart)),
+        replaces = mapOf(listOf(variable) to leftPart + listOf(variable) + rightPart),
         oldNegativeSigmaLeft,
         oldNegativeSigmaRight,
     )

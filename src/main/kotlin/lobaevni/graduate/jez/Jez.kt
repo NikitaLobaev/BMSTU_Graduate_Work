@@ -171,8 +171,8 @@ internal fun JezState.blockCompNCr(maxBlockLength: BigInteger) {
             }
     }
 
-    apply(JezReplaceConstantsAction(blocks.map { block ->
-        Pair(block, listOf(getOrPutGeneratedConstant(block)))
+    apply(JezReplaceConstantsAction(blocks.associateWith { block ->
+        listOf(getOrPutGeneratedConstant(block))
     }))
 }
 
@@ -258,7 +258,7 @@ internal fun JezState.pairCompNCr() {
         replaces = pairsMap
             .filterValues { it }
             .keys
-            .map { pair ->
+            .associate { pair ->
                 Pair(pair.toList(), listOf(getOrPutGeneratedConstant(pair.toList())))
             }
     ))
@@ -375,7 +375,9 @@ internal fun JezState.checkEmptySolution(): Boolean =
  * @see [checkEmptySolution].
  */
 internal fun JezState.checkTrivialEmptySolution(): Boolean {
-    val result = equation.u.filterIsInstance<JezConstant>() == equation.v.filterIsInstance<JezConstant>()
+    val result =
+        equation.u.filterIsInstance<JezConstant>().toJezSourceConstants() ==
+                equation.v.filterIsInstance<JezConstant>().toJezSourceConstants()
     if (result) {
         val curUsedVariables = equation.getUsedVariables()
         apply(JezDropParametersAndVariablesAction(
@@ -423,7 +425,8 @@ internal fun JezState.checkParametrizedEmptySolution(): Boolean {
         } ?: listOf()
 
     val variablesIndexes: MutableMap<Int, Pair<Int, JezGeneratedConstantBlock>> = mutableMapOf() //power index -> matrix index
-    equation.getUsedGeneratedConstantBlocks().forEach { block ->
+    val usedGeneratedConstantBlocks = equation.getUsedGeneratedConstantBlocks()
+    usedGeneratedConstantBlocks.forEach { block ->
         variablesIndexes.getOrPut(block.powerIndex) { Pair(variablesIndexes.size, block) }
     }
 
@@ -574,13 +577,14 @@ internal fun JezState.checkParametrizedEmptySolution(): Boolean {
         }
     }
     apply(JezDropParametersAndVariablesAction(
-        replaces = variablesReplaces + blocksReplaces,
-        indexes = curUsedVariables.associateWith { variable ->
-            Pair(
-                equation.u.getElementIndexes(variable),
-                equation.v.getElementIndexes(variable),
-            )
-        },
+        replaces = (variablesReplaces + blocksReplaces).toMap(),
+        indexes = (curUsedVariables + usedGeneratedConstantBlocks)
+            .associateWith { variable ->
+                Pair(
+                    equation.u.getElementIndexes(variable),
+                    equation.v.getElementIndexes(variable),
+                )
+            },
     ))
 
     lastParameters?.apply {
@@ -610,8 +614,8 @@ internal fun JezAction.isFlawed(): Boolean =
         is JezReplaceVariablesAction,
         is JezDropParametersAndVariablesAction -> true
         is JezReplaceConstantsAction ->
-            replaces.any { pair ->
-                pair.second.any { generatedConstant ->
+            replaces.any { entry ->
+                entry.value.any { generatedConstant ->
                     generatedConstant.isBlock
                 }
             }

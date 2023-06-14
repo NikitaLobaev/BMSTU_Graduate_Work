@@ -76,7 +76,7 @@ object JezHeuristics {
                 oldNegativeSigmaLeft = negativeSigmaLeft?.toJezNegativeSigma()?.filterKeys { it == variable },
                 oldNegativeSigmaRight = negativeSigmaRight?.toJezNegativeSigma()?.filterKeys { it == variable },
             )) || apply(JezDropParametersAndVariablesAction(
-                replaces = listOf(Pair(listOf(variable), listOf())),
+                replaces = mapOf(listOf(variable) to listOf()),
                 indexes = mapOf(variable to Pair(
                     equation.u.getElementIndexes(variable),
                     equation.v.getElementIndexes(variable),
