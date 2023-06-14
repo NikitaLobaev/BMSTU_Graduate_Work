@@ -87,17 +87,16 @@ internal class JezHistory(
         }
 
         dotRootGraph?.apply {
+            if (!checkDotMaxStatementsCount(beingAdded = 2)) return@apply
+
             val newEquationStrBr = "\"$newEquation\""
             val oldEquationStrBr = "\"$oldEquation\""
             if (!ignored) {
-                if (!checkDotMaxStatementsCount()) return@apply
                 +newEquationStrBr + {
                     label = if (dotHTMLLabels) newEquation.toHTMLString().formatHTMLLabel() else newEquation.toString()
                     color = if (converges) DOT_NODE_SOLUTION_COLOR else DOT_NODE_DEFAULT_COLOR
                 }
             }
-
-            if (!checkDotMaxStatementsCount()) return@apply
             oldEquationStrBr - newEquationStrBr + {
                 label = if (dotHTMLLabels) action.toHTMLString().formatHTMLLabel() else action.toString()
                 if (ignored) color = DOT_EDGE_IGNORED_COLOR
@@ -116,10 +115,10 @@ internal class JezHistory(
         currentGraphNode = currentGraphNode.parentNode ?: return
 
         dotRootGraph?.apply {
+            if (!checkDotMaxStatementsCount()) return@apply
+
             val oldEquationStrBr = "\"$oldEquation\""
             val newEquationStrBr = "\"$newEquation\""
-
-            if (!checkDotMaxStatementsCount()) return@apply
             oldEquationStrBr - newEquationStrBr + {
                 color = DOT_NODE_REVERTED_COLOR
             }
@@ -130,8 +129,9 @@ internal class JezHistory(
      * @return true, if max allowed statements count in DOT graph cannot be reached **after adding exactly one
      * statement**, false otherwise.
      */
-    private fun checkDotMaxStatementsCount(): Boolean =
-        dotMaxStatementsCount == null || (dotRootGraph != null && dotRootGraph.stmts.size < dotMaxStatementsCount)
+    private fun checkDotMaxStatementsCount(beingAdded: Int = 1): Boolean =
+        dotMaxStatementsCount == null ||
+                (dotRootGraph != null && dotRootGraph.stmts.size + beingAdded < dotMaxStatementsCount)
 
     @DotExperimentalHTMLLabel
     private fun String.formatHTMLLabel(): String = "\" label=<&nbsp;$this&nbsp;> hacklabel=\""
