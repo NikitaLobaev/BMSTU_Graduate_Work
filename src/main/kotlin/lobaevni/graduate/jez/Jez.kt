@@ -18,6 +18,8 @@ import java.math.BigInteger
 import kotlin.collections.first
 import kotlin.math.*
 
+private const val SUBSTITUTION_CHECK_LOG_INTERVAL_MS: Long = 1000
+
 /**
  * Tries to find minimal solution of this [JezEquation]. The entry point to the main algorithm.
  */
@@ -522,11 +524,16 @@ internal fun JezState.checkParametrizedEmptySolution(): Boolean {
         maxValue = max(maxValue, vectorB[rowIndex] / minDiv) //round down
     }
 
+    var lastSubstitutionCheckTimeMs = -SUBSTITUTION_CHECK_LOG_INTERVAL_MS
+
     /**
      * Check satisfiability of constructed SLDE with specified substitution.
      */
     fun checkSatisfiability(substitution: Array<Long>): Boolean {
-        logger.debug("checking SLDE substitution {}", substitution.toList())
+        if (System.currentTimeMillis() - lastSubstitutionCheckTimeMs >= SUBSTITUTION_CHECK_LOG_INTERVAL_MS) {
+            logger.debug("checking SLDE substitution {}", substitution.toList())
+            lastSubstitutionCheckTimeMs = System.currentTimeMillis()
+        }
         for (rowIndex in 0 until vectorB.size) {
             val sum = matrixA[rowIndex]
                 .mapIndexed { index, value ->
