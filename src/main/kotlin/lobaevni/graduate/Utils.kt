@@ -79,7 +79,7 @@ object Utils {
                 lastAcc.elements.add(curAcc.elements.first())
 
                 var j = lastAcc.pfValues.last()
-                while (j > 0 && lastAcc.elements[i] != lastAcc.elements[j]) { //TODO: тоже можно в функциональном стиле, reversed reduce?...
+                while (j > 0 && lastAcc.elements[i] != lastAcc.elements[j]) {
                     j = lastAcc.pfValues[j - 1]
                 }
                 if (lastAcc.elements[i] == lastAcc.elements[j]) {

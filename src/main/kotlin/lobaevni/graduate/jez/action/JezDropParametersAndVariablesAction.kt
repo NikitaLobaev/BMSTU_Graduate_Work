@@ -17,8 +17,11 @@ internal data class JezDropParametersAndVariablesAction(
         indexes,
     )
 
-    init { //TODO
-        //assert(replaces.all { it.second.isEmpty() })
+    init {
+        assert(indexes.values.all { it.first.isNotEmpty() || it.second.isNotEmpty() } &&
+                !replaces.any { entry ->
+                    entry.key.find { it is JezVariable } != null && entry.value.find { it is JezConstant } != null
+                })
     }
 
     override fun applyAction(state: JezState): Boolean {

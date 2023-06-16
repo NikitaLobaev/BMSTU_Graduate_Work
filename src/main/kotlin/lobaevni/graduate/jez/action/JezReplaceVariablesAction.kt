@@ -69,8 +69,8 @@ internal data class JezReplaceVariablesAction(
             rightReplacedPart.indices.forEach { _ -> state.sigmaRight[variable]!!.removeLast() }
 
             state.negativeSigmaLeft?.get(variable)?.apply {
-                clear()
                 if (leftReplacedPart.isNotEmpty()) {
+                    clear()
                     oldNegativeSigmaLeft?.get(variable)?.let { oldNegativeSigma ->
                         addAll(oldNegativeSigma)
                     }
@@ -80,8 +80,8 @@ internal data class JezReplaceVariablesAction(
                 }
             }
             state.negativeSigmaRight?.get(variable)?.apply {
-                clear()
                 if (rightReplacedPart.isNotEmpty()) {
+                    clear()
                     oldNegativeSigmaRight?.get(variable)?.let { oldNegativeSigma ->
                         addAll(oldNegativeSigma)
                     }
