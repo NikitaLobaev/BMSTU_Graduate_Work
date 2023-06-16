@@ -1,5 +1,18 @@
 package lobaevni.graduate
 
+import org.jetbrains.kotlinx.multik.ndarray.data.D1Array
+import org.jetbrains.kotlinx.multik.ndarray.data.D2Array
+import org.jetbrains.kotlinx.multik.ndarray.data.get
+import org.jetbrains.kotlinx.multik.ndarray.data.set
+import org.jetbrains.kotlinx.multik.ndarray.operations.mapIndexed
+import org.jetbrains.kotlinx.multik.ndarray.operations.minBy
+import org.jetbrains.kotlinx.multik.ndarray.operations.sum
+import org.jetbrains.kotlinx.multik.ndarray.operations.times
+import kotlin.math.abs
+import kotlin.math.max
+
+private const val SUBSTITUTION_CHECK_LOG_INTERVAL_MS: Long = 1000
+
 object Utils {
 
     /**
@@ -78,6 +91,68 @@ object Utils {
                 lastAcc
             }
             ?.pfValues ?: arrayListOf()
+    }
+
+    /**
+     * Tries to find minimal solution of specified SLDE (AX=B) via direct search.
+     * @return minimal substitution of specified SLDE, if found, null otherwise.
+     */
+    fun tryFindMinSolutionOfSLDE(sourceMatrixA: D2Array<Long>, sourceVectorB: D1Array<Long>): Array<Long>? {
+        if (sourceMatrixA.size == 0 || sourceMatrixA[0].size != sourceVectorB.size) return null
+
+        val matrixA = sourceMatrixA.copy()
+        val vectorB = sourceVectorB.copy()
+        var lastSubstitutionCheckTimeMs = -SUBSTITUTION_CHECK_LOG_INTERVAL_MS
+
+        /**
+         * Check satisfiability of constructed SLDE with specified substitution.
+         */
+        fun checkSatisfiability(substitution: Array<Long>): Boolean {
+            if (System.currentTimeMillis() - lastSubstitutionCheckTimeMs >= SUBSTITUTION_CHECK_LOG_INTERVAL_MS) {
+                logger.debug("checking SLDE substitution {}", substitution.toList())
+                lastSubstitutionCheckTimeMs = System.currentTimeMillis()
+            }
+            for (rowIndex in 0 until vectorB.size) {
+                val sum = matrixA[rowIndex]
+                    .mapIndexed { index, value ->
+                        value * substitution.elementAt(index)
+                    }
+                    .sum()
+                if (sum != vectorB[rowIndex]) return false
+            }
+            return true
+        }
+
+        var maxValue: Long = 0
+        for (rowIndex in 0 until vectorB.size) {
+            if (vectorB[rowIndex] < 0) {
+                vectorB[rowIndex] *= -1L
+                matrixA[rowIndex] = matrixA[rowIndex].times(-1)
+            }
+
+            val minDiv = matrixA[rowIndex]
+                .minBy { value ->
+                    abs(value)
+                }
+                ?.takeIf { minValue -> //find minimal value, but it may be at least one
+                    minValue > 0
+                } ?: 1
+            maxValue = max(maxValue, vectorB[rowIndex] / minDiv) //round down
+        }
+
+        val currentCombination = Array<Long>(matrixA[0].size) { 0 }
+        while (true) {
+            if (checkSatisfiability(currentCombination)) return currentCombination
+
+            val index = currentCombination.indexOfLast { it != maxValue }
+            if (index < 0) break
+
+            currentCombination[index]++
+            for (i in index + 1 until currentCombination.size) {
+                currentCombination[i] = 0
+            }
+        }
+        return null
     }
 
     /**

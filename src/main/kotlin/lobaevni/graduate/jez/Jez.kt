@@ -1,6 +1,7 @@
 package lobaevni.graduate.jez
 
 import lobaevni.graduate.Utils.cartesianProduct
+import lobaevni.graduate.Utils.tryFindMinSolutionOfSLDE
 import lobaevni.graduate.jez.JezHeuristics.getSideConstants
 import lobaevni.graduate.jez.JezHeuristics.tryAssumeAndApply
 import lobaevni.graduate.jez.action.*
@@ -17,8 +18,6 @@ import java.math.BigDecimal
 import java.math.BigInteger
 import kotlin.collections.first
 import kotlin.math.*
-
-private const val SUBSTITUTION_CHECK_LOG_INTERVAL_MS: Long = 1000
 
 /**
  * Tries to find minimal solution of this [JezEquation]. The entry point to the main algorithm.
@@ -66,7 +65,7 @@ internal fun JezState.tryFindMinimalSolution(
 
         if (checkTrivialContradictions()) break@mainLoop
         if (checkEmptySolution()) {
-            bestSigma = processSolution(bestSigma)
+            bestSigma = compareSolutions(bestSigma)
             break@mainLoop
         }
 
@@ -92,7 +91,7 @@ internal fun JezState.tryFindMinimalSolution(
 
                 if (checkEmptySolution()) {
                     val usedVariables = equation.getUsedVariables()
-                    bestSigma = processSolution(bestSigma)
+                    bestSigma = compareSolutions(bestSigma)
 
                     if (!fullTraversal) break@mainLoop
                     if (revertUntilNoSolution(skips = if (usedVariables.isNotEmpty()) 1 else 0)) {
@@ -290,10 +289,9 @@ internal fun JezState.pairCompCr(necComp: Boolean) {
 }
 
 /**
- * Processes currently found solution.
- * @return best sigma (with minimal length) of [lastSigma] and current.
+ * @return best sigma (with minimal source sum length) of [lastSigma] and current [JezState.sigma].
  */
-internal fun JezState.processSolution(lastSigma: JezSigma?): JezSigma = //TODO
+internal fun JezState.compareSolutions(lastSigma: JezSigma?): JezSigma =
     if (lastSigma == null || sigmaLeft.getSourceLength() + sigmaRight.getSourceLength() < lastSigma.getSourceLength()) {
         sigma
     } else lastSigma
@@ -503,68 +501,8 @@ internal fun JezState.checkParametrizedEmptySolution(): Boolean {
 
     logger.debug("trying to solve SLDE with matrix A={} and vector B={}",
         matrixA.toString().replace("\n", " "), vectorB)
-
     //TODO: we can try add a priori information and only after Gauss-Jordan "half-elimination" perform a complete search
-    //val vectorX = mk.linalg.solve(matrixA, vectorB)
-
-    var maxValue: Long = 0
-    for (rowIndex in 0 until vectorB.size) {
-        if (vectorB[rowIndex] < 0) {
-            vectorB[rowIndex] *= -1L
-            matrixA[rowIndex] = matrixA[rowIndex].times(-1)
-        }
-
-        val minDiv = matrixA[rowIndex]
-            .minBy { value ->
-                abs(value)
-            }
-            ?.takeIf { minValue -> //find minimal value, but it may be at least one
-                minValue > 0
-            } ?: 1
-        maxValue = max(maxValue, vectorB[rowIndex] / minDiv) //round down
-    }
-
-    var lastSubstitutionCheckTimeMs = -SUBSTITUTION_CHECK_LOG_INTERVAL_MS
-
-    /**
-     * Check satisfiability of constructed SLDE with specified substitution.
-     */
-    fun checkSatisfiability(substitution: Array<Long>): Boolean {
-        if (System.currentTimeMillis() - lastSubstitutionCheckTimeMs >= SUBSTITUTION_CHECK_LOG_INTERVAL_MS) {
-            logger.debug("checking SLDE substitution {}", substitution.toList())
-            lastSubstitutionCheckTimeMs = System.currentTimeMillis()
-        }
-        for (rowIndex in 0 until vectorB.size) {
-            val sum = matrixA[rowIndex]
-                .mapIndexed { index, value ->
-                    value * substitution.elementAt(index)
-                }
-                .sum()
-            if (sum != vectorB[rowIndex]) return false
-        }
-        return true
-    }
-
-    /**
-     * Generates and processes all possible combinations of variables values in current constructed SLDE.
-     */
-    fun checkAllCombinations(maxValue: Long): Array<Long>? {
-        val currentCombination = Array<Long>(variablesIndexes.size) { 0 }
-        while (true) {
-            if (checkSatisfiability(currentCombination)) return currentCombination
-
-            val index = currentCombination.indexOfLast { it != maxValue }
-            if (index < 0) break
-
-            currentCombination[index]++
-            for (i in index + 1 until currentCombination.size) {
-                currentCombination[i] = 0
-            }
-        }
-        return null
-    }
-
-    val result: Array<Long>? = checkAllCombinations(maxValue + 1)
+    val result: Array<Long>? = tryFindMinSolutionOfSLDE(matrixA, vectorB)
     logger.debug("SLDE solution is {}", result)
 
     if (result == null) return false
