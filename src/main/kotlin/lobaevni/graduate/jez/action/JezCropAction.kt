@@ -55,7 +55,7 @@ internal data class JezCropAction(
             oldEquation = oldEquation,
             action = this,
             newEquation = state.equation,
-            converges = state.checkTrivialEmptySolution(),
+            converges = state.checkTrivialEmptySolution(applyDropAction = false),
         )
         return true
     }

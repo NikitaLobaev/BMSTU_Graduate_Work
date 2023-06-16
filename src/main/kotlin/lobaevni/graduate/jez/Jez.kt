@@ -89,12 +89,12 @@ internal fun JezState.tryFindMinimalSolution(
             compressionLoop@ for (compression in compressions) {
                 compression()
 
+                val usedVariables = equation.getUsedVariables().isNotEmpty()
                 if (checkEmptySolution()) {
-                    val usedVariables = equation.getUsedVariables()
                     bestSigma = compareSolutions(bestSigma)
 
                     if (!fullTraversal) break@mainLoop
-                    if (revertUntilNoSolution(skips = if (usedVariables.isNotEmpty()) 1 else 0)) {
+                    if (revertUntilNoSolution(skips = if (usedVariables) 1 else 0)) {
                         continue@mainLoop
                     } else break@mainLoop
                 }
@@ -172,9 +172,11 @@ internal fun JezState.blockCompNCr(maxBlockLength: BigInteger) {
             }
     }
 
-    apply(JezReplaceConstantsAction(blocks.associateWith { block ->
-        listOf(getOrPutGeneratedConstant(block))
-    }))
+    blocks.forEach { block ->
+        apply(JezReplaceConstantsAction(
+            replaces = mapOf(block to listOf(getOrPutGeneratedConstant(block))),
+        ))
+    }
 }
 
 /**
@@ -247,12 +249,20 @@ internal fun JezState.blockCompCr() {
  */
 internal fun JezState.pairCompNCr() {
     val sideConstants = getSideConstants()
-    val pairsMap = cartesianProduct(sideConstants.first, sideConstants.second).associateWith { false }.toMutableMap()
-    listOf(equation.u, equation.v).forEach { equationPart -> //filtering existing pairs in equation
-        equationPart.zipWithNext().forEach pair@ { pair ->
-            if (pair.first !is JezConstant || pair.second !is JezConstant || !pairsMap.containsKey(pair)) return@pair
-            pairsMap[Pair(pair.first as JezConstant, pair.second as JezConstant)] = true
+    val pairsMap = cartesianProduct(sideConstants.first, sideConstants.second)
+        .filter { pair ->
+            pair.first != pair.second
         }
+        .associateWith { false }
+        .toMutableMap()
+    listOf(equation.u, equation.v).forEach { equationPart -> //filtering existing pairs in equation
+        equationPart
+            .zipWithNext()
+            .forEach pair@ { pair ->
+                if (pair.first !is JezConstant || pair.second !is JezConstant ||
+                    !pairsMap.containsKey(pair)) return@pair
+                pairsMap[Pair(pair.first as JezConstant, pair.second as JezConstant)] = true
+            }
     }
 
     apply(JezReplaceConstantsAction(
@@ -357,7 +367,6 @@ internal fun JezState.revertUntilNoSolution(skips: Int = 0): Boolean {
     while (skipsRemaining >= 0) {
         val action = history?.currentGraphNode?.action ?: return false
         if (!revert(action)) return false
-
         if (action.isFlawed()) skipsRemaining--
     }
     return true
@@ -374,11 +383,11 @@ internal fun JezState.checkEmptySolution(): Boolean =
 /**
  * @see [checkEmptySolution].
  */
-internal fun JezState.checkTrivialEmptySolution(): Boolean {
+internal fun JezState.checkTrivialEmptySolution(applyDropAction: Boolean = true): Boolean {
     val result =
         equation.u.filterIsInstance<JezConstant>().toJezSourceConstants() ==
                 equation.v.filterIsInstance<JezConstant>().toJezSourceConstants()
-    if (result) {
+    if (result && applyDropAction) {
         val curUsedVariables = equation.getUsedVariables()
         apply(JezDropParametersAndVariablesAction(
             elements = curUsedVariables,

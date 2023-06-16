@@ -69,23 +69,21 @@ object JezHeuristics {
             }
         val pair = pairs.firstOrNull() ?: return false
         val variable = pair.first.first
-        if (!(apply(JezReplaceVariablesAction(
+        if (apply(JezReplaceVariablesAction(
                 variable,
                 leftPart = if (pair.second) listOf(pair.first.second) else listOf(),
                 rightPart = if (pair.second) listOf() else listOf(pair.first.second),
                 oldNegativeSigmaLeft = negativeSigmaLeft?.toJezNegativeSigma()?.filterKeys { it == variable },
                 oldNegativeSigmaRight = negativeSigmaRight?.toJezNegativeSigma()?.filterKeys { it == variable },
-            )) || apply(JezDropParametersAndVariablesAction(
+            ))) return true
+        if (apply(JezDropParametersAndVariablesAction(
                 replaces = mapOf(listOf(variable) to listOf()),
                 indexes = mapOf(variable to Pair(
                     equation.u.getElementIndexes(variable),
                     equation.v.getElementIndexes(variable),
                 )),
-            )
-            ))) {
-            throw JezEquationNotConvergesException()
-        }
-        return true
+            ))) return true
+        throw JezEquationNotConvergesException()
     }
 
 }

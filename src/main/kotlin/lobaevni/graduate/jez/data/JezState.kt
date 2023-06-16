@@ -52,7 +52,7 @@ internal class JezState(
             negativeSigmaLeft?.put(variable, mutableSetOf())
             negativeSigmaRight?.put(variable, mutableSetOf())
         }
-        history?.init(equation, converges = checkTrivialEmptySolution())
+        history?.init(equation, converges = checkTrivialEmptySolution(applyDropAction = false))
     }
 
     /**

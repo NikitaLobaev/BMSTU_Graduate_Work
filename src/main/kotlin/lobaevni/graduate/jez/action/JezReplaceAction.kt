@@ -33,7 +33,7 @@ internal abstract class JezReplaceAction : JezAction() {
             oldEquation = oldEquation,
             action = this,
             newEquation = state.equation,
-            converges = state.checkTrivialEmptySolution(),
+            converges = state.checkTrivialEmptySolution(applyDropAction = false),
         )
         return true
     }

@@ -8,7 +8,7 @@ internal data class JezDropParametersAndVariablesAction(
 ) : JezReplaceAction() {
 
     constructor(
-        elements: Set<JezElement>, //TODO: если сломается, заменить на List
+        elements: Set<JezElement>,
         indexes: Map<JezElement, Pair<Set<Int>, Set<Int>>>,
     ) : this(
         replaces = elements.associate { variable ->
@@ -69,9 +69,7 @@ internal data class JezDropParametersAndVariablesAction(
                         }
                         return@mapIndexedNotNull element
                     }
-                    if (!iterator.hasNext()) {
-                        println("huh")
-                    }
+                    assert(iterator.hasNext())
                     return@mapIndexedNotNull iterator.next()
                 }
             assert(!iterator.hasNext())

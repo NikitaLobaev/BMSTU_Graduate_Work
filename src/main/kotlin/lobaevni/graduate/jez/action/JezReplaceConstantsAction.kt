@@ -31,6 +31,10 @@ internal data class JezReplaceConstantsAction(
             val constant = to.first()
             assert(state.removeGeneratedConstant(constant))
         }
+
+        state.negativeSigmaLeft?.clear()
+        state.negativeSigmaRight?.clear()
+
         return true
     }
 
