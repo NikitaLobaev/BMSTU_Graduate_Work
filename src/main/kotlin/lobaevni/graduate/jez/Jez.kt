@@ -519,7 +519,7 @@ internal fun JezState.checkParametrizedEmptySolution(): Boolean {
     logger.debug("trying to solve SLDE with matrix A={} and vector B={}",
         matrixA.toString().replace("\n", " "), vectorB)
     //TODO: we can try add a priori information and only after Gauss-Jordan "half-elimination" perform a complete search
-    val result: Array<Long>? = tryFindMinSolutionOfSLDE(matrixA, vectorB)
+    val result: D1Array<Long>? = tryFindMinSolutionOfSLDE(matrixA, vectorB)
     logger.debug("SLDE solution is {}", result)
 
     if (result == null) return false

@@ -17,7 +17,7 @@ class JezAlgorithmTests {
     @Nested
     inner class FullTraversal {
 
-        private val maxIterationsCount = BigInteger.valueOf(250)
+        private val maxIterationsCount = BigInteger.valueOf(500)
 
         @Test
         fun test1() {
@@ -103,6 +103,32 @@ class JezAlgorithmTests {
                 expectedSigma = mapOf(
                     "x" to "CBBB",
                     "y" to "AAAAA",
+                ),
+                expectedState = JezResult.SolutionState.Found.Minimal,
+            )
+        }
+
+        @Test
+        fun test9() {
+            test(
+                equation = "zxz = AByAB",
+                expectedSigma = mapOf(
+                    "x" to "",
+                    "y" to "",
+                    "z" to "AB",
+                ),
+                expectedState = JezResult.SolutionState.Found.Minimal,
+            )
+        }
+
+        @Test
+        fun test10() {
+            test(
+                equation = "xxzyyyy = AAAAAAA",
+                expectedSigma = mapOf(
+                    "x" to "A",
+                    "y" to "A",
+                    "z" to "A",
                 ),
                 expectedState = JezResult.SolutionState.Found.Minimal,
             )

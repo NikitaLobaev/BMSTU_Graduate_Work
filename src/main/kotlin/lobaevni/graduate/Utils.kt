@@ -1,13 +1,13 @@
 package lobaevni.graduate
 
+import org.jetbrains.kotlinx.multik.api.mk
+import org.jetbrains.kotlinx.multik.api.ndarray
+import org.jetbrains.kotlinx.multik.api.zeros
 import org.jetbrains.kotlinx.multik.ndarray.data.D1Array
 import org.jetbrains.kotlinx.multik.ndarray.data.D2Array
 import org.jetbrains.kotlinx.multik.ndarray.data.get
 import org.jetbrains.kotlinx.multik.ndarray.data.set
-import org.jetbrains.kotlinx.multik.ndarray.operations.mapIndexed
-import org.jetbrains.kotlinx.multik.ndarray.operations.minBy
-import org.jetbrains.kotlinx.multik.ndarray.operations.sum
-import org.jetbrains.kotlinx.multik.ndarray.operations.times
+import org.jetbrains.kotlinx.multik.ndarray.operations.*
 import kotlin.math.abs
 import kotlin.math.max
 
@@ -94,11 +94,12 @@ object Utils {
     }
 
     /**
-     * Tries to find minimal solution of specified SLDE (AX=B) via direct search.
-     * @return minimal substitution of specified SLDE, if found, null otherwise.
+     * Tries to find minimal non-negative solution of the specified SLDE (AX=B) via direct search.
+     * @return minimal substitution of the specified SLDE, if found, null otherwise.
      */
-    fun tryFindMinSolutionOfSLDE(sourceMatrixA: D2Array<Long>, sourceVectorB: D1Array<Long>): Array<Long>? {
-        if (sourceMatrixA.size == 0 || sourceMatrixA[0].size != sourceVectorB.size) return null
+    fun tryFindMinSolutionOfSLDE(sourceMatrixA: D2Array<Long>, sourceVectorB: D1Array<Long>): D1Array<Long>? {
+        if (sourceMatrixA.shape[0] != sourceVectorB.shape[0]) return null
+        if (sourceVectorB.shape[0] == 0) return mk.zeros(0)
 
         val matrixA = sourceMatrixA.copy()
         val vectorB = sourceVectorB.copy()
@@ -107,12 +108,12 @@ object Utils {
         /**
          * Check satisfiability of constructed SLDE with specified substitution.
          */
-        fun checkSatisfiability(substitution: Array<Long>): Boolean {
+        fun checkSatisfiability(substitution: LongArray): Boolean {
             if (System.currentTimeMillis() - lastSubstitutionCheckTimeMs >= SUBSTITUTION_CHECK_LOG_INTERVAL_MS) {
                 logger.debug("checking SLDE substitution {}", substitution.toList())
                 lastSubstitutionCheckTimeMs = System.currentTimeMillis()
             }
-            for (rowIndex in 0 until vectorB.size) {
+            for (rowIndex in 0 until vectorB.shape[0]) {
                 val sum = matrixA[rowIndex]
                     .mapIndexed { index, value ->
                         value * substitution.elementAt(index)
@@ -124,7 +125,7 @@ object Utils {
         }
 
         var maxValue: Long = 0
-        for (rowIndex in 0 until vectorB.size) {
+        for (rowIndex in 0 until vectorB.shape[0]) {
             if (vectorB[rowIndex] < 0) {
                 vectorB[rowIndex] *= -1L
                 matrixA[rowIndex] = matrixA[rowIndex].times(-1)
@@ -140,9 +141,9 @@ object Utils {
             maxValue = max(maxValue, vectorB[rowIndex] / minDiv) //round down
         }
 
-        val currentCombination = Array<Long>(matrixA[0].size) { 0 }
+        val currentCombination = LongArray(matrixA.shape[1]) { 0 }
         while (true) {
-            if (checkSatisfiability(currentCombination)) return currentCombination
+            if (checkSatisfiability(currentCombination)) return mk.ndarray(currentCombination)
 
             val index = currentCombination.indexOfLast { it != maxValue }
             if (index < 0) break
