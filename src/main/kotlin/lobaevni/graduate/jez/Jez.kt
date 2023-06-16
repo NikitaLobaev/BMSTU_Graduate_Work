@@ -183,38 +183,43 @@ internal fun JezState.blockCompNCr(maxBlockLength: BigInteger) {
  * Compression for crossing blocks.
  */
 internal fun JezState.blockCompCr() {
-    //duplicates allowed, because order is more important than space complexity
-    val suggestedBlockComps = mutableMapOf<JezVariable, MutableList<JezConstant>>()
+    val suggestedBlockComps = mutableMapOf<JezVariable, MutableSet<JezConstant>>()
     listOf(equation.u, equation.v).forEach { equationPart ->
-        equationPart.forEachIndexed { index, element ->
-            if (element !is JezVariable) return@forEachIndexed
-
-            val previous = equationPart.elementAtOrNull(index - 1)
-            val next = equationPart.elementAtOrNull(index + 1)
-            listOfNotNull(previous, next)
-                .filterIsInstance<JezGeneratedConstant>()
-                .filter { it.isBlock }
-                .forEach { constant ->
-                    suggestedBlockComps.getOrPut(element) { mutableListOf() }.add(constant.source.first())
-                }
-        }
+        equationPart
+            .zipWithNext()
+            .zipWithNext { current, next ->
+                Triple(current.first, current.second, next.second)
+            }
+            .forEach triple@ { triple ->
+                val variable = triple.second as? JezVariable ?: return@triple
+                listOf(triple.first, triple.third)
+                    .filterIsInstance<JezGeneratedConstant>()
+                    .filter { it.isBlock }
+                    .forEach { constant ->
+                        suggestedBlockComps.getOrPut(variable) { mutableSetOf() }.add(constant.source.first())
+                    }
+            }
     }
 
     val connectedBlocks = mutableMapOf<JezConstant, MutableSet<JezConstant>>()
     listOf(equation.u, equation.v).forEach { equationPart ->
-        equationPart.forEachIndexed { index, element ->
-            if ((element as? JezGeneratedConstant)?.isBlock != true) return@forEachIndexed
-
-            val previous = equationPart.elementAtOrNull(index - 1)
-            val next = equationPart.elementAtOrNull(index + 1)
-            listOfNotNull(previous, next)
-                .filterIsInstance<JezGeneratedConstant>()
-                .filter { it.isBlock }
-                .forEach { constant ->
-                    connectedBlocks.getOrPut(element.value.first()) { mutableSetOf() }.add(constant.value.first())
-                    connectedBlocks.getOrPut(constant.value.first()) { mutableSetOf() }.add(element.value.first())
-                }
-        }
+        equationPart
+            .zipWithNext()
+            .zipWithNext { current, next ->
+                Triple(current.first, current.second, next.second)
+            }
+            .forEach triple@ { triple ->
+                val constantBlock = triple.second as? JezGeneratedConstant ?: return@triple
+                listOf(triple.first, triple.third)
+                    .filterIsInstance<JezGeneratedConstant>()
+                    .filter { it.isBlock }
+                    .forEach { constant ->
+                        connectedBlocks.getOrPut(constantBlock.value.first()) { mutableSetOf() }
+                            .add(constant.value.first())
+                        connectedBlocks.getOrPut(constant.value.first()) { mutableSetOf() }
+                            .add(constantBlock.value.first())
+                    }
+            }
     }
     suggestedBlockComps.forEach { suggestedBlockComp ->
         suggestedBlockComp.value.toList().forEach { constant -> //need a copy, because we modify it same time
@@ -382,6 +387,8 @@ internal fun JezState.checkEmptySolution(): Boolean =
 
 /**
  * @see [checkEmptySolution].
+ * @param applyDropAction true, if allowed to apply [JezDropParametersAndVariablesAction] in current [JezState], false
+ * otherwise.
  */
 internal fun JezState.checkTrivialEmptySolution(applyDropAction: Boolean = true): Boolean {
     val result =
@@ -433,7 +440,8 @@ internal fun JezState.checkParametrizedEmptySolution(): Boolean {
             last
         } ?: listOf()
 
-    val variablesIndexes: MutableMap<Int, Pair<Int, JezGeneratedConstantBlock>> = mutableMapOf() //power index -> matrix index
+    //power index -> matrix index
+    val variablesIndexes: MutableMap<Int, Pair<Int, JezGeneratedConstantBlock>> = mutableMapOf()
     val usedGeneratedConstantBlocks = equation.getUsedGeneratedConstantBlocks()
     usedGeneratedConstantBlocks.forEach { block ->
         variablesIndexes.getOrPut(block.powerIndex) { Pair(variablesIndexes.size, block) }

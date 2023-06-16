@@ -27,13 +27,17 @@ internal data class JezReplaceConstantsAction(
     override fun revertAction(state: JezState): Boolean {
         if (!super.revertAction(state)) return false
 
-        replaces.forEach { (_, to) ->
+        var containsBlocks = false
+        replaces.forEach { (from, to) ->
             val constant = to.first()
             assert(state.removeGeneratedConstant(constant))
+            containsBlocks = containsBlocks || from.any { it is JezGeneratedConstant && it.isBlock }
         }
 
-        state.negativeSigmaLeft?.clear()
-        state.negativeSigmaRight?.clear()
+        if (containsBlocks) {
+            state.negativeSigmaLeft?.clear()
+            state.negativeSigmaRight?.clear()
+        }
 
         return true
     }
