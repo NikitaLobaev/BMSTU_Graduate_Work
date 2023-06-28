@@ -41,6 +41,4 @@ internal sealed class JezAction {
         )
     }
 
-
-
 }

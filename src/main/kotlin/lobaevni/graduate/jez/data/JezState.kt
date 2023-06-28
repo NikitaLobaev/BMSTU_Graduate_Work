@@ -4,8 +4,6 @@ import lobaevni.graduate.jez.action.JezAction
 import lobaevni.graduate.jez.checkTrivialEmptySolution
 import lobaevni.graduate.jez.history.JezHistory
 
-class JezEquationNotConvergesException : Exception()
-
 internal class JezState(
     var equation: JezEquation,
     val allowRevert: Boolean,

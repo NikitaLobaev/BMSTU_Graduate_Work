@@ -2,7 +2,6 @@ package lobaevni.graduate.jez
 
 import lobaevni.graduate.Utils.cartesianProduct
 import lobaevni.graduate.Utils.tryFindMinSolutionOfSLDE
-import lobaevni.graduate.jez.JezHeuristics.getSideConstants
 import lobaevni.graduate.jez.JezHeuristics.tryAssumeAndApply
 import lobaevni.graduate.jez.action.*
 import lobaevni.graduate.jez.data.*
@@ -50,7 +49,7 @@ fun JezEquation.tryFindMinimalSolution(
  * Tries to find minimal solution of [this.equation]. The main algorithm.
  */
 internal fun JezState.tryFindMinimalSolution(
-    maxIterationsCount: BigInteger?,
+    maxIterationsCount: BigInteger? = null,
 ): JezResult {
     assert(maxIterationsCount == null || maxIterationsCount > BigInteger.ZERO)
 
@@ -183,9 +182,9 @@ internal fun JezState.blockCompNCr(maxBlockLength: BigInteger) {
  * Compression for crossing blocks.
  */
 internal fun JezState.blockCompCr() {
-    val suggestedBlockComps = mutableMapOf<JezVariable, MutableSet<JezConstant>>()
+    val variablesAndBlocksAdjacency = mutableMapOf<JezVariable, MutableSet<JezConstant>>()
     listOf(equation.u, equation.v).forEach { equationPart ->
-        equationPart
+        (listOf(null) + equationPart + listOf(null))
             .zipWithNext()
             .zipWithNext { current, next ->
                 Triple(current.first, current.second, next.second)
@@ -196,39 +195,44 @@ internal fun JezState.blockCompCr() {
                     .filterIsInstance<JezGeneratedConstant>()
                     .filter { it.isBlock }
                     .forEach { constant ->
-                        suggestedBlockComps.getOrPut(variable) { mutableSetOf() }.add(constant.source.first())
+                        variablesAndBlocksAdjacency.getOrPut(variable) { mutableSetOf() }.add(constant.value.first())
                     }
             }
     }
 
-    val connectedBlocks = mutableMapOf<JezConstant, MutableSet<JezConstant>>()
+    val blocksAdjacency = mutableMapOf<JezConstant, LinkedHashSet<JezConstant>>()
     listOf(equation.u, equation.v).forEach { equationPart ->
-        equationPart
+        (listOf(null) + equationPart + listOf(null))
             .zipWithNext()
             .zipWithNext { current, next ->
                 Triple(current.first, current.second, next.second)
             }
             .forEach triple@ { triple ->
                 val constantBlock = triple.second as? JezGeneratedConstant ?: return@triple
+                val constant = constantBlock.value.first()
                 listOf(triple.first, triple.third)
                     .filterIsInstance<JezGeneratedConstant>()
                     .filter { it.isBlock }
-                    .forEach { constant ->
-                        connectedBlocks.getOrPut(constantBlock.value.first()) { mutableSetOf() }
-                            .add(constant.value.first())
-                        connectedBlocks.getOrPut(constant.value.first()) { mutableSetOf() }
-                            .add(constantBlock.value.first())
+                    .forEach adjacentForEach@ { adjacentConstantBlock ->
+                        val adjacentConstant = adjacentConstantBlock.value.first()
+                        if (constant == adjacentConstant) return@adjacentForEach
+
+                        blocksAdjacency.getOrPut(constant) { linkedSetOf() }
+                            .add(adjacentConstant)
+                        blocksAdjacency.getOrPut(adjacentConstant) { linkedSetOf() }
+                            .add(constant)
                     }
             }
     }
-    suggestedBlockComps.forEach { suggestedBlockComp ->
-        suggestedBlockComp.value.toList().forEach { constant -> //need a copy, because we modify it same time
-            suggestedBlockComp.value.addAll(connectedBlocks.getOrDefault(constant, null) ?: listOf())
+    variablesAndBlocksAdjacency.forEach { suggestedBlockComp ->
+        val curValue = suggestedBlockComp.value.toList() //need a copy, because we modify it same time
+        curValue.forEach { constant ->
+            suggestedBlockComp.value.addAll(blocksAdjacency.getOrDefault(constant, null) ?: listOf())
         }
     }
 
-    suggestedBlockComps.forEach { (variable, constants) ->
-        constants.any { constant ->
+    variablesAndBlocksAdjacency.forEach { (variable, constantsOfBlocks) ->
+        constantsOfBlocks.any { constant ->
             if (negativeSigmaLeft?.get(variable)?.contains(constant) == true &&
                 negativeSigmaRight?.get(variable)?.contains(constant) == true) return@any false
 
@@ -253,8 +257,41 @@ internal fun JezState.blockCompCr() {
  * Compression for non-crossing pairs.
  */
 internal fun JezState.pairCompNCr() {
-    val sideConstants = getSideConstants()
-    val pairsMap = cartesianProduct(sideConstants.first, sideConstants.second)
+    fun JezEquationPart.findExcludedConstants(): Pair<Set<JezConstant>, Set<JezConstant>> {
+        val constantsLeftExcluded = mutableSetOf<JezConstant>()
+        val constantsRightExcluded = mutableSetOf<JezConstant>()
+        this
+            .zipWithNext()
+            .zipWithNext { current, next ->
+                Triple(current.first, current.second, next.second)
+            }
+            .forEach { triple ->
+                val constant = triple.second as? JezConstant ?: return@forEach
+                if (constant is JezGeneratedConstantBlock) return@forEach
+
+                if (triple.first is JezVariable) {
+                    constantsRightExcluded += constant
+                }
+                if (triple.third is JezVariable) {
+                    constantsLeftExcluded += constant
+                }
+            }
+        return Pair(constantsLeftExcluded, constantsRightExcluded)
+    }
+
+    val usedConstants = equation.getUsedSourceConstants() + equation.getUsedGeneratedConstants()
+    val uExcludedConstants = equation.u.findExcludedConstants()
+    val vExcludedConstants = equation.v.findExcludedConstants()
+    val leftConstants = usedConstants.toMutableSet().apply {
+        removeAll(uExcludedConstants.first)
+        removeAll(vExcludedConstants.first)
+    }
+    val rightConstants = usedConstants.toMutableSet().apply {
+        removeAll(uExcludedConstants.second)
+        removeAll(vExcludedConstants.second)
+    }
+
+    val pairsMap = cartesianProduct(leftConstants, rightConstants)
         .filter { pair ->
             pair.first != pair.second
         }
